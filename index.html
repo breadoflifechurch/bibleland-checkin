@@ -1528,25 +1528,15 @@
             supervisors: 'kids_checkin_supervisors',
             scheduledSupervisors: 'kids_checkin_scheduled_supervisors'
         };
-        // Use window properties so Firebase sync works
-        if (!window.checkIns) window.window.checkIns = [];
-        if (!window.parents) window.window.parents = {};
-        if (!window.usedBuzzers) window.window.usedBuzzers = new Set();
-        if (!window.volunteers) window.window.volunteers = {};
-        if (!window.familyDatabase) window.window.familyDatabase = {};
-        if (!window.supervisorDatabase) window.window.supervisorDatabase = {};
-        if (!window.scheduledSupervisors) window.window.scheduledSupervisors = {};
-        if (!window.weeklyReports) window.window.weeklyReports = {};
-        
-        // Create shortcuts (but they reference window properties)
-        var window.checkIns = window.checkIns;
-        var window.parents = window.parents;
-        var window.usedBuzzers = window.usedBuzzers;
-        var window.volunteers = window.volunteers;
-        var window.familyDatabase = window.familyDatabase;
-        var window.supervisorDatabase = window.supervisorDatabase;
-        var window.scheduledSupervisors = window.scheduledSupervisors;
-        var window.weeklyReports = window.weeklyReports;
+        // Initialize on window so Firebase can sync
+        var checkIns = window.checkIns = window.checkIns || [];
+        var parents = window.parents = window.parents || {};
+        var usedBuzzers = window.usedBuzzers = window.usedBuzzers || new Set();
+        var volunteers = window.volunteers = window.volunteers || {};
+        var familyDatabase = window.familyDatabase = window.familyDatabase || {};
+        var supervisorDatabase = window.supervisorDatabase = window.supervisorDatabase || {};
+        var scheduledSupervisors = window.scheduledSupervisors = window.scheduledSupervisors || {};
+        var weeklyReports = window.weeklyReports = window.weeklyReports || {};
         let currentBuzzer = null;
         let childCounter = 0;
         let pendingAction = null;
@@ -1666,21 +1656,32 @@
 
         // ─── Load / Save ────────────────────────────────────────────────────────
         function loadData() {
-            window.parents = JSON.parse(localStorage.getItem(storageKeys.parents)) || {};
-            window.checkIns = JSON.parse(localStorage.getItem(storageKeys.checkIns)) || [];
-            window.usedBuzzers = new Set(JSON.parse(localStorage.getItem(storageKeys.usedBuzzers)) || []);
-            window.volunteers = JSON.parse(localStorage.getItem(storageKeys.volunteers)) || {};
-            window.familyDatabase = JSON.parse(localStorage.getItem(storageKeys.familyDatabase)) || {};
-            window.weeklyReports = JSON.parse(localStorage.getItem(storageKeys.weeklyReports)) || {};
-            window.supervisorDatabase = JSON.parse(localStorage.getItem(storageKeys.supervisors)) || {};
-            window.scheduledSupervisors = JSON.parse(localStorage.getItem(storageKeys.scheduledSupervisors)) || {};
-            if (!window.volunteers.all) window.volunteers.all = [];
+            const loadedParents = JSON.parse(localStorage.getItem(storageKeys.parents)) || {};
+            const loadedCheckIns = JSON.parse(localStorage.getItem(storageKeys.checkIns)) || [];
+            const loadedUsedBuzzers = new Set(JSON.parse(localStorage.getItem(storageKeys.usedBuzzers)) || []);
+            const loadedVolunteers = JSON.parse(localStorage.getItem(storageKeys.volunteers)) || {};
+            const loadedFamilyDatabase = JSON.parse(localStorage.getItem(storageKeys.familyDatabase)) || {};
+            const loadedWeeklyReports = JSON.parse(localStorage.getItem(storageKeys.weeklyReports)) || {};
+            const loadedSupervisorDatabase = JSON.parse(localStorage.getItem(storageKeys.supervisors)) || {};
+            const loadedScheduledSupervisors = JSON.parse(localStorage.getItem(storageKeys.scheduledSupervisors)) || {};
+            
+            // Update window properties (don't replace, update in place)
+            Object.assign(parents, loadedParents);
+            checkIns.push(...loadedCheckIns);
+            loadedUsedBuzzers.forEach(b => usedBuzzers.add(b));
+            Object.assign(volunteers, loadedVolunteers);
+            Object.assign(familyDatabase, loadedFamilyDatabase);
+            Object.assign(weeklyReports, loadedWeeklyReports);
+            Object.assign(supervisorDatabase, loadedSupervisorDatabase);
+            Object.assign(scheduledSupervisors, loadedScheduledSupervisors);
+            
+            if (!volunteers.all) volunteers.all = [];
             checkAndSaveWeeklyReport(); // Check if we need to save today's report
         }
 
         window.saveData = function() {
             localStorage.setItem(storageKeys.parents, JSON.stringify(parents));
-            localStorage.setItem(storageKeys.checkIns, JSON.stringify(window.checkIns));
+            localStorage.setItem(storageKeys.checkIns, JSON.stringify(checkIns));
             localStorage.setItem(storageKeys.usedBuzzers, JSON.stringify([...usedBuzzers]));
             localStorage.setItem(storageKeys.volunteers, JSON.stringify(volunteers));
             localStorage.setItem(storageKeys.familyDatabase, JSON.stringify(familyDatabase));
@@ -1739,8 +1740,8 @@
         function onNonMemberPhoneInput() {
             const raw = document.getElementById('nonmem-phone').value;
             const phone = raw.replace(/\D/g, '');
-            if (phone.length === 10 && window.parents[phone]) {
-                const p = window.parents[phone];
+            if (phone.length === 10 && parents[phone]) {
+                const p = parents[phone];
                 document.getElementById('firstName').value = p.firstName || '';
                 document.getElementById('lastName').value = p.lastName || '';
             }
@@ -1760,15 +1761,15 @@
             document.getElementById('phone').value = input.value;
 
             // Check familyDatabase first for saved kids
-            if (window.familyDatabase[phoneClean] && window.familyDatabase[phoneClean].kids && window.familyDatabase[phoneClean].kids.length > 0) {
+            if (familyDatabase[phoneClean] && familyDatabase[phoneClean].kids && familyDatabase[phoneClean].kids.length > 0) {
                 // Prefill from family database
-                const family = window.familyDatabase[phoneClean];
+                const family = familyDatabase[phoneClean];
                 document.getElementById('firstName').value = family.firstName || '';
                 document.getElementById('lastName').value = family.lastName || '';
                 document.getElementById('children-list').innerHTML = '';
                 childCounter = 0;
                 
-                window.familyDatabase[phoneClean].kids.forEach(child => {
+                familyDatabase[phoneClean].kids.forEach(child => {
                     childCounter++;
                     const div = document.createElement('div');
                     div.className = 'child-entry';
@@ -1793,8 +1794,8 @@
                     document.getElementById('children-list').appendChild(div);
                     attachAllergyHandler(div);
                 });
-            } else if (window.parents[phoneClean]) {
-                const p = window.parents[phoneClean];
+            } else if (parents[phoneClean]) {
+                const p = parents[phoneClean];
                 document.getElementById('firstName').value = p.firstName || '';
                 document.getElementById('lastName').value = p.lastName || '';
                 document.getElementById('children-list').innerHTML = '';
@@ -1921,8 +1922,8 @@
                 }
             } else {
                 // Add new volunteer to database
-                if (!window.volunteers.all) window.volunteers.all = [];
-                window.volunteers.all.push({
+                if (!volunteers.all) volunteers.all = [];
+                volunteers.all.push({
                     name: fullName,
                     phone: phone
                 });
@@ -1934,7 +1935,7 @@
             let isAlreadyScheduled = false;
             
             for (const date of next2Months) {
-                const slots = window.volunteers[date] || [];
+                const slots = volunteers[date] || [];
                 if (slots.some(v => v.phone === phone)) {
                     isAlreadyScheduled = true;
                     break;
@@ -1962,7 +1963,7 @@
             const last = document.getElementById('vol-last').value.trim();
 
             sundays.forEach(date => {
-                const slots = window.volunteers[date] || [];
+                const slots = volunteers[date] || [];
                 const isFull = slots.length >= 2;
                 const alreadySignedUp = slots.some(v => v.phone === phone);
                 
@@ -1997,20 +1998,20 @@
             const last = document.getElementById('vol-last').value.trim();
             const name = `${first} ${last}`;
 
-            if (!window.volunteers[date]) window.volunteers[date] = [];
+            if (!volunteers[date]) volunteers[date] = [];
             
-            if (window.volunteers[date].length >= 2) {
+            if (volunteers[date].length >= 2) {
                 showCenteredAlert("This date is already full.");
                 return;
             }
 
-            if (window.volunteers[date].some(v => v.phone === phone)) {
+            if (volunteers[date].some(v => v.phone === phone)) {
                 showCenteredAlert("You are already signed up for this date.");
                 return;
             }
 
             const vol = { name, phone };
-            window.volunteers[date].push(vol);
+            volunteers[date].push(vol);
             addToVolunteerAllIfNotExists(vol);
             saveData();
             
@@ -2027,10 +2028,10 @@
 
             // Check if they have existing children in familyDatabase
             const phoneClean = memberPhone.replace(/\D/g, '');
-            if (window.familyDatabase[phoneClean] && window.familyDatabase[phoneClean].kids && window.familyDatabase[phoneClean].kids.length > 0) {
+            if (familyDatabase[phoneClean] && familyDatabase[phoneClean].kids && familyDatabase[phoneClean].kids.length > 0) {
                 document.getElementById('children-list').innerHTML = '';
                 childCounter = 0;
-                window.familyDatabase[phoneClean].kids.forEach(child => {
+                familyDatabase[phoneClean].kids.forEach(child => {
                     childCounter++;
                     const div = document.createElement('div');
                     div.className = 'child-entry';
@@ -2112,15 +2113,15 @@
         function onPhoneInput() {
             const raw = document.getElementById('phone').value;
             const phone = raw.replace(/\D/g, '');
-            if (phone.length === 10 && window.parents[phone]) {
-                const p = window.parents[phone];
+            if (phone.length === 10 && parents[phone]) {
+                const p = parents[phone];
                 document.getElementById('firstName').value = p.firstName || '';
                 document.getElementById('lastName').value = p.lastName || '';
             }
             
             // Prefill ALL kids from family database if exists
-            if (phone.length === 10 && window.familyDatabase[phone]) {
-                const family = window.familyDatabase[phone];
+            if (phone.length === 10 && familyDatabase[phone]) {
+                const family = familyDatabase[phone];
                 if (family.kids && family.kids.length > 0) {
                     document.getElementById('children-list').innerHTML = '';
                     childCounter = 0;
@@ -2181,7 +2182,7 @@
             
             // Check if this phone number already checked in today
             const today = new Date().toDateString();
-            const alreadyCheckedIn = window.checkIns.some(entry => {
+            const alreadyCheckedIn = checkIns.some(entry => {
                 const entryDate = new Date(entry.timestamp || Date.now()).toDateString();
                 const entryPhone = entry.phone.replace(/\D/g, '');
                 return entryDate === today && entryPhone === phone;
@@ -2261,7 +2262,7 @@
             
             const formattedPhone = document.getElementById('phone').value;
             currentChildren.forEach(child => {
-                window.checkIns.push({
+                checkIns.push({
                     buzzer: currentBuzzer,
                     childName: child.name,
                     age: child.age || '—',
@@ -2272,13 +2273,13 @@
                 });
             });
             
-            if (!window.parents[phone]) window.parents[phone] = {};
-            window.parents[phone].firstName = first;
-            window.parents[phone].lastName = last;
-            window.parents[phone].children = currentChildren;
+            if (!parents[phone]) parents[phone] = {};
+            parents[phone].firstName = first;
+            parents[phone].lastName = last;
+            parents[phone].children = currentChildren;
             
             // Save to family database
-            window.familyDatabase[phone] = {
+            familyDatabase[phone] = {
                 type: isMemberPath ? 'member' : 'nonmember',
                 firstName: first,
                 lastName: last,
@@ -2289,7 +2290,7 @@
                 }))
             };
             
-            window.usedBuzzers.add(currentBuzzer);
+            usedBuzzers.add(currentBuzzer);
             saveData();
             checkAndSaveWeeklyReport(); // Update Sunday report if today is Sunday
             
@@ -2314,7 +2315,7 @@
                 btn.className = 'buzzer-btn';
                 btn.textContent = i;
                 
-                if (window.usedBuzzers.has(i)) {
+                if (usedBuzzers.has(i)) {
                     btn.classList.add('unavailable');
                 } else {
                     btn.classList.add('available');
@@ -2352,7 +2353,7 @@
             
             // Group check-ins by buzzer
             const buzzerGroups = {};
-            window.checkIns.forEach((ci, idx) => {
+            checkIns.forEach((ci, idx) => {
                 if (!buzzerGroups[ci.buzzer]) {
                     buzzerGroups[ci.buzzer] = [];
                 }
@@ -2406,7 +2407,7 @@
 
         function requestCheckoutByBuzzer(buzzerNum) {
             pendingCheckoutIndex = buzzerNum;
-            const children = window.checkIns.filter(ci => ci.buzzer === buzzerNum);
+            const children = checkIns.filter(ci => ci.buzzer === buzzerNum);
             const childNames = children.map(c => c.childName).join(', ');
             document.querySelector('#confirm-content p').textContent = 
                 `This will check out ${childNames} with buzzer #${buzzerNum}.`;
@@ -2434,10 +2435,10 @@
             const buzzerNum = pendingCheckoutIndex;
             
             // Remove all check-ins with this buzzer number
-            window.checkIns = window.checkIns.filter(ci => ci.buzzer !== buzzerNum);
+            checkIns = checkIns.filter(ci => ci.buzzer !== buzzerNum);
             
             // Remove buzzer from used set
-            window.usedBuzzers.delete(buzzerNum);
+            usedBuzzers.delete(buzzerNum);
             
             saveData();
             renderCheckInTable();
@@ -2560,7 +2561,7 @@
         // ─── Admin volunteer schedule ───────────────────────────────────────────
         function updateDisplays() {
             // Update stats
-            document.getElementById('stat-checked-in').textContent = window.checkIns.length;
+            document.getElementById('stat-checked-in').textContent = checkIns.length;
             
             const uniqueVols = new Map();
             Object.values(volunteers).forEach(slots => {
@@ -2568,13 +2569,13 @@
                     slots.forEach(vol => uniqueVols.set(vol.phone, vol));
                 }
             });
-            (window.volunteers.all || []).forEach(vol => uniqueVols.set(vol.phone, vol));
+            (volunteers.all || []).forEach(vol => uniqueVols.set(vol.phone, vol));
             document.getElementById('stat-volunteers').textContent = uniqueVols.size;
             
             const sundays = getUpcomingSundays(13);
             let openings = 0;
             sundays.forEach(date => {
-                const slots = window.volunteers[date] || [];
+                const slots = volunteers[date] || [];
                 openings += (2 - slots.length);
             });
             document.getElementById('stat-upcoming').textContent = openings;
@@ -2584,7 +2585,7 @@
             schedBody.innerHTML = '';
             
             sundays.forEach(date => {
-                const slots = window.volunteers[date] || [];
+                const slots = volunteers[date] || [];
                 const v1 = slots[0] || {
                     name: '—',
                     phone: '—'
@@ -2593,7 +2594,7 @@
                     name: '—',
                     phone: '—'
                 };
-                const supervisor = window.scheduledSupervisors[date] || null;
+                const supervisor = scheduledSupervisors[date] || null;
                 
                 // Create supervisor dropdown
                 let supervisorDropdown = '<select onchange="assignSupervisor(\'' + date + '\', this.value)" style="width: 100%; padding: 6px;">';
@@ -2674,7 +2675,7 @@
         }
 
         function removeVolunteerFromDate(date, index) {
-            let slots = window.volunteers[date] || [];
+            let slots = volunteers[date] || [];
             if (!slots[index]) return;
             
             const volName = slots[index].name;
@@ -2684,7 +2685,7 @@
                 'Confirm Delete',
                 () => {
                     slots.splice(index, 1);
-                    window.volunteers[date] = slots;
+                    volunteers[date] = slots;
                     saveData();
                     updateDisplays();
                 }
@@ -2705,15 +2706,15 @@
                 showCenteredAlert("Please enter full name and valid 10-digit phone number.");
                 return;
             }
-            if (!window.volunteers[date]) window.volunteers[date] = [];
+            if (!volunteers[date]) volunteers[date] = [];
             
             // Check if already scheduled for this date
-            if (window.volunteers[date].some(v => v.phone === phone)) {
+            if (volunteers[date].some(v => v.phone === phone)) {
                 showCenteredAlert("This person is already scheduled for this date!");
                 return;
             }
             
-            if (window.volunteers[date].length >= 2) {
+            if (volunteers[date].length >= 2) {
                 showCenteredAlert("This date is already full.");
                 return;
             }
@@ -2721,7 +2722,7 @@
                 name,
                 phone
             };
-            window.volunteers[date].push(vol);
+            volunteers[date].push(vol);
             addToVolunteerAllIfNotExists(vol);
             saveData();
             nameInput.value = '';
@@ -2737,7 +2738,7 @@
                     slots.forEach(vol => uniqueVols.set(vol.phone, vol));
                 }
             });
-            (window.volunteers.all || []).forEach(vol => uniqueVols.set(vol.phone, vol));
+            (volunteers.all || []).forEach(vol => uniqueVols.set(vol.phone, vol));
             const dbBody = document.querySelector('#volunteer-db-table tbody');
             dbBody.innerHTML = '';
             const sundays = getUpcomingSundays(13);
@@ -2861,12 +2862,12 @@
                 `Remove ${vol.name} from database and all schedules?`,
                 'Confirm Delete',
                 () => {
-                    if (window.volunteers.all) {
-                        window.volunteers.all = window.volunteers.all.filter(v => v.phone !== phone);
+                    if (volunteers.all) {
+                        volunteers.all = volunteers.all.filter(v => v.phone !== phone);
                     }
                     Object.keys(volunteers).forEach(date => {
-                        if (Array.isArray(window.volunteers[date])) {
-                            window.volunteers[date] = window.volunteers[date].filter(v => v.phone !== phone);
+                        if (Array.isArray(volunteers[date])) {
+                            volunteers[date] = volunteers[date].filter(v => v.phone !== phone);
                         }
                     });
                     saveData();
@@ -2876,7 +2877,7 @@
         }
 
         function getVolunteerByPhone(phone) {
-            let vol = window.volunteers.all?.find(v => v.phone === phone);
+            let vol = volunteers.all?.find(v => v.phone === phone);
             if (vol) return vol;
             for (const slots of Object.values(volunteers)) {
                 if (Array.isArray(slots)) {
@@ -2905,13 +2906,13 @@
                     slots.forEach(vol => uniqueVols.set(vol.phone, vol));
                 }
             });
-            (window.volunteers.all || []).forEach(vol => uniqueVols.set(vol.phone, vol));
+            (volunteers.all || []).forEach(vol => uniqueVols.set(vol.phone, vol));
             if (uniqueVols.has(phone)) {
                 showCenteredAlert("Volunteer with this phone already exists.");
                 return;
             }
-            if (!window.volunteers.all) window.volunteers.all = [];
-            window.volunteers.all.push({
+            if (!volunteers.all) volunteers.all = [];
+            volunteers.all.push({
                 name,
                 phone
             });
@@ -2923,15 +2924,15 @@
         }
 
         function updateAllVolunteers(phone, field, value) {
-            if (window.volunteers.all) {
-                window.volunteers.all = window.volunteers.all.map(v => v.phone === phone ? {
+            if (volunteers.all) {
+                volunteers.all = volunteers.all.map(v => v.phone === phone ? {
                     ...v,
                     [field]: value
                 } : v);
             }
             Object.keys(volunteers).forEach(date => {
-                if (Array.isArray(window.volunteers[date])) {
-                    window.volunteers[date] = window.volunteers[date].map(v => v.phone === phone ? {
+                if (Array.isArray(volunteers[date])) {
+                    volunteers[date] = volunteers[date].map(v => v.phone === phone ? {
                         ...v,
                         [field]: value
                     } : v);
@@ -2942,10 +2943,10 @@
         }
 
         function addToVolunteerAllIfNotExists(vol) {
-            if (!window.volunteers.all) window.volunteers.all = [];
-            const exists = window.volunteers.all.some(v => v.phone === vol.phone);
+            if (!volunteers.all) volunteers.all = [];
+            const exists = volunteers.all.some(v => v.phone === vol.phone);
             if (!exists) {
-                window.volunteers.all.push({
+                volunteers.all.push({
                     name: vol.name,
                     phone: vol.phone
                 });
@@ -2960,16 +2961,16 @@
                 showCenteredAlert("Volunteer not found.");
                 return;
             }
-            if (!window.volunteers[date]) window.volunteers[date] = [];
-            if (window.volunteers[date].some(v => v.phone === phone)) {
+            if (!volunteers[date]) volunteers[date] = [];
+            if (volunteers[date].some(v => v.phone === phone)) {
                 showCenteredAlert("This volunteer is already assigned to this date.");
                 return;
             }
-            if (window.volunteers[date].length >= 2) {
+            if (volunteers[date].length >= 2) {
                 showCenteredAlert("This date is already full (2 volunteers). Delete someone first.");
                 return;
             }
-            window.volunteers[date].push({
+            volunteers[date].push({
                 name: vol.name,
                 phone: vol.phone
             });
@@ -3035,9 +3036,9 @@
         }
 
         function toggleFamilyType(phone) {
-            if (!window.familyDatabase[phone]) return;
+            if (!familyDatabase[phone]) return;
             
-            const familyData = window.familyDatabase[phone];
+            const familyData = familyDatabase[phone];
             const currentType = familyData.type || 'nonmember';
             const newType = currentType === 'member' ? 'nonmember' : 'member';
             
@@ -3048,13 +3049,13 @@
                     // Update type
                     if (Array.isArray(familyData)) {
                         // Old format - convert to new format
-                        window.familyDatabase[phone] = {
+                        familyDatabase[phone] = {
                             type: newType,
                             kids: familyData
                         };
                     } else {
                         // New format - just update type
-                        window.familyDatabase[phone].type = newType;
+                        familyDatabase[phone].type = newType;
                     }
                     saveData();
                     renderFamilyDatabase();
@@ -3063,9 +3064,9 @@
         }
 
         function editFamily(phone) {
-            if (!window.familyDatabase[phone]) return;
+            if (!familyDatabase[phone]) return;
             
-            const family = window.familyDatabase[phone];
+            const family = familyDatabase[phone];
             const firstName = family.firstName || '';
             const lastName = family.lastName || '';
             const type = family.type || 'nonmember';
@@ -3170,14 +3171,14 @@
             
             // If phone changed, delete old entry and clear old auto-fill
             if (oldPhone !== newPhone) {
-                delete window.familyDatabase[oldPhone];
-                if (window.parents[oldPhone]) {
-                    delete window.parents[oldPhone];
+                delete familyDatabase[oldPhone];
+                if (parents[oldPhone]) {
+                    delete parents[oldPhone];
                 }
             }
             
             // Save updated family
-            window.familyDatabase[newPhone] = {
+            familyDatabase[newPhone] = {
                 type: newType,
                 firstName: newFirstName,
                 lastName: newLastName,
@@ -3190,19 +3191,19 @@
         }
 
         function deleteFamily(phone) {
-            if (!window.familyDatabase[phone]) return;
+            if (!familyDatabase[phone]) return;
             
-            const family = window.familyDatabase[phone];
+            const family = familyDatabase[phone];
             const name = `${family.firstName || ''} ${family.lastName || ''}`.trim();
             
             showConfirmModal(
                 `Delete entire family ${name} (${formatPhoneDisplay(phone)})?`,
                 'Confirm Delete',
                 () => {
-                    delete window.familyDatabase[phone];
+                    delete familyDatabase[phone];
                     // Also clear auto-fill data for this phone number
-                    if (window.parents[phone]) {
-                        delete window.parents[phone];
+                    if (parents[phone]) {
+                        delete parents[phone];
                     }
                     saveData();
                     renderFamilyDatabase();
@@ -3211,9 +3212,9 @@
         }
 
         function deleteKidFromFamily(phone, kidIndex) {
-            if (!window.familyDatabase[phone]) return;
+            if (!familyDatabase[phone]) return;
             
-            const familyData = window.familyDatabase[phone];
+            const familyData = familyDatabase[phone];
             const kids = familyData.kids || familyData;
             
             if (!kids[kidIndex]) return;
@@ -3228,10 +3229,10 @@
                     
                     // If no kids left, delete the family entry
                     if (kids.length === 0) {
-                        delete window.familyDatabase[phone];
+                        delete familyDatabase[phone];
                     } else if (Array.isArray(familyData)) {
                         // Update old format
-                        window.familyDatabase[phone] = kids;
+                        familyDatabase[phone] = kids;
                     }
                     
                     saveData();
@@ -3261,10 +3262,10 @@
         function checkAndSaveWeeklyReport() {
             if (isSunday()) {
                 const sundayKey = getSundayKey(new Date());
-                const todayCount = window.checkIns.length;
+                const todayCount = checkIns.length;
                 
                 // Save/update today's Sunday report
-                window.weeklyReports[sundayKey] = {
+                weeklyReports[sundayKey] = {
                     date: sundayKey,
                     count: todayCount,
                     checkins: checkIns
@@ -3277,7 +3278,7 @@
         function renderReports() {
             const container = document.getElementById('reports-content');
             const todayKey = getTodayKey();
-            const todayCount = window.checkIns.length;
+            const todayCount = checkIns.length;
             
             let html = '';
             
@@ -3297,7 +3298,7 @@
                 html += '<h3 style="margin-top: 30px; color: var(--primary);">Previous Sundays</h3>';
                 
                 sortedSundays.forEach(sunday => {
-                    const report = window.weeklyReports[sunday];
+                    const report = weeklyReports[sunday];
                     html += `
                         <div style="background: white; border-radius: 12px; padding: 20px; margin: 16px 0; border-left: 4px solid var(--primary);">
                             <h3 style="margin-top: 0; color: var(--primary);">📅 ${sunday} (Sunday)</h3>
@@ -3329,12 +3330,12 @@
                 return;
             }
             
-            if (window.supervisorDatabase[phone]) {
+            if (supervisorDatabase[phone]) {
                 alert('Supervisor with this phone already exists.');
                 return;
             }
             
-            window.supervisorDatabase[phone] = {
+            supervisorDatabase[phone] = {
                 firstName: firstName,
                 lastName: lastName
             };
@@ -3378,9 +3379,9 @@
         }
 
         function editSupervisor(phone) {
-            if (!window.supervisorDatabase[phone]) return;
+            if (!supervisorDatabase[phone]) return;
             
-            const supervisor = window.supervisorDatabase[phone];
+            const supervisor = supervisorDatabase[phone];
             
             const modal = document.createElement('div');
             modal.className = 'success-modal';
@@ -3418,18 +3419,18 @@
             
             // If phone changed, delete old entry
             if (oldPhone !== newPhone) {
-                delete window.supervisorDatabase[oldPhone];
+                delete supervisorDatabase[oldPhone];
                 
                 // Update any scheduled supervisors
                 Object.keys(scheduledSupervisors).forEach(date => {
-                    if (window.scheduledSupervisors[date] && window.scheduledSupervisors[date].phone === oldPhone) {
-                        window.scheduledSupervisors[date].phone = newPhone;
+                    if (scheduledSupervisors[date] && scheduledSupervisors[date].phone === oldPhone) {
+                        scheduledSupervisors[date].phone = newPhone;
                     }
                 });
             }
             
             // Save updated supervisor
-            window.supervisorDatabase[newPhone] = {
+            supervisorDatabase[newPhone] = {
                 firstName: newFirstName,
                 lastName: newLastName
             };
@@ -3441,20 +3442,20 @@
         }
 
         function deleteSupervisor(phone) {
-            if (!window.supervisorDatabase[phone]) return;
+            if (!supervisorDatabase[phone]) return;
             
-            const supervisor = window.supervisorDatabase[phone];
+            const supervisor = supervisorDatabase[phone];
             
             showConfirmModal(
                 `Delete supervisor ${supervisor.firstName} ${supervisor.lastName} (${formatPhoneDisplay(phone)})?`,
                 'Confirm Delete',
                 () => {
-                    delete window.supervisorDatabase[phone];
+                    delete supervisorDatabase[phone];
                     
                     // Remove from any scheduled dates
                     Object.keys(scheduledSupervisors).forEach(date => {
-                        if (window.scheduledSupervisors[date] && window.scheduledSupervisors[date].phone === phone) {
-                            delete window.scheduledSupervisors[date];
+                        if (scheduledSupervisors[date] && scheduledSupervisors[date].phone === phone) {
+                            delete scheduledSupervisors[date];
                         }
                     });
                     
@@ -3468,11 +3469,11 @@
         function assignSupervisor(date, phone) {
             if (!phone) {
                 // Remove supervisor assignment
-                delete window.scheduledSupervisors[date];
+                delete scheduledSupervisors[date];
             } else {
-                const supervisor = window.supervisorDatabase[phone];
+                const supervisor = supervisorDatabase[phone];
                 if (supervisor) {
-                    window.scheduledSupervisors[date] = {
+                    scheduledSupervisors[date] = {
                         phone: phone,
                         firstName: supervisor.firstName,
                         lastName: supervisor.lastName
@@ -3504,8 +3505,8 @@
             let scheduleHTML = '<h3 style="margin-top: 0; color: var(--primary);">Upcoming Schedule (Next 3 Months)</h3>';
             
             sundays.forEach(date => {
-                const slots = window.volunteers[date] || [];
-                const supervisor = window.scheduledSupervisors[date] || null;
+                const slots = volunteers[date] || [];
+                const supervisor = scheduledSupervisors[date] || null;
                 
                 let volunteersText = '';
                 if (slots.length === 0) {
@@ -3596,16 +3597,16 @@
             
             if (phone.length === 10) {
                 // Check familyDatabase first
-                if (window.familyDatabase[phone]) {
-                    const family = window.familyDatabase[phone];
+                if (familyDatabase[phone]) {
+                    const family = familyDatabase[phone];
                     document.getElementById('schedule-signup-first').value = family.firstName || '';
                     document.getElementById('schedule-signup-last').value = family.lastName || '';
                     return;
                 }
                 
                 // Check volunteers.all
-                if (window.volunteers.all) {
-                    const vol = window.volunteers.all.find(v => v.phone === phone);
+                if (volunteers.all) {
+                    const vol = volunteers.all.find(v => v.phone === phone);
                     if (vol) {
                         const nameParts = vol.name.split(' ');
                         document.getElementById('schedule-signup-first').value = nameParts[0] || '';
@@ -3633,17 +3634,17 @@
             
             // CHECK BEFORE ASKING FOR APPROVAL
             // Initialize volunteers[date] if it doesn't exist
-            if (!window.volunteers[date]) window.volunteers[date] = [];
+            if (!volunteers[date]) volunteers[date] = [];
             
             // Check if date is already full
-            if (window.volunteers[date].length >= 2) {
+            if (volunteers[date].length >= 2) {
                 document.querySelector('.success-modal').remove();
                 showCenteredAlert("This date is already full.");
                 return;
             }
             
             // Check if this phone is already signed up for this date
-            if (window.volunteers[date].some(v => v.phone === phone)) {
+            if (volunteers[date].some(v => v.phone === phone)) {
                 document.querySelector('.success-modal').remove();
                 showCenteredAlert("This phone number is already signed up for this date.");
                 return;
@@ -3730,27 +3731,27 @@
             const name = `${first} ${last}`;
             
             // Add to volunteers for this date
-            if (!window.volunteers[date]) window.volunteers[date] = [];
+            if (!volunteers[date]) volunteers[date] = [];
             
-            if (window.volunteers[date].length >= 2) {
+            if (volunteers[date].length >= 2) {
                 showCenteredAlert("This date is now full.");
                 document.querySelector('.success-modal').remove();
                 return;
             }
             
-            if (window.volunteers[date].some(v => v.phone === phone)) {
+            if (volunteers[date].some(v => v.phone === phone)) {
                 showCenteredAlert("This person is already signed up for this date.");
                 document.querySelector('.success-modal').remove();
                 return;
             }
             
             const vol = { name, phone };
-            window.volunteers[date].push(vol);
+            volunteers[date].push(vol);
             addToVolunteerAllIfNotExists(vol);
             
             // Save to familyDatabase if not already there
-            if (!window.familyDatabase[phone]) {
-                window.familyDatabase[phone] = {
+            if (!familyDatabase[phone]) {
+                familyDatabase[phone] = {
                     firstName: first,
                     lastName: last,
                     isMember: isMember,
@@ -3803,7 +3804,7 @@
                     let scheduledName = '';
                     
                     for (const date of upcomingSundays) {
-                        const slots = window.volunteers[date] || [];
+                        const slots = volunteers[date] || [];
                         const found = slots.find(v => v.phone === phone);
                         if (found) {
                             isScheduled = true;
@@ -3813,8 +3814,8 @@
                     }
                     
                     // If scheduled, skip directly to kids check-in
-                    if (isScheduled && window.familyDatabase[phone]) {
-                        const family = window.familyDatabase[phone];
+                    if (isScheduled && familyDatabase[phone]) {
+                        const family = familyDatabase[phone];
                         isMemberPath = true;
                         memberPhone = document.getElementById('vol-phone-first').value;
                         memberFirst = family.firstName || '';
@@ -3865,8 +3866,8 @@
                     
                     // Not scheduled or no family data - show volunteer form
                     // Prefill names if this phone exists in familyDatabase
-                    if (window.familyDatabase[phone]) {
-                        const family = window.familyDatabase[phone];
+                    if (familyDatabase[phone]) {
+                        const family = familyDatabase[phone];
                         document.getElementById('vol-first').value = family.firstName || '';
                         document.getElementById('vol-last').value = family.lastName || '';
                     } else {
