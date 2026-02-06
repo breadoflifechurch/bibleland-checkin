@@ -1667,7 +1667,7 @@
             checkAndSaveWeeklyReport(); // Check if we need to save today's report
         }
 
-        function saveData() {
+        window.saveData = function saveData() {
             localStorage.setItem(storageKeys.parents, JSON.stringify(parents));
             localStorage.setItem(storageKeys.checkIns, JSON.stringify(checkIns));
             localStorage.setItem(storageKeys.usedBuzzers, JSON.stringify([...usedBuzzers]));
