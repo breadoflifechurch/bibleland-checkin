@@ -2,7 +2,7 @@
 <!-- saved from url=(0055)file:///C:/Users/Alpine/Desktop/test%20no%20sunday.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bible Land Check-In ☁️ 🌟</title>
     <link rel="manifest" href="file:///C:/Users/Alpine/Desktop/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -880,27 +880,66 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: white;
-            padding: 12px 20px;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            font-size: 0.9rem;
             z-index: 1000;
         }
 
-        .user-info strong {
+        .profile-circle {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .profile-circle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(74, 144, 226, 0.3);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            min-width: 220px;
+            display: none;
+        }
+
+        .profile-dropdown.show {
+            display: block;
+        }
+
+        .profile-dropdown strong {
             color: var(--primary);
+            display: block;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            word-break: break-word;
         }
 
         .btn-logout {
             background: #ef4444;
             color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
-            margin-left: 10px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
         }
 
         .loading-screen {
@@ -959,6 +998,117 @@
             z-index: 999;
         }
 
+        /* Custom Numpad */
+        .numpad-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .numpad-overlay.show {
+            display: flex;
+        }
+
+        .numpad-container {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 360px;
+            width: 90%;
+        }
+
+        .numpad-display {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            text-align: center;
+            font-family: monospace;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            border: 2px solid #e0e0e0;
+        }
+
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .numpad-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 24px;
+            border-radius: 12px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .numpad-btn:hover {
+            background: #3a7bc8;
+            transform: scale(1.05);
+        }
+
+        .numpad-btn:active {
+            transform: scale(0.95);
+        }
+
+        .numpad-btn-zero {
+            grid-column: 2;
+        }
+
+        .numpad-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .numpad-backspace {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .numpad-ok {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .numpad-backspace:hover {
+            background: #f57c00;
+        }
+
+        .numpad-ok:hover {
+            background: #45b565;
+        }
+
         .sync-dot {
             width: 8px;
             height: 8px;
@@ -975,10 +1125,87 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+
+        /* iPad & Touch Device Optimizations */
+        @media (max-width: 1024px) {
+            body {
+                padding: 15px;
+            }
+
+            .main-buttons button {
+                font-size: 1.3rem;
+                padding: 20px 40px;
+                max-width: 100%;
+            }
+
+            input[type="text"],
+            input[type="tel"],
+            input[type="number"],
+            select,
+            button {
+                min-height: 44px; /* Apple's recommended touch target */
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .numpad-container {
+                width: 95%;
+                max-width: 400px;
+            }
+
+            .numpad-btn {
+                padding: 20px;
+                font-size: 1.6rem;
+            }
+        }
+
+        /* Prevent text selection on buttons (better for touch) */
+        button {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Better touch feedback */
+        button:active {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
+
+        /* Improve scrolling on iOS */
+        .card {
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Custom Numpad Overlay -->
+    <div class="numpad-overlay" id="numpad-overlay">
+        <div class="numpad-container">
+            <div class="numpad-display" id="numpad-display">(000) 000-0000</div>
+            <div class="numpad-grid">
+                <button class="numpad-btn" onclick="numpadPress('1')">1</button>
+                <button class="numpad-btn" onclick="numpadPress('2')">2</button>
+                <button class="numpad-btn" onclick="numpadPress('3')">3</button>
+                <button class="numpad-btn" onclick="numpadPress('4')">4</button>
+                <button class="numpad-btn" onclick="numpadPress('5')">5</button>
+                <button class="numpad-btn" onclick="numpadPress('6')">6</button>
+                <button class="numpad-btn" onclick="numpadPress('7')">7</button>
+                <button class="numpad-btn" onclick="numpadPress('8')">8</button>
+                <button class="numpad-btn" onclick="numpadPress('9')">9</button>
+                <button class="numpad-btn numpad-btn-zero" onclick="numpadPress('0')">0</button>
+            </div>
+            <div class="numpad-actions">
+                <button class="numpad-backspace" onclick="numpadBackspace()">⌫ Backspace</button>
+                <button class="numpad-ok" onclick="numpadOK()">✓ OK</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Login/Signup Screen -->
         <div id="login-screen" class="card">
@@ -1021,8 +1248,13 @@
         <div id="main-app-container" class="hidden">
             <!-- User Info Display -->
             <div class="user-info">
-                👤 <strong id="user-email-display"></strong>
-                <button class="btn-logout" onclick="handleLogout()">Logout</button>
+                <div class="profile-circle" onclick="toggleProfileDropdown()">
+                    <span id="user-initial">U</span>
+                </div>
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <strong id="user-email-display"></strong>
+                    <button class="btn-logout" onclick="handleLogout()">Logout</button>
+                </div>
             </div>
 
             <!-- Sync Indicator -->
@@ -1314,6 +1546,85 @@
         let pendingCheckoutIndex = null;
         let checkoutPasswordAttempts = 0;
 
+        // ─── Custom Numpad ──────────────────────────────────────────────
+        let numpadCurrentInput = null;
+        let numpadValue = '';
+
+        function showNumpad(inputElement) {
+            numpadCurrentInput = inputElement;
+            numpadValue = inputElement.value.replace(/\D/g, ''); // Get just digits
+            updateNumpadDisplay();
+            document.getElementById('numpad-overlay').classList.add('show');
+        }
+
+        function hideNumpad() {
+            document.getElementById('numpad-overlay').classList.remove('show');
+            numpadCurrentInput = null;
+            numpadValue = '';
+        }
+
+        function updateNumpadDisplay() {
+            const display = document.getElementById('numpad-display');
+            if (numpadValue.length === 0) {
+                display.textContent = '(000) 000-0000';
+                display.style.color = '#999';
+            } else {
+                const formatted = formatPhoneForDisplay(numpadValue);
+                display.textContent = formatted;
+                display.style.color = 'var(--text)';
+            }
+        }
+
+        function formatPhoneForDisplay(digits) {
+            if (digits.length <= 3) {
+                return `(${digits}`;
+            } else if (digits.length <= 6) {
+                return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+            } else {
+                return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+            }
+        }
+
+        function numpadPress(digit) {
+            if (numpadValue.length < 10) {
+                numpadValue += digit;
+                updateNumpadDisplay();
+            }
+        }
+
+        function numpadBackspace() {
+            if (numpadValue.length > 0) {
+                numpadValue = numpadValue.slice(0, -1);
+                updateNumpadDisplay();
+            }
+        }
+
+        function numpadOK() {
+            if (numpadCurrentInput) {
+                const formatted = formatPhoneForDisplay(numpadValue);
+                numpadCurrentInput.value = formatted;
+                
+                // Trigger the oninput event manually
+                const event = new Event('input', { bubbles: true });
+                numpadCurrentInput.dispatchEvent(event);
+            }
+            hideNumpad();
+        }
+
+        // Add click listeners to all phone inputs
+        function setupPhoneInputs() {
+            document.querySelectorAll('input[type="tel"]').forEach(input => {
+                input.addEventListener('focus', function() {
+                    showNumpad(this);
+                });
+                // Prevent keyboard from showing on mobile
+                input.setAttribute('readonly', 'readonly');
+            });
+        }
+
+        // Setup phone inputs after a short delay to ensure DOM is ready
+        setTimeout(setupPhoneInputs, 500);
+
         // ─── Clock and Date Update ──────────────────────────────────────────────
         function updateDateTime() {
             const now = new Date();
@@ -1374,6 +1685,8 @@
         function show(id) {
             hideAll();
             document.getElementById(id).classList.remove('hidden');
+            // Re-attach numpad to any new phone inputs
+            setTimeout(setupPhoneInputs, 100);
         }
 
         function backToMain() {
@@ -1792,6 +2105,40 @@
                 const p = parents[phone];
                 document.getElementById('firstName').value = p.firstName || '';
                 document.getElementById('lastName').value = p.lastName || '';
+            }
+            
+            // Prefill ALL kids from family database if exists
+            if (phone.length === 10 && familyDatabase[phone]) {
+                const family = familyDatabase[phone];
+                if (family.kids && family.kids.length > 0) {
+                    document.getElementById('children-list').innerHTML = '';
+                    childCounter = 0;
+                    family.kids.forEach(child => {
+                        childCounter++;
+                        const div = document.createElement('div');
+                        div.className = 'child-entry';
+                        const allergiesValue = child.allergies || '';
+                        const isOther = allergiesValue !== '' && allergiesValue !== 'None';
+                        const otherText = isOther ? allergiesValue : '';
+                        
+                        div.innerHTML = `
+                            <strong>Child ${childCounter}</strong><br>
+                            <span class="child-name-group">
+                                <input type="text" class="child-name" value="${child.name || ''}" required />
+                                <input type="number" class="child-age" min="1" max="6" style="margin-left:12px; width:90px;" value="${child.age || ''}" required />
+                            </span>
+                            <select class="child-allergies" style="margin-left:0px; width:220px;" required>
+                                <option value="" disabled ${allergiesValue === '' ? 'selected' : ''} style="color:#bbb;">Allergies</option>
+                                <option value="None" ${allergiesValue === 'None' ? 'selected' : ''}>None</option>
+                                <option value="Other" ${isOther ? 'selected' : ''}>Other (specify below)</option>
+                            </select>
+                            <input type="text" class="child-allergies-other" style="margin-left:8px; width:180px; display:${isOther ? 'inline' : 'none'};" value="${otherText}" placeholder="Specify allergy" />
+                            <button onclick="this.parentElement.remove(); renumberChildren()" style="margin-left:12px; background:#ffdddd; color:#c0392b; border:none;">&times;</button>
+                        `;
+                        document.getElementById('children-list').appendChild(div);
+                        attachAllergyHandler(div);
+                    });
+                }
             }
         }
 
@@ -3560,6 +3907,9 @@
             if (user) {
                 window.currentUserId = user.uid;
                 document.getElementById('user-email-display').textContent = user.email;
+                // Set profile initial (first letter of email)
+                const initial = user.email.charAt(0).toUpperCase();
+                document.getElementById('user-initial').textContent = initial;
                 
                 // Show loading
                 document.getElementById('login-screen').classList.add('hidden');
@@ -3759,6 +4109,21 @@
             document.getElementById('login-error').classList.add('hidden');
             document.getElementById('login-success').classList.add('hidden');
         };
+
+        // Toggle profile dropdown
+        window.toggleProfileDropdown = function() {
+            const dropdown = document.getElementById('profile-dropdown');
+            dropdown.classList.toggle('show');
+        };
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const userInfo = document.querySelector('.user-info');
+            const dropdown = document.getElementById('profile-dropdown');
+            if (dropdown && !userInfo.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
 
         // Handle logout
         window.handleLogout = async function() {
