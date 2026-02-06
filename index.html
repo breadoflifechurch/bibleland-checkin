@@ -2750,12 +2750,33 @@
                         </div>
                         <h3>Children:</h3>
                         <div id="edit-kids-list">${kidsHTML}</div>
+                        <button class="btn-outline" onclick="addChildToFamily('${phone}')" style="margin-top: 12px; width: 100%;">➕ Add Child</button>
                     </div>
                     <button class="btn-success" onclick="saveEditFamily('${phone}')">Save Changes</button>
                     <button class="btn-outline" onclick="this.closest('.success-modal').remove()">Cancel</button>
                 </div>
             `;
             document.body.appendChild(modal);
+        }
+
+        function addChildToFamily(phone) {
+            const kidsList = document.getElementById('edit-kids-list');
+            const currentKidsCount = kidsList.querySelectorAll('div[style*="background: #f8fbff"]').length;
+            const newIndex = currentKidsCount;
+            
+            const newKidHTML = `
+                <div style="background: #f8fbff; padding: 12px; margin: 8px 0; border-radius: 8px;">
+                    <div style="margin-bottom: 8px;">
+                        <label>Name: <input type="text" id="edit-kid-name-${newIndex}" value="" placeholder="Child Name" style="width: 200px; padding: 6px;"></label>
+                        <label style="margin-left: 12px;">Age: <input type="number" id="edit-kid-age-${newIndex}" value="5" min="1" max="18" style="width: 80px; padding: 6px;"></label>
+                    </div>
+                    <div>
+                        <label>Allergies: <input type="text" id="edit-kid-allergies-${newIndex}" value="None" style="width: 300px; padding: 6px;"></label>
+                    </div>
+                </div>
+            `;
+            
+            kidsList.insertAdjacentHTML('beforeend', newKidHTML);
         }
 
         function saveEditFamily(oldPhone) {
@@ -2770,28 +2791,31 @@
                 return;
             }
             
-            const family = familyDatabase[oldPhone];
-            const kids = family.kids || [];
+            // Collect ALL kids from the form (including newly added ones)
+            const updatedKids = [];
+            const kidsList = document.getElementById('edit-kids-list');
+            const kidDivs = kidsList.querySelectorAll('div[style*="background: #f8fbff"]');
             
-            // Update kids
-            const updatedKids = kids.map((kid, index) => {
+            kidDivs.forEach((kidDiv, index) => {
                 const nameInput = document.getElementById(`edit-kid-name-${index}`);
                 const ageInput = document.getElementById(`edit-kid-age-${index}`);
                 const allergiesInput = document.getElementById(`edit-kid-allergies-${index}`);
                 
-                if (nameInput && ageInput && allergiesInput) {
-                    return {
+                if (nameInput && ageInput && allergiesInput && nameInput.value.trim()) {
+                    updatedKids.push({
                         name: nameInput.value.trim(),
                         age: parseInt(ageInput.value),
                         allergies: allergiesInput.value.trim()
-                    };
+                    });
                 }
-                return kid;
             });
             
-            // If phone changed, delete old entry
+            // If phone changed, delete old entry and clear old auto-fill
             if (oldPhone !== newPhone) {
                 delete familyDatabase[oldPhone];
+                if (parents[oldPhone]) {
+                    delete parents[oldPhone];
+                }
             }
             
             // Save updated family
@@ -2818,6 +2842,10 @@
                 'Confirm Delete',
                 () => {
                     delete familyDatabase[phone];
+                    // Also clear auto-fill data for this phone number
+                    if (parents[phone]) {
+                        delete parents[phone];
+                    }
                     saveData();
                     renderFamilyDatabase();
                 }
