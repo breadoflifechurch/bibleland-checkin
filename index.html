@@ -1463,6 +1463,34 @@
                 <h2><span class="section-icon">📊</span> Weekly Reports</h2>
                 <div id="reports-content"></div>
             </div>
+
+            <div class="admin-section">
+                <h2><span class="section-icon">🔐</span> Change Admin Password</h2>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; max-width: 400px;">
+                    <p style="margin-top: 0; color: #666;">Change the 4-digit PIN for admin access</p>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Current Password:</label>
+                        <input type="password" id="change-pass-current" maxlength="4" placeholder="••••" 
+                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px;">
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">New Password:</label>
+                        <input type="password" id="change-pass-new" maxlength="4" placeholder="••••"
+                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px;">
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Confirm New Password:</label>
+                        <input type="password" id="change-pass-confirm" maxlength="4" placeholder="••••"
+                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px;">
+                    </div>
+                    <button class="btn-success" onclick="changeAdminPassword()" style="width: 100%; margin-top: 10px;">
+                        Change Password
+                    </button>
+                    <p style="margin-bottom: 0; margin-top: 10px; font-size: 0.9rem; color: #999;">
+                        💡 Use a 4-digit PIN (e.g., 1234, 5678)
+                    </p>
+                </div>
+            </div>
         </div>
         <!-- Custom checkout confirmation modal -->
         <div id="confirm-modal" class="hidden">
@@ -1517,7 +1545,7 @@
         </div>
     </div>
     <script>
-        const ADMIN_PASSWORD = '0000';
+        // Admin password is now stored in Firebase
         const storageKeys = {
             parents: 'kids_checkin_parents',
             checkIns: 'kids_checkin_list',
@@ -2502,37 +2530,112 @@
             }
         }
 
-        function checkAdminPassword() {
+        async function checkAdminPassword() {
             const entered = adminPin;
-            if (entered !== ADMIN_PASSWORD) {
+            
+            // Get password from Firebase
+            try {
+                const settingsRef = window.firebaseDB ? window.doc(window.firebaseDB, 'churches', 'bibleland2025', 'settings', 'admin') : null;
+                if (!settingsRef) {
+                    showCenteredAlert('Error', 'Firebase not initialized');
+                    return;
+                }
+                
+                const settingsSnap = await window.getDoc(settingsRef);
+                let correctPassword = '1234'; // Default password
+                
+                if (settingsSnap.exists()) {
+                    correctPassword = settingsSnap.data().password || '1234';
+                } else {
+                    // First time - set default password
+                    await window.setDoc(settingsRef, { password: '1234' });
+                }
+                
+                if (entered !== correctPassword) {
+                    adminPin = '';
+                    updatePinDisplay();
+                    showCenteredAlert('Incorrect PIN', 'Access Denied');
+                    return;
+                }
+                
+                // Correct password
+                document.getElementById('admin-password-modal').classList.add('hidden');
+                adminPin = '';
+                
+                if (!pendingAction) {
+                    show('admin-content');
+                    loadData();
+                    updateDisplays();
+                    return;
+                }
+                const { action, index } = pendingAction;
+                pendingAction = null;
+                if (action === 'checkout') {
+                    finalizeCheckout();
+                    return;
+                }
+                if (action === 'show-phone') {
+                    const rows = document.querySelectorAll('#checkin-table tbody tr');
+                    if (rows[index]) rows[index].classList.add('phone-revealed');
+                }
+            } catch (error) {
+                console.error('Error checking admin password:', error);
                 adminPin = '';
                 updatePinDisplay();
-                showCenteredAlert('Incorrect PIN', 'Access Denied');
+                showCenteredAlert('Error', 'Could not verify password');
+            }
+        }
+
+        // Change admin password function
+        async function changeAdminPassword() {
+            const currentPass = document.getElementById('change-pass-current').value;
+            const newPass = document.getElementById('change-pass-new').value;
+            const confirmPass = document.getElementById('change-pass-confirm').value;
+            
+            // Validation
+            if (!currentPass || !newPass || !confirmPass) {
+                showCenteredAlert('Error', 'Please fill in all fields');
                 return;
             }
             
-            // Correct password
-            document.getElementById('admin-password-modal').classList.add('hidden');
-            adminPin = '';
+            if (newPass.length !== 4 || !/^\d{4}$/.test(newPass)) {
+                showCenteredAlert('Error', 'New password must be exactly 4 digits');
+                return;
+            }
             
-            if (!pendingAction) {
-                show('admin-content');
-                loadData();
-                updateDisplays();
+            if (newPass !== confirmPass) {
+                showCenteredAlert('Error', 'New passwords do not match');
                 return;
             }
-            const {
-                action,
-                index
-            } = pendingAction;
-            pendingAction = null;
-            if (action === 'checkout') {
-                finalizeCheckout();
-                return;
-            }
-            if (action === 'show-phone') {
-                const rows = document.querySelectorAll('#checkin-table tbody tr');
-                if (rows[index]) rows[index].classList.add('phone-revealed');
+            
+            try {
+                // Verify current password
+                const settingsRef = window.doc(window.firebaseDB, 'churches', 'bibleland2025', 'settings', 'admin');
+                const settingsSnap = await window.getDoc(settingsRef);
+                
+                let storedPassword = '1234';
+                if (settingsSnap.exists()) {
+                    storedPassword = settingsSnap.data().password || '1234';
+                }
+                
+                if (currentPass !== storedPassword) {
+                    showCenteredAlert('Error', 'Current password is incorrect');
+                    document.getElementById('change-pass-current').value = '';
+                    return;
+                }
+                
+                // Update password in Firebase
+                await window.setDoc(settingsRef, { password: newPass });
+                
+                // Clear form
+                document.getElementById('change-pass-current').value = '';
+                document.getElementById('change-pass-new').value = '';
+                document.getElementById('change-pass-confirm').value = '';
+                
+                showCenteredAlert('Success! ✅', 'Admin password has been changed');
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showCenteredAlert('Error', 'Could not change password');
             }
         }
 
@@ -3911,6 +4014,9 @@
         const db = getFirestore(app);
 
         window.firebaseDB = db;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+        window.doc = doc;
         window.currentUserId = null;
         window.isSignupMode = false;
 
