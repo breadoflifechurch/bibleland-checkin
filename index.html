@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bible Land Check-In ☁️ 🌟</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Kids Check-In">
     <style>
@@ -3958,6 +3959,80 @@
                     originalSaveData();
                     
                     console.log('✅ Shared data loaded from cloud');
+                    console.log('   Check-ins:', window.checkIns?.length || 0);
+                    console.log('   Families:', Object.keys(window.familyDatabase || {}).length);
+                } else {
+                    // No cloud data exists - try to migrate from localStorage
+                    console.log('📭 No cloud data found. Checking localStorage for migration...');
+                    
+                    // Load from localStorage
+                    const localParents = localStorage.getItem('parents');
+                    const localCheckIns = localStorage.getItem('checkIns');
+                    const localUsedBuzzers = localStorage.getItem('usedBuzzers');
+                    const localVolunteers = localStorage.getItem('volunteers');
+                    const localFamilyDatabase = localStorage.getItem('familyDatabase');
+                    const localWeeklyReports = localStorage.getItem('weeklyReports');
+                    const localSupervisorDatabase = localStorage.getItem('supervisorDatabase');
+                    const localScheduledSupervisors = localStorage.getItem('scheduledSupervisors');
+                    
+                    let hasLocalData = false;
+                    
+                    if (localParents) {
+                        window.parents = JSON.parse(localParents);
+                        hasLocalData = true;
+                    }
+                    if (localCheckIns) {
+                        window.checkIns = JSON.parse(localCheckIns);
+                        hasLocalData = true;
+                    }
+                    if (localUsedBuzzers) {
+                        window.usedBuzzers = new Set(JSON.parse(localUsedBuzzers));
+                        hasLocalData = true;
+                    }
+                    if (localVolunteers) {
+                        window.volunteers = JSON.parse(localVolunteers);
+                        hasLocalData = true;
+                    }
+                    if (localFamilyDatabase) {
+                        window.familyDatabase = JSON.parse(localFamilyDatabase);
+                        hasLocalData = true;
+                    }
+                    if (localWeeklyReports) {
+                        window.weeklyReports = JSON.parse(localWeeklyReports);
+                        hasLocalData = true;
+                    }
+                    if (localSupervisorDatabase) {
+                        window.supervisorDatabase = JSON.parse(localSupervisorDatabase);
+                        hasLocalData = true;
+                    }
+                    if (localScheduledSupervisors) {
+                        window.scheduledSupervisors = JSON.parse(localScheduledSupervisors);
+                        hasLocalData = true;
+                    }
+                    
+                    if (hasLocalData) {
+                        console.log('📤 Found localStorage data! Migrating to cloud...');
+                        console.log('   Check-ins:', window.checkIns?.length || 0);
+                        console.log('   Families:', Object.keys(window.familyDatabase || {}).length);
+                        
+                        // Push to Firebase
+                        await setDoc(sharedDocRef, {
+                            parents: window.parents || {},
+                            checkIns: window.checkIns || [],
+                            usedBuzzers: [...(window.usedBuzzers || [])],
+                            volunteers: window.volunteers || {},
+                            familyDatabase: window.familyDatabase || {},
+                            weeklyReports: window.weeklyReports || {},
+                            supervisorDatabase: window.supervisorDatabase || {},
+                            scheduledSupervisors: window.scheduledSupervisors || {},
+                            lastUpdated: new Date().toISOString(),
+                            lastUpdatedBy: window.currentUserId
+                        });
+                        
+                        console.log('✅ Migration complete! Data now in cloud.');
+                    } else {
+                        console.log('ℹ️ No local data to migrate. Starting fresh.');
+                    }
                 }
                 updateSyncIndicator('synced');
             } catch (error) {
