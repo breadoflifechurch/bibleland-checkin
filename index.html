@@ -98,10 +98,13 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+        }
+        
+        .modal-overlay:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 3000;
         }
 
         input[type="tel"],
@@ -162,10 +165,13 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        
+        #confirm-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
         }
 
         #confirm-content {
@@ -195,10 +201,13 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        
+        .success-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
         }
 
         .success-content {
@@ -221,11 +230,14 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        
+        #schedule-view-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
-            overflow-y: auto;
         }
 
         #schedule-view-content {
@@ -263,10 +275,13 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        
+        #admin-password-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
         }
 
         #password-content {
@@ -289,10 +304,13 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        
+        #validation-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
         }
 
         #validation-content {
@@ -813,10 +831,13 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        
+        .centered-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
         }
 
         .centered-modal-content {
@@ -3060,7 +3081,6 @@
         
         function confirmNewPassword() {
             confirmNewPasswordChange();
-        }
         }
 
         // ─── Get upcoming Sundays ───────────────────────────────────────────────
