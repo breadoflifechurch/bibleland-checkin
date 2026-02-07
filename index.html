@@ -4714,6 +4714,7 @@
         let lastUpdateBy = null;
         let lastUpdateTime = null;
         let isLocalUpdate = false;
+        let isInitialLoad = true;
         
         function setupRealtimeSync() {
             if (!window.currentUserId) return;
@@ -4728,10 +4729,18 @@
                     if (doc.exists()) {
                         const data = doc.data();
                         
-                        // Skip if this is a local update (within 1 second of our own save)
+                        // Skip initial load from listener (we already loaded in loadFromFirestore)
+                        if (isInitialLoad) {
+                            console.log('⏭️ Skipping initial listener load');
+                            lastUpdateBy = data.lastUpdatedBy;
+                            lastUpdateTime = data.lastUpdated;
+                            isInitialLoad = false;
+                            return;
+                        }
+                        
+                        // Skip if this is a local update (within 2 seconds of our own save)
                         if (data.lastUpdatedBy === window.currentUserId && isLocalUpdate) {
                             console.log('⏭️ Skipping self-triggered update');
-                            isLocalUpdate = false;
                             return;
                         }
                         
