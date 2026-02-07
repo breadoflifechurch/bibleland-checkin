@@ -1535,42 +1535,76 @@
         </div>
         
         <!-- Change Admin Password Modal -->
-        <div id="change-password-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
+        <div id="change-password-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 3000;">
             <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%;">
                 <h2 style="margin-top: 0; color: var(--primary);">Change Admin Password</h2>
-                <p style="color: #666; margin-bottom: 20px;">Enter your current and new 4-digit PIN</p>
+                <p style="color: #666; margin-bottom: 20px;">Enter the old password to continue</p>
                 
-                <div style="margin: 15px 0;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Current Password:</label>
-                    <input type="tel" id="change-pass-current" maxlength="4" placeholder="••••" readonly
-                           onclick="showNumpad(this)"
-                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
-                </div>
-                <div style="margin: 15px 0;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">New Password:</label>
-                    <input type="tel" id="change-pass-new" maxlength="4" placeholder="••••" readonly
-                           onclick="showNumpad(this)"
-                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
-                </div>
-                <div style="margin: 15px 0;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Confirm New Password:</label>
-                    <input type="tel" id="change-pass-confirm" maxlength="4" placeholder="••••" readonly
-                           onclick="showNumpad(this)"
-                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
+                <!-- Step 1: Verify Current Password -->
+                <div id="change-pass-step1">
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Current Password:</label>
+                        <input type="tel" id="change-pass-current" maxlength="4" placeholder="••••" readonly
+                               onclick="showNumpad(this)"
+                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 24px;">
+                        <button class="btn-primary" onclick="verifyCurrentPassword()" style="flex: 1;">
+                            Continue
+                        </button>
+                        <button class="btn-outline" onclick="closeChangePasswordModal()" style="flex: 1;">
+                            Cancel
+                        </button>
+                    </div>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 24px;">
-                    <button class="btn-success" onclick="changeAdminPassword()" style="flex: 1;">
-                        Change Password
-                    </button>
-                    <button class="btn-outline" onclick="closeChangePasswordModal()" style="flex: 1;">
-                        Cancel
-                    </button>
+                <!-- Step 2: Enter New Password (hidden initially) -->
+                <div id="change-pass-step2" class="hidden">
+                    <p style="color: #50c878; margin-bottom: 20px;">✓ Current password verified</p>
+                    
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">New Password:</label>
+                        <input type="text" id="change-pass-new" maxlength="4" placeholder="1234" readonly
+                               onclick="showNumpad(this)"
+                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Confirm New Password:</label>
+                        <input type="text" id="change-pass-confirm" maxlength="4" placeholder="1234" readonly
+                               onclick="showNumpad(this)"
+                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 24px;">
+                        <button class="btn-success" onclick="confirmNewPassword()" style="flex: 1;">
+                            Change Password
+                        </button>
+                        <button class="btn-outline" onclick="closeChangePasswordModal()" style="flex: 1;">
+                            Cancel
+                        </button>
+                    </div>
                 </div>
                 
                 <p style="margin: 15px 0 0; font-size: 0.85rem; color: #999; text-align: center;">
                     💡 Tap the fields to enter numbers
                 </p>
+            </div>
+        </div>
+        
+        <!-- Confirmation Modal for Password Change -->
+        <div id="password-confirm-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 3500;">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 350px; max-width: 90%; text-align: center;">
+                <h3 style="margin-top: 0; color: var(--text);">Are you sure?</h3>
+                <p style="font-size: 1.1rem; margin: 20px 0;">Change admin password to: <strong id="new-pass-display"></strong></p>
+                <div style="display: flex; gap: 10px; margin-top: 24px; justify-content: center;">
+                    <button class="btn-success" onclick="finalizePasswordChange()">
+                        Yes, Change It
+                    </button>
+                    <button class="btn-outline" onclick="closePasswordConfirmModal()">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -1588,6 +1622,51 @@
                 <h3 id="alert-title">Alert</h3>
                 <p id="alert-message" style="font-size: 1.1rem; margin: 20px 0;"></p>
                 <button class="btn-primary" onclick="closeCenteredAlert()">OK</button>
+            </div>
+        </div>
+        
+        <!-- Add Child to Buzzer Modal -->
+        <div id="add-child-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 450px; max-width: 90%;">
+                <h2 style="margin-top: 0; color: var(--primary);">Add Child to Buzzer <span id="add-child-buzzer-num"></span></h2>
+                <p style="color: #666; margin-bottom: 20px;">For: <strong id="add-child-parent-name"></strong></p>
+                
+                <div style="margin: 15px 0;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Child's Name:</label>
+                    <input type="text" id="add-child-name" placeholder="Enter child's name"
+                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Age (1-6):</label>
+                    <input type="number" id="add-child-age" min="1" max="6" placeholder="Age"
+                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Allergies:</label>
+                    <select id="add-child-allergies" onchange="toggleAddChildOtherAllergy()"
+                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
+                        <option value="">-- Select --</option>
+                        <option value="None">None</option>
+                        <option value="Peanuts">Peanuts</option>
+                        <option value="Dairy">Dairy</option>
+                        <option value="Gluten">Gluten</option>
+                        <option value="Eggs">Eggs</option>
+                        <option value="Other">Other (specify)</option>
+                    </select>
+                    <input type="text" id="add-child-allergies-other" placeholder="Specify allergy" class="hidden"
+                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; margin-top: 10px;">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 24px;">
+                    <button class="btn-success" onclick="submitAddChild()" style="flex: 1;">
+                        Add Child
+                    </button>
+                    <button class="btn-outline" onclick="closeAddChildModal()" style="flex: 1;">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2482,6 +2561,124 @@
         }
 
         // ─── View Current Check-Ins ─────────────────────────────────────────────
+        
+        // Store temporary data for adding child
+        let pendingAddChild = null;
+        
+        function requestAddChildToBuzzer(buzzerNum, phone, parentName) {
+            // Store the data
+            pendingAddChild = { buzzerNum, phone, parentName };
+            
+            // Request admin password first
+            pendingAction = { action: 'add-child-to-buzzer' };
+            showAdminPasswordModal();
+        }
+        
+        function showAddChildForm() {
+            if (!pendingAddChild) return;
+            
+            document.getElementById('add-child-buzzer-num').textContent = '#' + pendingAddChild.buzzerNum;
+            document.getElementById('add-child-parent-name').textContent = pendingAddChild.parentName;
+            document.getElementById('add-child-name').value = '';
+            document.getElementById('add-child-age').value = '';
+            document.getElementById('add-child-allergies').value = '';
+            document.getElementById('add-child-allergies-other').value = '';
+            document.getElementById('add-child-allergies-other').classList.add('hidden');
+            
+            document.getElementById('add-child-modal').classList.remove('hidden');
+        }
+        
+        function closeAddChildModal() {
+            document.getElementById('add-child-modal').classList.add('hidden');
+            pendingAddChild = null;
+        }
+        
+        function toggleAddChildOtherAllergy() {
+            const select = document.getElementById('add-child-allergies');
+            const otherInput = document.getElementById('add-child-allergies-other');
+            
+            if (select.value === 'Other') {
+                otherInput.classList.remove('hidden');
+            } else {
+                otherInput.classList.add('hidden');
+            }
+        }
+        
+        function submitAddChild() {
+            if (!pendingAddChild) return;
+            
+            const name = document.getElementById('add-child-name').value.trim();
+            const age = document.getElementById('add-child-age').value.trim();
+            let allergies = document.getElementById('add-child-allergies').value;
+            const otherAllergy = document.getElementById('add-child-allergies-other').value.trim();
+            
+            // Validation
+            if (!name) {
+                showCenteredAlert('Required', 'Please enter the child\'s name');
+                return;
+            }
+            
+            if (!age || age < 1 || age > 6) {
+                showCenteredAlert('Required', 'Please enter a valid age between 1 and 6');
+                return;
+            }
+            
+            if (!allergies) {
+                showCenteredAlert('Required', 'Please select an allergy option (select "None" if no allergies)');
+                return;
+            }
+            
+            if (allergies === 'Other') {
+                if (!otherAllergy) {
+                    showCenteredAlert('Required', 'Please specify the allergy or select "None"');
+                    return;
+                }
+                allergies = otherAllergy;
+            }
+            
+            // Add child to check-ins
+            const phone = pendingAddChild.phone;
+            const buzzer = pendingAddChild.buzzerNum;
+            const parentName = pendingAddChild.parentName;
+            
+            checkIns.push({
+                buzzer: buzzer,
+                childName: name,
+                age: age,
+                allergies: allergies,
+                phone: phone,
+                parentName: parentName,
+                timestamp: Date.now()
+            });
+            
+            // Update family database
+            const cleanPhone = phone.replace(/\D/g, '');
+            if (familyDatabase[cleanPhone]) {
+                const existingKids = familyDatabase[cleanPhone].kids || [];
+                const existingKid = existingKids.find(k => k.name.toLowerCase() === name.toLowerCase());
+                
+                if (existingKid) {
+                    // Update age if different
+                    if (existingKid.age != age) {
+                        existingKid.age = age;
+                    }
+                } else {
+                    // Add new child
+                    existingKids.push({
+                        name: name,
+                        age: age,
+                        allergies: allergies
+                    });
+                    familyDatabase[cleanPhone].kids = existingKids;
+                }
+            }
+            
+            saveData();
+            closeAddChildModal();
+            renderCheckInTable();
+            showCenteredAlert('Success! ✅', `${name} has been added to buzzer #${buzzer}`);
+        }
+        
         function showViewCheckIns() {
             show('view-checkins');
             renderCheckInTable();
@@ -2511,14 +2708,15 @@
                     ' style="color: red; font-weight: bold;"' : '';
                 
                 tr.innerHTML = `
-                    <td rowspan="${group.length}">#${buzzerNum}</td>
+                    <td rowspan="${group.length + 1}">#${buzzerNum}</td>
                     <td>${firstChild.childName}</td>
                     <td>${firstChild.age}</td>
                     <td${allergiesStyle}>${firstChild.allergies}</td>
-                    <td rowspan="${group.length}">${firstChild.parentName}</td>
-                    <td rowspan="${group.length}" class="phone-cell" onclick="requestAdminAction('show-phone', ${firstChild.originalIndex})">${firstChild.phone}</td>
-                    <td rowspan="${group.length}">
-                        <button class="btn-danger" onclick="requestCheckoutByBuzzer(${buzzerNum})">Check Out</button>
+                    <td rowspan="${group.length + 1}">${firstChild.parentName}</td>
+                    <td rowspan="${group.length + 1}" class="phone-cell" onclick="requestAdminAction('show-phone', ${firstChild.originalIndex})">${firstChild.phone}</td>
+                    <td rowspan="${group.length + 1}">
+                        <button class="btn-danger btn-sm" onclick="requestCheckoutByBuzzer(${buzzerNum})" style="display: block; margin: 4px auto;">Check Out</button>
+                        <button class="btn-primary btn-sm" onclick="requestAddChildToBuzzer(${buzzerNum}, '${firstChild.phone}', '${firstChild.parentName}')" style="display: block; margin: 4px auto;">+ Add Child</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -2537,6 +2735,15 @@
                     `;
                     tbody.appendChild(siblingTr);
                 }
+                
+                // Add empty row with "Add Child" action for visual separation
+                let addRowTr = document.createElement('tr');
+                addRowTr.innerHTML = `
+                    <td colspan="3" style="border-top: 2px solid #e0e0e0; padding: 4px; text-align: center; color: #999; font-size: 0.8rem;">
+                        Click "+ Add Child" to add another child
+                    </td>
+                `;
+                tbody.appendChild(addRowTr);
             });
         }
         // ─── Custom checkout confirmation ───────────────────────────────────────
@@ -2686,6 +2893,10 @@
                     finalizeCheckout();
                     return;
                 }
+                if (action === 'add-child-to-buzzer') {
+                    showAddChildForm();
+                    return;
+                }
                 if (action === 'show-phone') {
                     const rows = document.querySelectorAll('#checkin-table tbody tr');
                     if (rows[index]) rows[index].classList.add('phone-revealed');
@@ -2701,6 +2912,9 @@
         // Show/Hide Change Password Modal
         function showChangePasswordModal() {
             document.getElementById('change-password-modal').classList.remove('hidden');
+            // Show step 1, hide step 2
+            document.getElementById('change-pass-step1').classList.remove('hidden');
+            document.getElementById('change-pass-step2').classList.add('hidden');
             // Clear fields
             document.getElementById('change-pass-current').value = '';
             document.getElementById('change-pass-new').value = '';
@@ -2710,26 +2924,13 @@
         function closeChangePasswordModal() {
             document.getElementById('change-password-modal').classList.add('hidden');
         }
-
-        // Change admin password function
-        async function changeAdminPassword() {
+        
+        // Step 1: Verify current password
+        async function verifyCurrentPassword() {
             const currentPass = document.getElementById('change-pass-current').value;
-            const newPass = document.getElementById('change-pass-new').value;
-            const confirmPass = document.getElementById('change-pass-confirm').value;
             
-            // Validation
-            if (!currentPass || !newPass || !confirmPass) {
-                showCenteredAlert('Error', 'Please fill in all fields');
-                return;
-            }
-            
-            if (newPass.length !== 4 || !/^\d{4}$/.test(newPass)) {
-                showCenteredAlert('Error', 'New password must be exactly 4 digits');
-                return;
-            }
-            
-            if (newPass !== confirmPass) {
-                showCenteredAlert('Error', 'New passwords do not match');
+            if (!currentPass || currentPass.length !== 4) {
+                showCenteredAlert('Error', 'Please enter your current 4-digit password');
                 return;
             }
             
@@ -2749,10 +2950,57 @@
                     return;
                 }
                 
+                // Password correct - move to step 2
+                document.getElementById('change-pass-step1').classList.add('hidden');
+                document.getElementById('change-pass-step2').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error verifying password:', error);
+                showCenteredAlert('Error', 'Could not verify password');
+            }
+        }
+        
+        // Step 2: Confirm new password and show confirmation
+        function confirmNewPassword() {
+            const newPass = document.getElementById('change-pass-new').value;
+            const confirmPass = document.getElementById('change-pass-confirm').value;
+            
+            // Validation
+            if (!newPass || !confirmPass) {
+                showCenteredAlert('Error', 'Please fill in both password fields');
+                return;
+            }
+            
+            if (newPass.length !== 4 || !/^\d{4}$/.test(newPass)) {
+                showCenteredAlert('Error', 'New password must be exactly 4 digits');
+                return;
+            }
+            
+            if (newPass !== confirmPass) {
+                showCenteredAlert('Error', 'Passwords do not match');
+                return;
+            }
+            
+            // Show confirmation modal
+            document.getElementById('new-pass-display').textContent = newPass;
+            document.getElementById('password-confirm-modal').classList.remove('hidden');
+        }
+        
+        function closePasswordConfirmModal() {
+            document.getElementById('password-confirm-modal').classList.add('hidden');
+        }
+        
+        // Final step: Actually change the password
+        async function finalizePasswordChange() {
+            const newPass = document.getElementById('change-pass-new').value;
+            
+            try {
                 // Update password in Firebase
+                const settingsRef = window.doc(window.firebaseDB, 'churches', 'bibleland2025', 'settings', 'admin');
                 await window.setDoc(settingsRef, { password: newPass });
                 
-                // Close modal
+                // Close all modals
+                closePasswordConfirmModal();
                 closeChangePasswordModal();
                 
                 showCenteredAlert('Success! ✅', 'Admin password has been changed');
@@ -2972,18 +3220,18 @@
             uniqueVols.forEach(vol => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-        <td>${vol.name}</td>
-        <td>${formatPhoneDisplay(vol.phone)}</td>
-        <td>
-          <select id="assign-date-${vol.phone}" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #d1e3ff;">
+        <td style="padding: 6px;">${vol.name}</td>
+        <td style="padding: 6px; white-space: nowrap;">${formatPhoneDisplay(vol.phone)}</td>
+        <td style="padding: 6px;">
+          <select id="assign-date-${vol.phone}" style="padding: 4px 6px; border-radius: 6px; border: 1px solid #d1e3ff; font-size: 0.75rem; width: 100%;">
             ${sundays.map(date => `<option value="${date}">${date}</option>`).join('')}
           </select>
-          <button class="btn-primary btn-sm" onclick="assignVolunteerToDate('${vol.phone}')" style="margin-left: 8px;">Assign</button>
+          <button class="btn-primary" onclick="assignVolunteerToDate('${vol.phone}')" style="margin-left: 4px; font-size: 0.7rem; padding: 4px 8px;">Assign</button>
         </td>
-        <td>
-          <div class="action-buttons">
-            <button class="btn-icon btn-edit" onclick="editVolunteerInfo('${vol.phone}')" title="Edit volunteer">✏️</button>
-            <button class="btn-icon btn-delete" onclick="deleteVolunteerFromDatabase('${vol.phone}')" title="Delete volunteer">🗑️</button>
+        <td style="padding: 6px;">
+          <div class="action-buttons" style="display: flex; gap: 4px; justify-content: center;">
+            <button class="btn-icon btn-edit" onclick="editVolunteerInfo('${vol.phone}')" title="Edit" style="font-size: 0.85rem; padding: 4px 8px;">✏️</button>
+            <button class="btn-icon btn-delete" onclick="deleteVolunteerFromDatabase('${vol.phone}')" title="Delete" style="font-size: 0.85rem; padding: 4px 8px;">🗑️</button>
           </div>
         </td>
       `;
