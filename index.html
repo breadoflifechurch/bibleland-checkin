@@ -1899,14 +1899,29 @@
             const loadedSupervisorDatabase = JSON.parse(localStorage.getItem(storageKeys.supervisors)) || {};
             const loadedScheduledSupervisors = JSON.parse(localStorage.getItem(storageKeys.scheduledSupervisors)) || {};
             
-            // Update window properties (don't replace, update in place)
+            // Replace arrays/objects (don't append)
+            Object.keys(parents).forEach(k => delete parents[k]);
             Object.assign(parents, loadedParents);
+            
+            checkIns.length = 0; // Clear array
             checkIns.push(...loadedCheckIns);
+            
+            usedBuzzers.clear(); // Clear set
             loadedUsedBuzzers.forEach(b => usedBuzzers.add(b));
+            
+            Object.keys(volunteers).forEach(k => delete volunteers[k]);
             Object.assign(volunteers, loadedVolunteers);
+            
+            Object.keys(familyDatabase).forEach(k => delete familyDatabase[k]);
             Object.assign(familyDatabase, loadedFamilyDatabase);
+            
+            Object.keys(weeklyReports).forEach(k => delete weeklyReports[k]);
             Object.assign(weeklyReports, loadedWeeklyReports);
+            
+            Object.keys(supervisorDatabase).forEach(k => delete supervisorDatabase[k]);
             Object.assign(supervisorDatabase, loadedSupervisorDatabase);
+            
+            Object.keys(scheduledSupervisors).forEach(k => delete scheduledSupervisors[k]);
             Object.assign(scheduledSupervisors, loadedScheduledSupervisors);
             
             if (!volunteers.all) volunteers.all = [];
@@ -2960,7 +2975,6 @@
                 
                 if (!pendingAction) {
                     show('admin-content');
-                    loadData();
                     updateDisplays();
                     return;
                 }
