@@ -142,9 +142,9 @@
         }
 
         .btn-sm {
-            font-size: 0.9rem;
-            padding: 4px 8px;
-            border-radius: 8px;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 6px;
         }
 
         /* Custom confirmation modal */
@@ -527,24 +527,47 @@
 
         .admin-section {
             background: #f8fbff;
-            border-radius: 16px;
-            padding: 24px;
-            margin: 20px 0;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 15px 0;
             border: 1px solid #d1e3ff;
         }
 
         .admin-section h2 {
             color: var(--primary);
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+        }
+        
+        /* Two-column grid for admin sections */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .admin-grid .admin-section {
+            margin: 0;
+        }
+        
+        /* Make some sections full-width */
+        .admin-section.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        @media (max-width: 900px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .section-icon {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
         }
 
         .admin-table {
@@ -560,15 +583,16 @@
 
         .admin-table th {
             background: linear-gradient(135deg, var(--primary), #6bb6ff);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 12px;
+            letter-spacing: 0.3px;
+            padding: 8px;
         }
 
         .admin-table td {
-            padding: 12px;
+            padding: 8px;
             border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
         }
 
         .admin-table tr:last-child td {
@@ -1253,6 +1277,10 @@
                 </div>
                 <div class="profile-dropdown" id="profile-dropdown">
                     <strong id="user-email-display"></strong>
+                    <a href="#" onclick="event.preventDefault(); showChangePasswordModal(); toggleProfileDropdown();" 
+                       style="font-size: 0.85rem; color: #4a90e2; text-decoration: none; display: block; margin: 8px 0; padding: 4px 0;">
+                        Change Admin Password
+                    </a>
                     <button class="btn-logout" onclick="handleLogout()">Logout</button>
                 </div>
             </div>
@@ -1399,7 +1427,8 @@
                 </div>
             </div>
 
-            <div class="admin-section">
+            <!-- Volunteer Schedule - Full Width -->
+            <div class="admin-section full-width">
                 <h2><span class="section-icon">📅</span> Volunteer Schedule</h2>
                 <div class="admin-table">
                     <table id="admin-schedule-table">
@@ -1417,79 +1446,56 @@
                 </div>
             </div>
 
-            <div class="admin-section">
-                <h2><span class="section-icon">👥</span> Volunteer Database</h2>
-                <button class="btn-success btn-sm" onclick="toggleAddToDatabaseForm()" style="margin-bottom: 15px;">+ Add New Volunteer</button>
-                <div id="add-to-db-form" class="hidden add-vol-form">
-                    <label>First &amp; Last: <input type="text" id="db-vol-name" placeholder="John Doe"></label><br>
-                    <label>Phone: <input type="tel" id="db-vol-phone" placeholder="(000) 000-0000" oninput="formatPhone(this)"></label><br>
-                    <button class="btn-success btn-sm" onclick="addToVolunteerDatabase()">Save</button>
-                    <button class="btn-outline btn-sm" onclick="toggleAddToDatabaseForm()">Cancel</button>
+            <!-- Two-Column Grid for Databases -->
+            <div class="admin-grid">
+                <div class="admin-section">
+                    <h2><span class="section-icon">👥</span> Volunteer Database</h2>
+                    <button class="btn-success btn-sm" onclick="toggleAddToDatabaseForm()" style="margin-bottom: 12px; font-size: 0.85rem; padding: 6px 12px;">+ Add Volunteer</button>
+                    <div id="add-to-db-form" class="hidden add-vol-form">
+                        <label>First &amp; Last: <input type="text" id="db-vol-name" placeholder="John Doe"></label><br>
+                        <label>Phone: <input type="tel" id="db-vol-phone" placeholder="(000) 000-0000" oninput="formatPhone(this)"></label><br>
+                        <button class="btn-success btn-sm" onclick="addToVolunteerDatabase()">Save</button>
+                        <button class="btn-outline btn-sm" onclick="toggleAddToDatabaseForm()">Cancel</button>
+                    </div>
+                    <div class="admin-table">
+                        <table id="volunteer-db-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Quick Assign</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="admin-table">
-                    <table id="volunteer-db-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Quick Assign</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+
+                <div class="admin-section">
+                    <h2><span class="section-icon">👔</span> Supervisor Database</h2>
+                    <button class="btn-success btn-sm" onclick="toggleAddSupervisorForm()" style="margin-bottom: 12px; font-size: 0.85rem; padding: 6px 12px;">+ Add Supervisor</button>
+                    <div id="add-supervisor-form" class="hidden add-vol-form">
+                        <label>First Name: <input type="text" id="super-first-name" placeholder="John"></label><br>
+                        <label>Last Name: <input type="text" id="super-last-name" placeholder="Doe"></label><br>
+                        <label>Phone: <input type="tel" id="super-phone" placeholder="(000) 000-0000" oninput="formatPhone(this)"></label><br>
+                        <button class="btn-success btn-sm" onclick="addSupervisorToDatabase()">Save</button>
+                        <button class="btn-outline btn-sm" onclick="toggleAddSupervisorForm()">Cancel</button>
+                    </div>
+                    <div id="supervisor-database-content"></div>
                 </div>
             </div>
 
-            <div class="admin-section">
+            <!-- Family Database - Full Width -->
+            <div class="admin-section full-width">
                 <h2><span class="section-icon">👨‍👩‍👧‍👦</span> Family Database</h2>
                 <div id="family-database-content"></div>
             </div>
 
-            <div class="admin-section">
-                <h2><span class="section-icon">👔</span> Supervisor Database</h2>
-                <button class="btn-success btn-sm" onclick="toggleAddSupervisorForm()" style="margin-bottom: 15px;">+ Add New Supervisor</button>
-                <div id="add-supervisor-form" class="hidden add-vol-form">
-                    <label>First Name: <input type="text" id="super-first-name" placeholder="John"></label><br>
-                    <label>Last Name: <input type="text" id="super-last-name" placeholder="Doe"></label><br>
-                    <label>Phone: <input type="tel" id="super-phone" placeholder="(000) 000-0000" oninput="formatPhone(this)"></label><br>
-                    <button class="btn-success btn-sm" onclick="addSupervisorToDatabase()">Save</button>
-                    <button class="btn-outline btn-sm" onclick="toggleAddSupervisorForm()">Cancel</button>
-                </div>
-                <div id="supervisor-database-content"></div>
-            </div>
-
-            <div class="admin-section">
+            <!-- Weekly Reports - Full Width -->
+            <div class="admin-section full-width">
                 <h2><span class="section-icon">📊</span> Weekly Reports</h2>
                 <div id="reports-content"></div>
-            </div>
-
-            <div class="admin-section">
-                <h2><span class="section-icon">🔐</span> Change Admin Password</h2>
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; max-width: 400px;">
-                    <p style="margin-top: 0; color: #666;">Change the 4-digit PIN for admin access</p>
-                    <div style="margin: 15px 0;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Current Password:</label>
-                        <input type="password" id="change-pass-current" maxlength="4" placeholder="••••" 
-                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px;">
-                    </div>
-                    <div style="margin: 15px 0;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">New Password:</label>
-                        <input type="password" id="change-pass-new" maxlength="4" placeholder="••••"
-                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px;">
-                    </div>
-                    <div style="margin: 15px 0;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Confirm New Password:</label>
-                        <input type="password" id="change-pass-confirm" maxlength="4" placeholder="••••"
-                               style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px;">
-                    </div>
-                    <button class="btn-success" onclick="changeAdminPassword()" style="width: 100%; margin-top: 10px;">
-                        Change Password
-                    </button>
-                    <p style="margin-bottom: 0; margin-top: 10px; font-size: 0.9rem; color: #999;">
-                        💡 Use a 4-digit PIN (e.g., 1234, 5678)
-                    </p>
-                </div>
             </div>
         </div>
         <!-- Custom checkout confirmation modal -->
@@ -1527,6 +1533,47 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Change Admin Password Modal -->
+        <div id="change-password-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%;">
+                <h2 style="margin-top: 0; color: var(--primary);">Change Admin Password</h2>
+                <p style="color: #666; margin-bottom: 20px;">Enter your current and new 4-digit PIN</p>
+                
+                <div style="margin: 15px 0;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Current Password:</label>
+                    <input type="tel" id="change-pass-current" maxlength="4" placeholder="••••" readonly
+                           onclick="showNumpad(this)"
+                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
+                </div>
+                <div style="margin: 15px 0;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">New Password:</label>
+                    <input type="tel" id="change-pass-new" maxlength="4" placeholder="••••" readonly
+                           onclick="showNumpad(this)"
+                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
+                </div>
+                <div style="margin: 15px 0;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Confirm New Password:</label>
+                    <input type="tel" id="change-pass-confirm" maxlength="4" placeholder="••••" readonly
+                           onclick="showNumpad(this)"
+                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px; cursor: pointer;">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 24px;">
+                    <button class="btn-success" onclick="changeAdminPassword()" style="flex: 1;">
+                        Change Password
+                    </button>
+                    <button class="btn-outline" onclick="closeChangePasswordModal()" style="flex: 1;">
+                        Cancel
+                    </button>
+                </div>
+                
+                <p style="margin: 15px 0 0; font-size: 0.85rem; color: #999; text-align: center;">
+                    💡 Tap the fields to enter numbers
+                </p>
+            </div>
+        </div>
+        
         <!-- Validation modal -->
         <div id="validation-modal" class="hidden">
             <div id="validation-content">
@@ -2194,17 +2241,46 @@
         }
 
         // ─── Finish check-in ────────────────────────────────────────────────────
+        let isProcessingCheckIn = false; // Guard to prevent duplicate submissions
+        
+        function resetCheckInButton() {
+            const checkInBtn = document.querySelector('button[onclick="finishCheckIn()"]');
+            if (checkInBtn) {
+                checkInBtn.disabled = false;
+                checkInBtn.style.opacity = '1';
+            }
+        }
+        
         function finishCheckIn() {
+            // Prevent multiple simultaneous calls
+            if (isProcessingCheckIn) {
+                console.log('⚠️ Check-in already in progress, ignoring duplicate call');
+                return;
+            }
+            
+            isProcessingCheckIn = true;
+            
+            // Disable the check-in button to prevent double-clicks
+            const checkInBtn = document.querySelector('button[onclick="finishCheckIn()"]');
+            if (checkInBtn) {
+                checkInBtn.disabled = true;
+                checkInBtn.style.opacity = '0.5';
+            }
+            
             const phone = document.getElementById('phone').value.replace(/\D/g, '').trim();
             const first = document.getElementById('firstName').value.trim();
             const last = document.getElementById('lastName').value.trim();
             
             if (phone.length !== 10) {
                 showValidationModal("Please enter a valid 10-digit phone number");
+                resetCheckInButton();
+                isProcessingCheckIn = false;
                 return;
             }
             if (!first || !last) {
                 showValidationModal("Please fill in parent first and last name");
+                resetCheckInButton();
+                isProcessingCheckIn = false;
                 return;
             }
             
@@ -2218,6 +2294,8 @@
             
             if (alreadyCheckedIn) {
                 showCenteredAlert("This phone number is already checked in today!", "Duplicate Check-In");
+                resetCheckInButton();
+                isProcessingCheckIn = false;
                 return;
             }
             
@@ -2272,11 +2350,15 @@
             
             if (hasError) {
                 showValidationModal(errorMessage);
+                resetCheckInButton();
+                isProcessingCheckIn = false;
                 return;
             }
             
             if (added === 0) {
                 showValidationModal("Please add at least one child");
+                resetCheckInButton();
+                isProcessingCheckIn = false;
                 return;
             }
             
@@ -2285,6 +2367,8 @@
                 memberFirst = first;
                 memberLast = last;
                 showBuzzerScreen();
+                resetCheckInButton();
+                isProcessingCheckIn = false; // Reset because we're not done yet, just going to buzzer screen
                 return;
             }
             
@@ -2306,17 +2390,41 @@
             parents[phone].lastName = last;
             parents[phone].children = currentChildren;
             
-            // Save to family database
-            familyDatabase[phone] = {
-                type: isMemberPath ? 'member' : 'nonmember',
-                firstName: first,
-                lastName: last,
-                kids: currentChildren.map(child => ({
-                    name: child.name,
-                    age: child.age,
-                    allergies: child.allergies
-                }))
-            };
+            // Update family database - only add NEW children, don't remove existing ones
+            if (!familyDatabase[phone]) {
+                // First time for this phone - create new entry
+                familyDatabase[phone] = {
+                    type: isMemberPath ? 'member' : 'nonmember',
+                    firstName: first,
+                    lastName: last,
+                    kids: currentChildren.map(child => ({
+                        name: child.name,
+                        age: child.age,
+                        allergies: child.allergies
+                    }))
+                };
+            } else {
+                // Phone exists - only add NEW children
+                const existingKids = familyDatabase[phone].kids || [];
+                const existingKidNames = existingKids.map(k => k.name.toLowerCase());
+                
+                // Add new children that don't exist yet
+                currentChildren.forEach(child => {
+                    if (!existingKidNames.includes(child.name.toLowerCase())) {
+                        existingKids.push({
+                            name: child.name,
+                            age: child.age,
+                            allergies: child.allergies
+                        });
+                    }
+                });
+                
+                // Update the family database with merged list
+                familyDatabase[phone].kids = existingKids;
+                // Update parent names in case they changed
+                familyDatabase[phone].firstName = first;
+                familyDatabase[phone].lastName = last;
+            }
             
             usedBuzzers.add(currentBuzzer);
             saveData();
@@ -2326,6 +2434,10 @@
             const childNames = currentChildren.map(c => c.name).join(', ');
             document.getElementById('success-text').textContent = `Checked in ${childNames} with buzzer #${currentBuzzer}`;
             document.getElementById('success-modal').classList.remove('hidden');
+            
+            // Reset the guard and button after successful check-in
+            resetCheckInButton();
+            isProcessingCheckIn = false;
         }
 
         // ─── Show buzzer screen ─────────────────────────────────────────────────
@@ -2586,6 +2698,19 @@
             }
         }
 
+        // Show/Hide Change Password Modal
+        function showChangePasswordModal() {
+            document.getElementById('change-password-modal').classList.remove('hidden');
+            // Clear fields
+            document.getElementById('change-pass-current').value = '';
+            document.getElementById('change-pass-new').value = '';
+            document.getElementById('change-pass-confirm').value = '';
+        }
+        
+        function closeChangePasswordModal() {
+            document.getElementById('change-password-modal').classList.add('hidden');
+        }
+
         // Change admin password function
         async function changeAdminPassword() {
             const currentPass = document.getElementById('change-pass-current').value;
@@ -2627,10 +2752,8 @@
                 // Update password in Firebase
                 await window.setDoc(settingsRef, { password: newPass });
                 
-                // Clear form
-                document.getElementById('change-pass-current').value = '';
-                document.getElementById('change-pass-new').value = '';
-                document.getElementById('change-pass-confirm').value = '';
+                // Close modal
+                closeChangePasswordModal();
                 
                 showCenteredAlert('Success! ✅', 'Admin password has been changed');
             } catch (error) {
