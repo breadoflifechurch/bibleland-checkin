@@ -94,6 +94,16 @@
             display: none !important;
         }
 
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
         input[type="tel"],
         input[type="text"],
         input[type="password"],
@@ -1535,7 +1545,7 @@
         </div>
         
         <!-- Change Admin Password Modal - Step 1: Current Password -->
-        <div id="change-password-step1-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 3000;">
+        <div id="change-password-step1-modal" class="hidden modal-overlay">
             <div id="password-content" style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center;">
                 <h2 style="margin-top: 0; color: var(--primary);">Enter Current Admin PIN</h2>
                 <div id="change-pin-display" style="font-size: 3rem; letter-spacing: 16px; margin: 30px 0; min-height: 60px; color: var(--text);"></div>
@@ -1560,7 +1570,7 @@
         </div>
         
         <!-- Change Admin Password Modal - Step 2: New Password Entry -->
-        <div id="change-password-step2-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 3000;">
+        <div id="change-password-step2-modal" class="hidden modal-overlay">
             <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%;">
                 <h2 style="margin-top: 0; color: var(--primary);">Enter New Admin Password</h2>
                 <p style="color: #50c878; margin-bottom: 20px;">✓ Current password verified</p>
@@ -1588,13 +1598,7 @@
         </div>
         
         <!-- Confirmation Modal for Password Change -->
-        <div id="password-confirm-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 3500;">
-            <div style="background: white; border-radius: 16px; padding: 32px; width: 350px; max-width: 90%; text-align: center;">
-                <h3 style="margin-top: 0; color: var(--text);">Are you sure?</h3>
-                <p style="font-size: 1.1rem; margin: 20px 0;">Do you want to change the admin password?</p>
-        
-        <!-- Confirmation Modal for Password Change -->
-        <div id="password-confirm-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 3500;">
+        <div id="password-confirm-modal" class="hidden modal-overlay">
             <div style="background: white; border-radius: 16px; padding: 32px; width: 350px; max-width: 90%; text-align: center;">
                 <h3 style="margin-top: 0; color: var(--text);">Are you sure?</h3>
                 <p style="font-size: 1.1rem; margin: 20px 0;">Do you want to change the admin password?</p>
@@ -1627,7 +1631,7 @@
         </div>
         
         <!-- Add Child to Buzzer Modal -->
-        <div id="add-child-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;">
+        <div id="add-child-modal" class="hidden modal-overlay">
             <div style="background: white; border-radius: 16px; padding: 32px; width: 450px; max-width: 90%;">
                 <h2 style="margin-top: 0; color: var(--primary);">Add Child to Buzzer <span id="add-child-buzzer-num"></span></h2>
                 <p style="color: #666; margin-bottom: 20px;">For: <strong id="add-child-parent-name"></strong></p>
@@ -2736,15 +2740,6 @@
                     `;
                     tbody.appendChild(siblingTr);
                 }
-                
-                // Add empty row with "Add Child" action for visual separation
-                let addRowTr = document.createElement('tr');
-                addRowTr.innerHTML = `
-                    <td colspan="3" style="border-top: 2px solid #e0e0e0; padding: 4px; text-align: center; color: #999; font-size: 0.8rem;">
-                        Click "+ Add Child" to add another child
-                    </td>
-                `;
-                tbody.appendChild(addRowTr);
             });
         }
         // ─── Custom checkout confirmation ───────────────────────────────────────
@@ -4559,6 +4554,7 @@
         };
 
         // Real-time sync listener
+        let lastUpdateBy = null;
         function setupRealtimeSync() {
             if (!window.currentUserId) return;
             
@@ -4571,6 +4567,15 @@
                 const unsubscribe = onSnapshot(sharedDocRef, (doc) => {
                     if (doc.exists()) {
                         const data = doc.data();
+                        
+                        // Skip if this update was triggered by the current user
+                        if (data.lastUpdatedBy === window.currentUserId && data.lastUpdatedBy === lastUpdateBy) {
+                            console.log('⏭️ Skipping self-triggered update');
+                            return;
+                        }
+                        
+                        lastUpdateBy = data.lastUpdatedBy;
+                        
                         console.log('🔄 Real-time update received from cloud');
                         console.log('   Check-ins:', data.checkIns?.length || 0);
                         console.log('   Families:', Object.keys(data.familyDatabase || {}).length);
