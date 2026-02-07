@@ -106,6 +106,19 @@
             align-items: center;
             justify-content: center;
         }
+        
+        .modal-overlay-high {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 4000;
+        }
+        
+        .modal-overlay-high:not(.hidden) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         input[type="tel"],
         input[type="text"],
@@ -304,7 +317,7 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            z-index: 5000;
         }
         
         #validation-modal:not(.hidden) {
@@ -831,7 +844,7 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            z-index: 5000;
         }
         
         .centered-modal:not(.hidden) {
@@ -1592,34 +1605,71 @@
         
         <!-- Change Admin Password Modal - Step 2: New Password Entry -->
         <div id="change-password-step2-modal" class="hidden modal-overlay">
-            <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%;">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center;">
                 <h2 style="margin-top: 0; color: var(--primary);">Enter New Admin Password</h2>
                 <p style="color: #50c878; margin-bottom: 20px;">✓ Current password verified</p>
                 
-                <div style="margin: 15px 0;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">New Password (4 digits):</label>
-                    <input type="text" id="change-pass-new" maxlength="4" placeholder="1234"
-                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px;">
-                </div>
-                <div style="margin: 15px 0;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Confirm New Password:</label>
-                    <input type="text" id="change-pass-confirm" maxlength="4" placeholder="1234"
-                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 8px;">
+                <div style="margin: 20px 0;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">New Password (4 digits):</label>
+                    <div id="new-password-display" style="font-size: 2.5rem; letter-spacing: 12px; margin: 15px 0; min-height: 50px; color: var(--text);"></div>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 24px;">
-                    <button class="btn-success" onclick="confirmNewPasswordChange()" style="flex: 1;">
-                        OK
-                    </button>
-                    <button class="btn-outline" onclick="closeChangePasswordFlow()" style="flex: 1;">
-                        Cancel
-                    </button>
+                <div class="numpad">
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('1')">1</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('2')">2</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('3')">3</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('4')">4</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('5')">5</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('6')">6</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('7')">7</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('8')">8</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('9')">9</button>
+                    <button class="numpad-btn small-btn" onclick="deleteNewPasswordDigit()" title="Erase">⌫</button>
+                    <button class="numpad-btn" onclick="addNewPasswordDigit('0')">0</button>
+                    <button class="numpad-btn small-btn" onclick="clearNewPassword()" title="Clear All">C</button>
+                </div>
+                
+                <div style="margin-top:20px;">
+                    <button class="btn-outline" onclick="closeChangePasswordFlow()">Cancel</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Change Admin Password Modal - Step 3: Confirm Password Entry -->
+        <div id="change-password-step3-modal" class="hidden modal-overlay">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center;">
+                <h2 style="margin-top: 0; color: var(--primary);">Confirm New Password</h2>
+                <p style="color: #666; margin-bottom: 20px;">Enter the password again</p>
+                
+                <div style="margin: 20px 0;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600;">Confirm Password (4 digits):</label>
+                    <div id="confirm-password-display" style="font-size: 2.5rem; letter-spacing: 12px; margin: 15px 0; min-height: 50px; color: var(--text);"></div>
+                </div>
+                
+                <div class="numpad">
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('1')">1</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('2')">2</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('3')">3</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('4')">4</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('5')">5</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('6')">6</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('7')">7</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('8')">8</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('9')">9</button>
+                    <button class="numpad-btn small-btn" onclick="deleteConfirmPasswordDigit()" title="Erase">⌫</button>
+                    <button class="numpad-btn" onclick="addConfirmPasswordDigit('0')">0</button>
+                    <button class="numpad-btn small-btn" onclick="clearConfirmPassword()" title="Clear All">C</button>
+                </div>
+                
+                <div style="margin-top:20px;">
+                    <button class="btn-outline" onclick="backToNewPassword()">← Back</button>
+                    <button class="btn-outline" onclick="closeChangePasswordFlow()">Cancel</button>
                 </div>
             </div>
         </div>
         
         <!-- Confirmation Modal for Password Change -->
-        <div id="password-confirm-modal" class="hidden modal-overlay">
+        <div id="password-confirm-modal" class="hidden modal-overlay-high">
             <div style="background: white; border-radius: 16px; padding: 32px; width: 350px; max-width: 90%; text-align: center;">
                 <h3 style="margin-top: 0; color: var(--text);">Are you sure?</h3>
                 <p style="font-size: 1.1rem; margin: 20px 0;">Do you want to change the admin password?</p>
@@ -1665,8 +1715,16 @@
                 
                 <div style="margin: 15px 0;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Age (1-6):</label>
-                    <input type="number" id="add-child-age" min="1" max="6" placeholder="Age"
-                           style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
+                    <select id="add-child-age"
+                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
+                        <option value="">-- Select --</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
                 </div>
                 
                 <div style="margin: 15px 0;">
@@ -1675,10 +1733,6 @@
                             style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
                         <option value="">-- Select --</option>
                         <option value="None">None</option>
-                        <option value="Peanuts">Peanuts</option>
-                        <option value="Dairy">Dairy</option>
-                        <option value="Gluten">Gluten</option>
-                        <option value="Eggs">Eggs</option>
                         <option value="Other">Other (specify)</option>
                     </select>
                     <input type="text" id="add-child-allergies-other" placeholder="Specify allergy" class="hidden"
@@ -2616,6 +2670,12 @@
         
         function closeAddChildModal() {
             document.getElementById('add-child-modal').classList.add('hidden');
+            // Clear form fields
+            document.getElementById('add-child-name').value = '';
+            document.getElementById('add-child-age').value = '';
+            document.getElementById('add-child-allergies').value = '';
+            document.getElementById('add-child-allergies-other').value = '';
+            document.getElementById('add-child-allergies-other').classList.add('hidden');
             pendingAddChild = null;
         }
         
@@ -2644,8 +2704,8 @@
                 return;
             }
             
-            if (!age || age < 1 || age > 6) {
-                showCenteredAlert('Required', 'Please enter a valid age between 1 and 6');
+            if (!age) {
+                showCenteredAlert('Required', 'Please select the child\'s age (1-6)');
                 return;
             }
             
@@ -2929,10 +2989,14 @@
         // Show/Hide Change Password Modal
         // ===== CHANGE ADMIN PASSWORD FLOW =====
         let changePasswordPin = '';
+        let newPasswordValue = '';
+        let confirmPasswordValue = '';
         
         // Step 1: Request current password
         function requestCurrentPasswordForChange() {
             changePasswordPin = '';
+            newPasswordValue = '';
+            confirmPasswordValue = '';
             updateChangePinDisplay();
             document.getElementById('change-password-step1-modal').classList.remove('hidden');
         }
@@ -2940,10 +3004,11 @@
         function closeChangePasswordFlow() {
             document.getElementById('change-password-step1-modal').classList.add('hidden');
             document.getElementById('change-password-step2-modal').classList.add('hidden');
+            document.getElementById('change-password-step3-modal').classList.add('hidden');
             document.getElementById('password-confirm-modal').classList.add('hidden');
             changePasswordPin = '';
-            document.getElementById('change-pass-new').value = '';
-            document.getElementById('change-pass-confirm').value = '';
+            newPasswordValue = '';
+            confirmPasswordValue = '';
         }
         
         function addChangePinDigit(digit) {
@@ -2975,6 +3040,80 @@
             } else {
                 display.textContent = '●'.repeat(changePasswordPin.length);
             }
+        }
+        
+        // New password entry functions
+        function addNewPasswordDigit(digit) {
+            if (newPasswordValue.length < 4) {
+                newPasswordValue += digit;
+                updateNewPasswordDisplay();
+                
+                // Auto-advance when 4 digits entered
+                if (newPasswordValue.length === 4) {
+                    setTimeout(() => {
+                        document.getElementById('change-password-step2-modal').classList.add('hidden');
+                        document.getElementById('change-password-step3-modal').classList.remove('hidden');
+                    }, 200);
+                }
+            }
+        }
+        
+        function deleteNewPasswordDigit() {
+            newPasswordValue = newPasswordValue.slice(0, -1);
+            updateNewPasswordDisplay();
+        }
+        
+        function clearNewPassword() {
+            newPasswordValue = '';
+            updateNewPasswordDisplay();
+        }
+        
+        function updateNewPasswordDisplay() {
+            const display = document.getElementById('new-password-display');
+            if (newPasswordValue.length === 0) {
+                display.textContent = '';
+            } else {
+                display.textContent = newPasswordValue; // Show actual numbers
+            }
+        }
+        
+        // Confirm password entry functions
+        function addConfirmPasswordDigit(digit) {
+            if (confirmPasswordValue.length < 4) {
+                confirmPasswordValue += digit;
+                updateConfirmPasswordDisplay();
+                
+                // Auto-check when 4 digits entered
+                if (confirmPasswordValue.length === 4) {
+                    setTimeout(validateAndConfirmPassword, 200);
+                }
+            }
+        }
+        
+        function deleteConfirmPasswordDigit() {
+            confirmPasswordValue = confirmPasswordValue.slice(0, -1);
+            updateConfirmPasswordDisplay();
+        }
+        
+        function clearConfirmPassword() {
+            confirmPasswordValue = '';
+            updateConfirmPasswordDisplay();
+        }
+        
+        function updateConfirmPasswordDisplay() {
+            const display = document.getElementById('confirm-password-display');
+            if (confirmPasswordValue.length === 0) {
+                display.textContent = '';
+            } else {
+                display.textContent = confirmPasswordValue; // Show actual numbers
+            }
+        }
+        
+        function backToNewPassword() {
+            confirmPasswordValue = '';
+            updateConfirmPasswordDisplay();
+            document.getElementById('change-password-step3-modal').classList.add('hidden');
+            document.getElementById('change-password-step2-modal').classList.remove('hidden');
         }
         
         // Verify current password
@@ -3017,24 +3156,12 @@
             }
         }
         
-        // Step 2: Confirm new password and show confirmation dialog
-        function confirmNewPasswordChange() {
-            const newPass = document.getElementById('change-pass-new').value;
-            const confirmPass = document.getElementById('change-pass-confirm').value;
-            
-            // Validation
-            if (!newPass || !confirmPass) {
-                showCenteredAlert('Error', 'Please fill in both password fields');
-                return;
-            }
-            
-            if (newPass.length !== 4 || !/^\d{4}$/.test(newPass)) {
-                showCenteredAlert('Error', 'New password must be exactly 4 digits');
-                return;
-            }
-            
-            if (newPass !== confirmPass) {
+        // Validate passwords match and show confirmation
+        function validateAndConfirmPassword() {
+            if (newPasswordValue !== confirmPasswordValue) {
                 showCenteredAlert('Error', 'Passwords do not match');
+                confirmPasswordValue = '';
+                updateConfirmPasswordDisplay();
                 return;
             }
             
@@ -3048,12 +3175,10 @@
         
         // Final step: Actually change the password
         async function finalizePasswordChange() {
-            const newPass = document.getElementById('change-pass-new').value;
-            
             try {
                 // Update password in Firebase
                 const settingsRef = window.doc(window.firebaseDB, 'churches', 'bibleland2025', 'settings', 'admin');
-                await window.setDoc(settingsRef, { password: newPass });
+                await window.setDoc(settingsRef, { password: newPasswordValue });
                 
                 // Close all modals
                 closePasswordConfirmModal();
@@ -3080,7 +3205,11 @@
         }
         
         function confirmNewPassword() {
-            confirmNewPasswordChange();
+            validateAndConfirmPassword();
+        }
+        
+        function confirmNewPasswordChange() {
+            validateAndConfirmPassword();
         }
 
         // ─── Get upcoming Sundays ───────────────────────────────────────────────
@@ -4543,6 +4672,8 @@
             
             try {
                 updateSyncIndicator('syncing');
+                isLocalUpdate = true; // Mark this as a local update
+                
                 // Use shared data location for the church
                 const sharedDocRef = doc(db, 'churches', CHURCH_CODE, 'data', 'shared');
                 
@@ -4565,16 +4696,25 @@
                 
                 console.log('✅ Saved to shared cloud data successfully!');
                 updateSyncIndicator('synced');
+                
+                // Reset flag after 2 seconds
+                setTimeout(() => {
+                    isLocalUpdate = false;
+                }, 2000);
             } catch (error) {
                 console.error('❌ Error saving to Firestore:', error);
                 console.error('   Error code:', error.code);
                 console.error('   Error message:', error.message);
                 updateSyncIndicator('synced');
+                isLocalUpdate = false;
             }
         };
 
         // Real-time sync listener
         let lastUpdateBy = null;
+        let lastUpdateTime = null;
+        let isLocalUpdate = false;
+        
         function setupRealtimeSync() {
             if (!window.currentUserId) return;
             
@@ -4588,13 +4728,21 @@
                     if (doc.exists()) {
                         const data = doc.data();
                         
-                        // Skip if this update was triggered by the current user
-                        if (data.lastUpdatedBy === window.currentUserId && data.lastUpdatedBy === lastUpdateBy) {
+                        // Skip if this is a local update (within 1 second of our own save)
+                        if (data.lastUpdatedBy === window.currentUserId && isLocalUpdate) {
                             console.log('⏭️ Skipping self-triggered update');
+                            isLocalUpdate = false;
+                            return;
+                        }
+                        
+                        // Skip if this is the exact same update we just processed
+                        if (data.lastUpdatedBy === lastUpdateBy && data.lastUpdated === lastUpdateTime) {
+                            console.log('⏭️ Skipping duplicate update');
                             return;
                         }
                         
                         lastUpdateBy = data.lastUpdatedBy;
+                        lastUpdateTime = data.lastUpdated;
                         
                         console.log('🔄 Real-time update received from cloud');
                         console.log('   Check-ins:', data.checkIns?.length || 0);
