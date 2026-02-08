@@ -5605,10 +5605,33 @@
                     originalSaveData();
                     
                     console.log('✅ Shared data loaded from cloud');
+                } else {
+                    // Document doesn't exist - initialize with empty data structures
+                    console.log('📝 No shared data found - initializing fresh');
+                    window.parents = window.parents || {};
+                    window.checkIns = window.checkIns || [];
+                    window.usedBuzzers = window.usedBuzzers || new Set();
+                    window.volunteers = window.volunteers || {};
+                    window.familyDatabase = window.familyDatabase || {};
+                    window.weeklyReports = window.weeklyReports || {};
+                    window.supervisorDatabase = window.supervisorDatabase || {};
+                    window.scheduledSupervisors = window.scheduledSupervisors || {};
+                    
+                    // Create the document with empty structures
+                    await window.saveData();
                 }
                 updateSyncIndicator('synced');
             } catch (error) {
                 console.error('Error loading from Firestore:', error);
+                // Initialize with empty data on error
+                window.parents = window.parents || {};
+                window.checkIns = window.checkIns || [];
+                window.usedBuzzers = window.usedBuzzers || new Set();
+                window.volunteers = window.volunteers || {};
+                window.familyDatabase = window.familyDatabase || {};
+                window.weeklyReports = window.weeklyReports || {};
+                window.supervisorDatabase = window.supervisorDatabase || {};
+                window.scheduledSupervisors = window.scheduledSupervisors || {};
                 updateSyncIndicator('synced');
             }
         }
@@ -5749,7 +5772,7 @@
                             }
                         }
                     } else {
-                        console.log('📭 No shared data exists yet');
+                        console.log('📭 No shared data exists yet - will be created on first save');
                     }
                 }, (error) => {
                     console.error('❌ Real-time sync error:', error);
