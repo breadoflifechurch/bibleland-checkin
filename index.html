@@ -9,6 +9,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Kids Check-In">
     <style>
+        /* Prevent double-tap zoom globally */
+        * {
+            touch-action: manipulation;
+        }
         :root {
             --primary: #4a90e2;
             --primary-light: #a3d0ff;
@@ -171,6 +175,38 @@
             font-size: 0.8rem;
             padding: 5px 10px;
             border-radius: 6px;
+        }
+
+        /* Modal close button (X) */
+        .modal-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            line-height: 1;
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+            padding: 0;
+        }
+
+        .modal-close-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+            transform: scale(1.1);
+        }
+
+        .modal-close-btn:active {
+            transform: scale(0.95);
         }
 
         /* Custom confirmation modal */
@@ -1950,9 +1986,10 @@
         <!-- Success modal -->
         <div id="success-modal" class="success-modal hidden">
             <div class="success-content">
+                <button class="modal-close-btn" onclick="document.getElementById('success-modal').classList.add('hidden'); backToMain();">×</button>
                 <h2>Success! 🎉</h2>
                 <p id="success-text"></p>
-                <button class="btn-success" onclick="document.getElementById(&#39;success-modal&#39;).classList.add(&#39;hidden&#39;); backToMain();">OK</button>
+                <button class="btn-success" onclick="document.getElementById('success-modal').classList.add('hidden'); backToMain();">OK</button>
             </div>
         </div>
         <!-- View current check-ins -->
@@ -2072,6 +2109,7 @@
         <!-- Custom checkout confirmation modal -->
         <div id="confirm-modal" class="hidden">
             <div id="confirm-content">
+                <button class="modal-close-btn" onclick="closeConfirmModal()">×</button>
                 <h3>Are you sure?</h3>
                 <p>This will check out the selected child.</p>
                 <div class="modal-buttons">
@@ -2083,6 +2121,7 @@
         <!-- Admin password modal -->
         <div id="admin-password-modal" class="hidden">
             <div id="password-content">
+                <button class="modal-close-btn" onclick="closeAdminPasswordModal()">×</button>
                 <h2>Enter Admin PIN</h2>
                 <div id="pin-display"></div>
                 <div class="numpad">
@@ -2107,7 +2146,8 @@
         
         <!-- Change Admin Password Modal - Step 1: Current Password -->
         <div id="change-password-step1-modal" class="hidden modal-overlay">
-            <div id="password-content" style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center;">
+            <div id="password-content" style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center; position: relative;">
+                <button class="modal-close-btn" onclick="closeChangePasswordModal()">×</button>
                 <h2 style="margin-top: 0; color: var(--primary);">Enter Current Admin PIN</h2>
                 <div id="change-pin-display" style="font-size: 3rem; letter-spacing: 16px; margin: 30px 0; min-height: 60px; color: var(--text);"></div>
                 <div class="numpad">
@@ -2132,7 +2172,8 @@
         
         <!-- Change Admin Password Modal - Step 2: New Password Entry -->
         <div id="change-password-step2-modal" class="hidden modal-overlay">
-            <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center;">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center; position: relative;">
+                <button class="modal-close-btn" onclick="closeChangePasswordModal()">×</button>
                 <h2 style="margin-top: 0; color: var(--primary);">Enter New Admin Password</h2>
                 <p style="color: #50c878; margin-bottom: 20px;">✓ Current password verified</p>
                 
@@ -2164,7 +2205,8 @@
         
         <!-- Change Admin Password Modal - Step 3: Confirm Password Entry -->
         <div id="change-password-step3-modal" class="hidden modal-overlay">
-            <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center;">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 400px; max-width: 90%; text-align: center; position: relative;">
+                <button class="modal-close-btn" onclick="closeChangePasswordModal()">×</button>
                 <h2 style="margin-top: 0; color: var(--primary);">Confirm New Password</h2>
                 <p style="color: #666; margin-bottom: 20px;">Enter the password again</p>
                 
@@ -2197,7 +2239,8 @@
         
         <!-- Confirmation Modal for Password Change -->
         <div id="password-confirm-modal" class="hidden modal-overlay-high">
-            <div style="background: white; border-radius: 16px; padding: 32px; width: 350px; max-width: 90%; text-align: center;">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 350px; max-width: 90%; text-align: center; position: relative;">
+                <button class="modal-close-btn" onclick="cancelPasswordChange()">×</button>
                 <h3 style="margin-top: 0; color: var(--text);">Are you sure?</h3>
                 <p style="font-size: 1.1rem; margin: 20px 0;">Do you want to change the admin password?</p>
                 <div style="display: flex; gap: 10px; margin-top: 24px; justify-content: center;">
@@ -2214,6 +2257,7 @@
         <!-- Validation modal -->
         <div id="validation-modal" class="hidden">
             <div id="validation-content">
+                <button class="modal-close-btn" onclick="closeValidationModal()">×</button>
                 <h3>⚠️ Required Information</h3>
                 <p id="validation-message"></p>
                 <button class="btn-primary" onclick="closeValidationModal()">OK</button>
@@ -2222,6 +2266,7 @@
         <!-- Centered Alert Modal -->
         <div id="centered-alert" class="centered-modal hidden">
             <div class="centered-modal-content">
+                <button class="modal-close-btn" onclick="closeCenteredAlert()">×</button>
                 <h3 id="alert-title">Alert</h3>
                 <p id="alert-message" style="font-size: 1.1rem; margin: 20px 0;"></p>
                 <button class="btn-primary" onclick="closeCenteredAlert()">OK</button>
@@ -2230,7 +2275,8 @@
         
         <!-- Add Child to Buzzer Modal -->
         <div id="add-child-modal" class="hidden modal-overlay">
-            <div style="background: white; border-radius: 16px; padding: 32px; width: 450px; max-width: 90%;">
+            <div style="background: white; border-radius: 16px; padding: 32px; width: 450px; max-width: 90%; position: relative;">
+                <button class="modal-close-btn" onclick="closeAddChildModal()">×</button>
                 <h2 style="margin-top: 0; color: var(--primary);">Add Child to Buzzer <span id="add-child-buzzer-num"></span></h2>
                 <p style="color: #666; margin-bottom: 20px;">For: <strong id="add-child-parent-name"></strong></p>
                 
@@ -3336,13 +3382,13 @@
                     ' style="color: red; font-weight: bold;"' : '';
                 
                 tr.innerHTML = `
-                    <td rowspan="${group.length + 1}">#${buzzerNum}</td>
+                    <td rowspan="${group.length}">#${buzzerNum}</td>
                     <td>${firstChild.childName}</td>
                     <td>${firstChild.age}</td>
                     <td${allergiesStyle}>${firstChild.allergies}</td>
-                    <td rowspan="${group.length + 1}">${firstChild.parentName}</td>
-                    <td rowspan="${group.length + 1}" class="phone-cell" onclick="requestAdminAction('show-phone', ${firstChild.originalIndex})">${firstChild.phone}</td>
-                    <td rowspan="${group.length + 1}">
+                    <td rowspan="${group.length}">${firstChild.parentName}</td>
+                    <td rowspan="${group.length}" class="phone-cell" onclick="requestAdminAction('show-phone', ${firstChild.originalIndex})">${firstChild.phone}</td>
+                    <td rowspan="${group.length}">
                         <button class="btn-danger btn-sm" onclick="requestCheckoutByBuzzer(${buzzerNum})" style="display: block; margin: 4px auto;">Check Out</button>
                         <button class="btn-primary btn-sm" onclick="requestAddChildToBuzzer(${buzzerNum}, '${firstChild.phone}', '${firstChild.parentName}')" style="display: block; margin: 4px auto;">+ Add Child</button>
                     </td>
@@ -5322,6 +5368,11 @@
                                 const familyDbView = document.getElementById('family-db-view');
                                 if (familyDbView && !familyDbView.classList.contains('hidden')) {
                                     renderFamilyDatabase();
+                                }
+                                // Refresh supervisor database if visible
+                                const supervisorDbView = document.getElementById('supervisor-db-view');
+                                if (supervisorDbView && !supervisorDbView.classList.contains('hidden')) {
+                                    renderSupervisorDatabase();
                                 }
                             }
                         }
