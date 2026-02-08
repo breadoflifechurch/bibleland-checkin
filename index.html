@@ -177,6 +177,44 @@
             border-radius: 6px;
         }
 
+        /* Card close button (X) for main screens */
+        .card-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f0f0f0;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+            padding: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .card-close-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+            transform: scale(1.1);
+        }
+
+        .card-close-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Make sure cards have relative positioning for absolute close button */
+        .card {
+            position: relative;
+        }
+
         /* Modal close button (X) */
         .modal-close-btn {
             position: absolute;
@@ -2009,6 +2047,7 @@
         </div>
         <!-- Membership -->
         <div id="membership-screen" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Are you a member? 👪</h1>
             <div class="membership-buttons">
                 <button class="btn-primary" onclick="selectMembership(&#39;member&#39;)">Yes, Member</button>
@@ -2020,6 +2059,7 @@
         </div>
         <!-- Non-member phone entry -->
         <div id="nonmem-phone-screen" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Parent Phone Number</h1>
             <p style="text-align:center; color:#555;">Enter phone to load existing family info or add new</p>
             <label>Phone: <input type="tel" id="nonmem-phone" placeholder="(000) 000-0000" oninput="formatPhone(this); onNonMemberPhoneInput()"></label><br><br>
@@ -2028,6 +2068,7 @@
         </div>
         <!-- Volunteer phone first -->
         <div id="volunteer-phone-screen" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Volunteer Sign-Up</h1>
             <h2>Step 1: Your Phone Number</h2>
             <label>Phone: <input type="tel" id="vol-phone-first" placeholder="(000) 000-0000" oninput="formatPhone(this); onVolunteerPhoneInput()"></label><br><br>
@@ -2035,7 +2076,8 @@
             <button class="btn-outline" onclick="backToMain()">Cancel</button>
         </div>
         <!-- Volunteer name -->
-        <div id="volunteer-form" class="volunteer-form hidden">
+        <div id="volunteer-form" class="volunteer-form hidden" style="position: relative;">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h2>Step 2: Your Name</h2>
             <label>First Name: <input type="text" id="vol-first" placeholder="First name"></label><br>
             <label>Last Name: <input type="text" id="vol-last" placeholder="Last name"></label><br><br>
@@ -2044,6 +2086,7 @@
         </div>
         <!-- Volunteer schedule -->
         <div id="volunteer-screen" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Volunteer Schedule</h1>
             <div id="volunteer-schedule">
                 <h2>Upcoming Sundays (2 spots each)</h2>
@@ -2055,6 +2098,7 @@
         </div>
         <!-- Buzzer selection -->
         <div id="buzzer-screen" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Choose Buzzer Number 🔔</h1>
             <p style="text-align:center; color:#555;">Green = available · Red = in use</p>
             <div id="buzzer-grid"></div>
@@ -2065,6 +2109,7 @@
         </div>
         <!-- Parent + children info -->
         <div id="info-form" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Parent &amp; Children 😊</h1>
             <label>Phone: <input type="tel" id="phone" placeholder="(000) 000-0000" oninput="formatPhone(this); onPhoneInput()"></label><br>
             <label>First name: <input type="text" id="firstName" placeholder="Parent first name"></label><br>
@@ -2088,6 +2133,7 @@
         </div>
         <!-- View current check-ins -->
         <div id="view-checkins" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Currently Checked In 🎉</h1>
             <table id="checkin-table">
                 <thead>
@@ -2109,6 +2155,7 @@
         </div>
         <!-- Admin Area -->
         <div id="admin-content" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <div class="admin-header">
                 <h1 style="margin: 0;">Admin Dashboard 🔧</h1>
                 <button class="btn-outline" onclick="backToMain()">← Back to Menu</button>
