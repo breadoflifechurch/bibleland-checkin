@@ -51,6 +51,29 @@
             padding: 28px;
             box-shadow: var(--shadow);
             margin: 20px 0;
+            position: relative;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 16px;
+                border-radius: 16px;
+                margin: 10px 0;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.2rem;
+            }
         }
 
         .main-buttons {
@@ -103,12 +126,22 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 3000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .modal-overlay:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-overlay:not(.hidden) {
+                padding: 10px;
+                align-items: flex-start;
+            }
         }
         
         .modal-overlay-high {
@@ -116,12 +149,22 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 4000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .modal-overlay-high:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-overlay-high:not(.hidden) {
+                padding: 10px;
+                align-items: flex-start;
+            }
         }
 
         input[type="tel"],
@@ -438,6 +481,18 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 10px;
+            min-width: 600px;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                min-width: 500px;
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+            }
         }
 
         th {
@@ -560,6 +615,33 @@
             background: #ecfdf5;
             border-color: #a7f3d0;
             color: #065f46;
+        }
+
+        /* MOBILE RESPONSIVE - Buzzer Grid */
+        @media (max-width: 768px) {
+            #buzzer-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+                max-width: 100%;
+                margin: 20px auto;
+            }
+            
+            .buzzer-btn {
+                font-size: 1.3rem;
+                padding: 14px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #buzzer-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+            }
+            
+            .buzzer-btn {
+                font-size: 1.1rem;
+                padding: 12px 6px;
+            }
         }
 
         .membership-buttons {
@@ -2188,6 +2270,7 @@
         <div id="view-checkins" class="card hidden">
             <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Currently Checked In 🎉</h1>
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 20px 0;">
             <table id="checkin-table">
                 <thead>
                     <tr>
@@ -2202,6 +2285,7 @@
                 </thead>
                 <tbody></tbody>
             </table>
+            </div>
             <div style="margin-top:30px; text-align:center;">
                 <button class="btn-outline" onclick="backToMain()">Back to Menu</button>
             </div>
@@ -2303,7 +2387,6 @@
         <!-- Custom checkout confirmation modal -->
         <div id="confirm-modal" class="hidden">
             <div id="confirm-content">
-                <button class="modal-close-btn" onclick="closeConfirmModal()">×</button>
                 <h3>Are you sure?</h3>
                 <p>This will check out the selected child.</p>
                 <div class="modal-buttons">
@@ -5052,27 +5135,27 @@
             const phone = phoneInput.value.replace(/\D/g, '');
             
             if (phone.length === 10) {
-                // Check familyDatabase first
+                // Check volunteers.all database FIRST (priority for volunteer signups)
+                if (volunteers.all) {
+                    const vol = volunteers.all.find(v => v.phone === phone);
+                    if (vol) {
+                        document.getElementById('schedule-signup-first').value = vol.firstName || '';
+                        document.getElementById('schedule-signup-last').value = vol.lastName || '';
+                        return;
+                    }
+                }
+                
+                // Check familyDatabase as fallback
                 if (familyDatabase[phone]) {
                     const family = familyDatabase[phone];
                     document.getElementById('schedule-signup-first').value = family.firstName || '';
                     document.getElementById('schedule-signup-last').value = family.lastName || '';
                     return;
                 }
-                
-                // Check volunteers.all
-                if (volunteers.all) {
-                    const vol = volunteers.all.find(v => v.phone === phone);
-                    if (vol) {
-                        const nameParts = vol.name.split(' ');
-                        document.getElementById('schedule-signup-first').value = nameParts[0] || '';
-                        document.getElementById('schedule-signup-last').value = nameParts.slice(1).join(' ') || '';
-                    }
-                }
             }
         }
 
-        // ─── Submit schedule sign-up with admin approval ─────────────────────────
+        // ─── Submit schedule sign-up (DIRECT - NO ADMIN APPROVAL) ───────────────
         function submitScheduleSignup(date) {
             const phone = document.getElementById('schedule-signup-phone').value.replace(/\D/g, '');
             const first = document.getElementById('schedule-signup-first').value.trim();
@@ -5088,7 +5171,7 @@
                 return;
             }
             
-            // CHECK BEFORE ASKING FOR APPROVAL
+            // CHECK BEFORE SAVING
             // Initialize volunteers[date] if it doesn't exist
             if (!volunteers[date]) volunteers[date] = [];
             
@@ -5109,11 +5192,68 @@
             // Close the sign-up form
             document.querySelector('.success-modal').remove();
             
-            // Show admin password prompt
-            showAdminApprovalForSignup(date, phone, first, last);
+            // DIRECT SIGNUP - NO ADMIN APPROVAL NEEDED
+            const fullName = `${first} ${last}`;
+            
+            // Add to volunteers list for this date
+            volunteers[date].push({ name: fullName, phone: phone });
+            
+            // Save to volunteers.all database (volunteer database) - keyed by phone
+            if (!volunteers.all) volunteers.all = [];
+            
+            // Check if volunteer already exists in database
+            const existingVolIndex = volunteers.all.findIndex(v => v.phone === phone);
+            
+            if (existingVolIndex === -1) {
+                // New volunteer - add to database
+                volunteers.all.push({
+                    phone: phone,
+                    firstName: first,
+                    lastName: last,
+                    name: fullName,
+                    signupDates: [date]
+                });
+            } else {
+                // Existing volunteer - update their info and add date
+                volunteers.all[existingVolIndex].firstName = first;
+                volunteers.all[existingVolIndex].lastName = last;
+                volunteers.all[existingVolIndex].name = fullName;
+                
+                if (!volunteers.all[existingVolIndex].signupDates) {
+                    volunteers.all[existingVolIndex].signupDates = [];
+                }
+                if (!volunteers.all[existingVolIndex].signupDates.includes(date)) {
+                    volunteers.all[existingVolIndex].signupDates.push(date);
+                }
+            }
+            
+            // Save to scheduledSupervisors (for backwards compatibility if needed)
+            scheduledSupervisors[date] = {
+                firstName: first,
+                lastName: last,
+                name: fullName,
+                phone: phone,
+                signupTime: new Date().toISOString()
+            };
+            
+            // Persist data
+            saveData();
+            
+            // Close success alert after a moment and refresh schedule
+            setTimeout(() => {
+                // Remove any success alert
+                const alerts = document.querySelectorAll('.success-modal');
+                alerts.forEach(a => a.remove());
+                
+                // Refresh the schedule view
+                showScheduleView();
+            }, 1500);
+            
+            // Show success message
+            showCenteredAlert(`✅ ${fullName} signed up for ${date}!`);
         }
 
-        // ─── Admin approval with numpad ───────────────────────────────────────────
+        // ─── Admin approval with numpad (DEPRECATED - NO LONGER USED) ───────────
         function showAdminApprovalForSignup(date, phone, first, last) {
             const modal = document.createElement('div');
             modal.className = 'success-modal';
