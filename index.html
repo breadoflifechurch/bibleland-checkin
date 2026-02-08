@@ -13,7 +13,6 @@
         * {
             touch-action: manipulation;
         }
-
         :root {
             --primary: #4a90e2;
             --primary-light: #a3d0ff;
@@ -90,26 +89,6 @@
         #btn-schedule {
             background: #9b59b6;
         }
-
-#admin-content .card-close-btn {
-    position: fixed;
-    top: -3px;
-    right: -3px;
-    z-index: 10000;
-
-    background: #fff;
-    border: none;
-    font-size: 23px;
-    cursor: pointer;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    box-shadow: 0 5px 8px rgba(0,0,0,0.3);
-}
-
-#admin-content.hidden .card-close-btn {
-    display: none;
-}
 
         #btn-admin {
             background: #7f8c8d;
@@ -358,6 +337,33 @@
             overflow-y: auto;
             box-shadow: var(--shadow);
             margin: 20px;
+            position: relative;
+        }
+
+        #schedule-view-content .card-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10001;
+            background: #ef4444;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        #schedule-view-content .card-close-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.6);
         }
 
         .schedule-date-block {
@@ -660,6 +666,62 @@
             padding-bottom: 15px;
             border-bottom: 2px solid #e3f2fd;
         }
+
+/* Red X button over username for admin, view-checkins, and view-schedule */
+#admin-content .card-close-btn,
+#view-checkins .card-close-btn,
+#view-schedule .card-close-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 10001;
+    background: #ef4444;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+#admin-content .card-close-btn:hover,
+#view-checkins .card-close-btn:hover,
+#view-schedule .card-close-btn:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.6);
+}
+
+#admin-content.hidden .card-close-btn,
+#view-checkins.hidden .card-close-btn,
+#view-schedule.hidden .card-close-btn {
+    display: none;
+}
+
+/* Ensure button is on top in both landscape and portrait */
+@media (orientation: portrait) {
+    #admin-content .card-close-btn,
+    #view-checkins .card-close-btn,
+    #view-schedule .card-close-btn {
+        top: 12px;
+        right: 12px;
+    }
+}
+
+@media (orientation: landscape) {
+    #admin-content .card-close-btn,
+    #view-checkins .card-close-btn,
+    #view-schedule .card-close-btn {
+        top: 10px;
+        right: 10px;
+    }
+}
 
         .admin-section {
             background: #f8fbff;
@@ -2186,7 +2248,7 @@
                 <div class="stat-card">
                     <div class="stat-number" id="stat-checked-in">0</div>
                     <div class="stat-label">Currently Checked In</div>
-                </div><
+                </div>
                 <div class="stat-card green">
                     <div class="stat-number" id="stat-volunteers">0</div>
                     <div class="stat-label">Total Volunteers</div>
@@ -4974,6 +5036,7 @@
             modal.className = 'success-modal';
             modal.innerHTML = `
                 <div id="schedule-view-content">
+                    <button class="card-close-btn" onclick="this.closest('.success-modal').remove()">✕</button>
                     ${scheduleHTML}
                     <button class="btn-primary" onclick="this.closest('.success-modal').remove()" style="margin-top: 20px;">Close</button>
                 </div>
