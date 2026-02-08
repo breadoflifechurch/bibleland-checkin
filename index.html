@@ -12,7 +12,15 @@
         /* Prevent double-tap zoom globally */
         * {
             touch-action: manipulation;
+            box-sizing: border-box;
         }
+        
+        /* Prevent text overflow */
+        body, div, p, span, td, th {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
         :root {
             --primary: #4a90e2;
             --primary-light: #a3d0ff;
@@ -31,11 +39,16 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
 
         .container {
             max-width: 960px;
             margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         h1,
@@ -54,6 +67,8 @@
             position: relative;
             max-width: 100%;
             box-sizing: border-box;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         #login-screen {
@@ -186,6 +201,7 @@
         input[type="text"],
         input[type="password"],
         input[type="number"],
+        input[type="email"],
         select {
             font-size: 1.3rem;
             padding: 14px 18px;
@@ -196,6 +212,19 @@
             margin: 10px 0;
             box-sizing: border-box;
         }
+        
+        @media (max-width: 768px) {
+            input[type="tel"],
+            input[type="text"],
+            input[type="password"],
+            input[type="number"],
+            input[type="email"],
+            select {
+                font-size: 1rem;
+                padding: 12px 14px;
+                max-width: 100%;
+            }
+        }
 
         button:not(.main-buttons button, .numpad-btn) {
             font-size: 1.15rem;
@@ -203,6 +232,14 @@
             border-radius: 16px;
             margin: 10px 6px;
             cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            button:not(.main-buttons button, .numpad-btn) {
+                font-size: 1rem;
+                padding: 12px 20px;
+                margin: 8px 4px;
+            }
         }
 
         .btn-success {
@@ -317,12 +354,15 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 2000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .success-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .success-content {
@@ -333,6 +373,20 @@
             max-width: 90%;
             text-align: center;
             box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .success-modal:not(.hidden) {
+                align-items: flex-start;
+                padding: 10px;
+            }
+            
+            .success-content {
+                padding: 24px 20px;
+                margin-top: 20px;
+            }
         }
 
         .success-content h2 {
@@ -347,12 +401,14 @@
             background: rgba(0, 0, 0, 0.5);
             z-index: 2000;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         #schedule-view-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         #schedule-view-content {
@@ -366,6 +422,19 @@
             box-shadow: var(--shadow);
             margin: 20px;
             position: relative;
+        }
+        
+        @media (max-width: 768px) {
+            #schedule-view-modal:not(.hidden) {
+                align-items: flex-start;
+                padding: 10px;
+            }
+            
+            #schedule-view-content {
+                padding: 24px 16px;
+                margin: 10px;
+                max-height: 85vh;
+            }
         }
 
         #schedule-view-content .card-close-btn {
@@ -418,12 +487,15 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 2000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         #admin-password-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         #password-content {
@@ -434,11 +506,25 @@
             max-width: 90%;
             text-align: center;
             box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         #password-content h2 {
             margin-top: 0;
             color: var(--text);
+        }
+        
+        @media (max-width: 768px) {
+            #admin-password-modal:not(.hidden) {
+                align-items: flex-start;
+                padding: 10px;
+            }
+            
+            #password-content {
+                padding: 24px 20px;
+                margin-top: 20px;
+            }
         }
 
         /* Validation modal */
@@ -447,12 +533,15 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 5000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         #validation-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         #validation-content {
@@ -463,6 +552,8 @@
             max-width: 90%;
             text-align: center;
             box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         #validation-content h3 {
@@ -473,6 +564,22 @@
         #validation-content p {
             font-size: 1.1rem;
             margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            #validation-modal:not(.hidden) {
+                align-items: flex-start;
+                padding: 10px;
+            }
+            
+            #validation-content {
+                padding: 24px 20px;
+                margin-top: 20px;
+            }
+            
+            #validation-content p {
+                font-size: 1rem;
+            }
         }
 
         .child-name-group {
@@ -490,6 +597,15 @@
             border-radius: 16px;
             padding: 16px;
             margin: 16px 0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .child-entry {
+                padding: 12px;
+                margin: 12px 0;
+            }
         }
 
         table {
@@ -501,12 +617,49 @@
 
         @media (max-width: 768px) {
             table {
-                min-width: 500px;
-                font-size: 0.9rem;
+                min-width: 100%;
+                font-size: 0.85rem;
+                border-spacing: 0 6px;
             }
             
             th, td {
+                padding: 6px 3px;
+                font-size: 0.8rem;
+            }
+            
+            th {
                 padding: 6px 4px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            table {
+                font-size: 0.75rem;
+                border-spacing: 0 4px;
+            }
+            
+            th, td {
+                padding: 4px 2px;
+                font-size: 0.7rem;
+            }
+            
+            /* Abbreviate column headers on very small screens */
+            th {
+                font-size: 0.65rem;
+                padding: 4px 2px;
+            }
+            
+            /* Extra small buttons in tables */
+            table .btn-sm,
+            table button {
+                font-size: 0.6rem;
+                padding: 3px 6px;
+                border-radius: 4px;
+            }
+            
+            /* Make action emojis smaller */
+            .volunteer-actions {
+                font-size: 1.2rem;
             }
         }
 
@@ -591,8 +744,9 @@
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 12px;
-            max-width: 420px;
+            max-width: 600px;
             margin: 30px auto;
+            justify-items: center;
         }
 
         .buzzer-btn {
@@ -604,6 +758,12 @@
             color: var(--primary);
             cursor: pointer;
             transition: all 0.2s;
+            width: 100%;
+            max-width: 80px;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .buzzer-btn:hover:not(.unavailable) {
@@ -632,30 +792,35 @@
             color: #065f46;
         }
 
-        /* MOBILE RESPONSIVE - Buzzer Grid */
+        /* TABLET & MOBILE LANDSCAPE - 4 columns (24÷4=6 rows, perfect!) */
         @media (max-width: 768px) {
             #buzzer-grid {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 8px;
-                max-width: 100%;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+                max-width: 400px;
                 margin: 20px auto;
             }
             
             .buzzer-btn {
-                font-size: 1.3rem;
-                padding: 14px 8px;
+                font-size: 1.4rem;
+                padding: 16px;
+                max-width: 90px;
             }
         }
 
+        /* MOBILE PORTRAIT - 4 columns still works perfectly */
         @media (max-width: 480px) {
             #buzzer-grid {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 6px;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                max-width: 100%;
+                padding: 0 10px;
             }
             
             .buzzer-btn {
-                font-size: 1.1rem;
-                padding: 12px 6px;
+                font-size: 1.2rem;
+                padding: 14px;
+                max-width: none;
             }
         }
 
@@ -796,6 +961,9 @@
             padding: 18px;
             margin: 15px 0;
             border: 1px solid #d1e3ff;
+            box-sizing: border-box;
+            overflow: hidden;
+            max-width: 100%;
         }
 
         .admin-section h2 {
@@ -806,6 +974,17 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-section {
+                padding: 12px;
+                margin: 10px 0;
+            }
+            
+            .admin-section h2 {
+                font-size: 1.1rem;
+            }
         }
         
         /* Two-column grid for admin sections */
@@ -838,7 +1017,8 @@
         .admin-table {
             background: white;
             border-radius: 12px;
-            overflow: hidden;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
@@ -852,6 +1032,21 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
             padding: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-table th {
+                font-size: 0.7rem;
+                padding: 6px 4px;
+                letter-spacing: 0.1px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .admin-table th {
+                font-size: 0.65rem;
+                padding: 4px 2px;
+            }
         }
 
         .admin-table td {
@@ -1676,6 +1871,13 @@
                 padding: 6px 12px;
             }
             
+            /* Make table buttons extra small on mobile */
+            table .btn-sm,
+            table button {
+                font-size: 0.7rem;
+                padding: 4px 8px;
+            }
+            
             /* Forms mobile - CRITICAL for iOS */
             input[type="tel"],
             input[type="text"],
@@ -2222,7 +2424,7 @@
             <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Parent Phone Number</h1>
             <p style="text-align:center; color:#555;">Enter phone to load existing family info or add new</p>
-            <label>Phone: <input type="tel" id="nonmem-phone" placeholder="(000) 000-0000" oninput="formatPhone(this); onNonMemberPhoneInput()"></label><br><br>
+            <label>Phone: <input type="tel" id="nonmem-phone" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this); onNonMemberPhoneInput()"></label><br><br>
             <button class="btn-primary" id="continue-nonmember">Continue</button>
             <button class="btn-outline" onclick="backToMain()">Cancel</button>
         </div>
@@ -2231,7 +2433,7 @@
             <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Volunteer Sign-Up</h1>
             <h2>Step 1: Your Phone Number</h2>
-            <label>Phone: <input type="tel" id="vol-phone-first" placeholder="(000) 000-0000" oninput="formatPhone(this); onVolunteerPhoneInput()"></label><br><br>
+            <label>Phone: <input type="tel" id="vol-phone-first" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this); onVolunteerPhoneInput()"></label><br><br>
             <button class="btn-primary" id="continue-member">Continue</button>
             <button class="btn-outline" onclick="backToMain()">Cancel</button>
         </div>
@@ -2262,7 +2464,7 @@
             <h1>Choose Buzzer Number 🔔</h1>
             <p style="text-align:center; color:#555;">Green = available · Red = in use</p>
             <div id="buzzer-grid"></div>
-            <div style="text-align:center; margin-top:30px;">
+            <div style="text-align:center; margin-top:30px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
                 <button class="btn-outline" onclick="backFromBuzzerToInfo()">← Back to Info</button>
                 <button class="btn-outline" onclick="backToMain()">Cancel</button>
             </div>
@@ -2271,7 +2473,7 @@
         <div id="info-form" class="card hidden">
             <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Parent &amp; Children 😊</h1>
-            <label>Phone: <input type="tel" id="phone" placeholder="(000) 000-0000" oninput="formatPhone(this); onPhoneInput()"></label><br>
+            <label>Phone: <input type="tel" id="phone" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this); onPhoneInput()"></label><br>
             <label>First name: <input type="text" id="firstName" placeholder="Parent first name"></label><br>
             <label>Last name: <input type="text" id="lastName" placeholder="Parent last name"></label><br>
             <h2>Children</h2>
@@ -2363,8 +2565,8 @@
                     <h2><span class="section-icon">👥</span> Volunteer Database</h2>
                     <button class="btn-success btn-sm" onclick="toggleAddToDatabaseForm()" style="margin-bottom: 12px; font-size: 0.85rem; padding: 6px 12px;">+ Add Volunteer</button>
                     <div id="add-to-db-form" class="hidden add-vol-form">
+                        <label>Phone: <input type="tel" id="db-vol-phone" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this)"></label><br>
                         <label>First &amp; Last: <input type="text" id="db-vol-name" placeholder="John Doe"></label><br>
-                        <label>Phone: <input type="tel" id="db-vol-phone" placeholder="(000) 000-0000" oninput="formatPhone(this)"></label><br>
                         <button class="btn-success btn-sm" onclick="addToVolunteerDatabase()">Save</button>
                         <button class="btn-outline btn-sm" onclick="toggleAddToDatabaseForm()">Cancel</button>
                     </div>
@@ -2387,9 +2589,9 @@
                     <h2><span class="section-icon">👔</span> Supervisor Database</h2>
                     <button class="btn-success btn-sm" onclick="toggleAddSupervisorForm()" style="margin-bottom: 12px; font-size: 0.85rem; padding: 6px 12px;">+ Add Supervisor</button>
                     <div id="add-supervisor-form" class="hidden add-vol-form">
+                        <label>Phone: <input type="tel" id="super-phone" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this)"></label><br>
                         <label>First Name: <input type="text" id="super-first-name" placeholder="John"></label><br>
                         <label>Last Name: <input type="text" id="super-last-name" placeholder="Doe"></label><br>
-                        <label>Phone: <input type="tel" id="super-phone" placeholder="(000) 000-0000" oninput="formatPhone(this)"></label><br>
                         <button class="btn-success btn-sm" onclick="addSupervisorToDatabase()">Save</button>
                         <button class="btn-outline btn-sm" onclick="toggleAddSupervisorForm()">Cancel</button>
                     </div>
@@ -4215,8 +4417,8 @@
                     formTr.innerHTML = `
           <td colspan="4" style="padding:0;">
             <div class="add-vol-form">
+              <label>Phone: <input type="tel" id="add-vol-phone-${date}" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this)" /></label><br>
               <label>First & Last: <input type="text" id="add-vol-name-${date}" placeholder="John Doe" /></label><br>
-              <label>Phone: <input type="tel" id="add-vol-phone-${date}" placeholder="(000) 000-0000" oninput="formatPhone(this)" /></label><br>
               <button class="btn-success btn-sm" onclick="addVolunteerToDate('${date}')">Save</button>
               <button class="btn-outline btn-sm" onclick="toggleAddVolunteerForm('${date}')">Cancel</button>
             </div>
@@ -4359,8 +4561,8 @@
             alertContent.innerHTML = `
                 <h3>Edit Volunteer</h3>
                 <div style="margin: 20px 0;">
+                    <input type="tel" id="edit-vol-phone" value="${formatPhoneDisplay(vol.phone)}" placeholder="(000) 000-0000" inputmode="numeric" oninput="formatPhone(this)" maxlength="14" style="width: 100%; padding: 10px; margin: 8px 0; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
                     <input type="text" id="edit-vol-name" value="${vol.name}" placeholder="Full Name" style="width: 100%; padding: 10px; margin: 8px 0; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
-                    <input type="tel" id="edit-vol-phone" value="${formatPhoneDisplay(vol.phone)}" placeholder="(000) 000-0000" oninput="formatPhone(this)" maxlength="14" style="width: 100%; padding: 10px; margin: 8px 0; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
                 </div>
                 <button class="btn-success" id="save-vol-edit">Save</button>
                 <button class="btn-outline" id="cancel-vol-edit">Cancel</button>
@@ -4571,31 +4773,31 @@
                 const kidsArray = Array.isArray(kids) ? kids : [];
                 
                 html += `
-                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 12px 0; border: 2px solid #d1e3ff;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e3f2fd;">
-                            <div>
-                                <div><strong style="font-size: 1.2rem; color: var(--text);">${firstName} ${lastName}</strong></div>
-                                <div style="margin-top: 4px;">
-                                    <strong style="font-size: 1.0rem; color: var(--primary);">${formatPhoneDisplay(phone)}</strong>
-                                    <span style="display: inline-block; margin-left: 8px; padding: 4px 12px; background: ${type === 'member' ? '#e3f2fd' : '#fff3e0'}; color: ${typeColor}; border-radius: 12px; font-size: 0.85rem; font-weight: bold;">${typeDisplay}</span>
-                                    <span style="color: #666; margin-left: 12px;">(${kidsArray.length} child${kidsArray.length !== 1 ? 'ren' : ''})</span>
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e3f2fd; flex-wrap: wrap; gap: 8px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <div><strong style="font-size: 1.2rem; color: var(--text); word-break: break-word;">${firstName} ${lastName}</strong></div>
+                                <div style="margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px;">
+                                    <strong style="font-size: 1.0rem; color: var(--primary); word-break: break-word;">${formatPhoneDisplay(phone)}</strong>
+                                    <span style="display: inline-block; padding: 4px 12px; background: ${type === 'member' ? '#e3f2fd' : '#fff3e0'}; color: ${typeColor}; border-radius: 12px; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">${typeDisplay}</span>
+                                    <span style="color: #666; white-space: nowrap;">(${kidsArray.length} child${kidsArray.length !== 1 ? 'ren' : ''})</span>
                                 </div>
                             </div>
-                            <div>
-                                <button class="btn-sm btn-primary" onclick="editFamily('${phone}')" style="margin: 2px;">Edit</button>
-                                <button class="btn-sm btn-danger" onclick="deleteFamily('${phone}')" style="margin: 2px;">Delete Family</button>
+                            <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                                <button class="btn-sm btn-primary" onclick="editFamily('${phone}')" style="margin: 2px; white-space: nowrap;">Edit</button>
+                                <button class="btn-sm btn-danger" onclick="deleteFamily('${phone}')" style="margin: 2px; white-space: nowrap;">Delete Family</button>
                             </div>
                         </div>
                         <div>`;
                 
                 kidsArray.forEach((kid, index) => {
                     html += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f8fbff; border-radius: 8px; margin: 6px 0;">
-                            <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f8fbff; border-radius: 8px; margin: 6px 0; flex-wrap: wrap; gap: 8px; box-sizing: border-box;">
+                            <div style="flex: 1; min-width: 0; word-break: break-word;">
                                 <strong>${kid.name}</strong> - Age ${kid.age}
-                                ${kid.allergies && kid.allergies !== 'None' ? `<span style="color: #d32f2f; margin-left: 8px;">⚠️ ${kid.allergies}</span>` : ''}
+                                ${kid.allergies && kid.allergies !== 'None' ? `<span style="color: #d32f2f;">⚠️ ${kid.allergies}</span>` : ''}
                             </div>
-                            <button class="btn-sm btn-danger" onclick="deleteKidFromFamily('${phone}', ${index})" title="Delete ${kid.name}">Delete</button>
+                            <button class="btn-sm btn-danger" onclick="deleteKidFromFamily('${phone}', ${index})" title="Delete ${kid.name}" style="flex-shrink: 0; white-space: nowrap;">Delete</button>
                         </div>`;
                 });
                 
@@ -4671,7 +4873,7 @@
                             <label style="margin-left: 12px;">Last Name: <input type="text" id="edit-last-name" value="${lastName}" style="width: 200px; padding: 8px;"></label>
                         </div>
                         <div style="margin-bottom: 16px;">
-                            <label>Phone: <input type="tel" id="edit-phone" value="${formatPhoneDisplay(phone)}" style="width: 200px; padding: 8px;"></label>
+                            <label>Phone: <input type="tel" id="edit-phone" value="${formatPhoneDisplay(phone)}" inputmode="numeric" maxlength="14" style="width: 200px; padding: 8px;"></label>
                             <label style="margin-left: 12px;">Type: 
                                 <select id="edit-type" style="width: 150px; padding: 8px;">
                                     <option value="member" ${type === 'member' ? 'selected' : ''}>Member</option>
@@ -4932,15 +5134,15 @@
             let html = '';
             Object.entries(supervisorDatabase).forEach(([phone, supervisor]) => {
                 html += `
-                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 12px 0; border: 2px solid #d1e3ff;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="font-size: 1.1rem; color: var(--text);">${supervisor.firstName} ${supervisor.lastName}</strong><br>
-                                <span style="color: var(--primary); font-size: 0.95rem;">${formatPhoneDisplay(phone)}</span>
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <strong style="font-size: 1.1rem; color: var(--text); word-break: break-word;">${supervisor.firstName} ${supervisor.lastName}</strong><br>
+                                <span style="color: var(--primary); font-size: 0.95rem; word-break: break-word;">${formatPhoneDisplay(phone)}</span>
                             </div>
-                            <div>
-                                <button class="btn-sm btn-primary" onclick="editSupervisor('${phone}')" style="margin: 2px;">Edit</button>
-                                <button class="btn-sm btn-danger" onclick="deleteSupervisor('${phone}')" style="margin: 2px;">Delete</button>
+                            <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                                <button class="btn-sm btn-primary" onclick="editSupervisor('${phone}')" style="margin: 2px; white-space: nowrap;">Edit</button>
+                                <button class="btn-sm btn-danger" onclick="deleteSupervisor('${phone}')" style="margin: 2px; white-space: nowrap;">Delete</button>
                             </div>
                         </div>
                     </div>
@@ -4962,13 +5164,13 @@
                     <h2>Edit Supervisor</h2>
                     <div style="text-align: left; margin: 20px 0;">
                         <div style="margin-bottom: 16px;">
+                            <label>Phone: <input type="tel" id="edit-super-phone" value="${formatPhoneDisplay(phone)}" inputmode="numeric" maxlength="14" style="width: 200px; padding: 8px;"></label>
+                        </div>
+                        <div style="margin-bottom: 16px;">
                             <label>First Name: <input type="text" id="edit-super-first" value="${supervisor.firstName}" style="width: 200px; padding: 8px;"></label>
                         </div>
                         <div style="margin-bottom: 16px;">
                             <label>Last Name: <input type="text" id="edit-super-last" value="${supervisor.lastName}" style="width: 200px; padding: 8px;"></label>
-                        </div>
-                        <div style="margin-bottom: 16px;">
-                            <label>Phone: <input type="tel" id="edit-super-phone" value="${formatPhoneDisplay(phone)}" style="width: 200px; padding: 8px;"></label>
                         </div>
                     </div>
                     <button class="btn-success" onclick="saveEditSupervisor('${phone}')">Save Changes</button>
@@ -5139,7 +5341,7 @@
                     <p>Enter your information to volunteer:</p>
                     <label style="display: block; text-align: left; margin: 10px 0;">
                         Phone Number:
-                        <input type="tel" id="schedule-signup-phone" placeholder="(000) 000-0000" 
+                        <input type="tel" id="schedule-signup-phone" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14"
                                oninput="formatPhone(this); onScheduleSignupPhoneInput()" 
                                style="width: 100%; max-width: 100%; margin-top: 5px;">
                     </label>
