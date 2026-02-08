@@ -2764,7 +2764,6 @@
         <!-- Change Admin Password Modal - Step 3: Confirm Password Entry -->
         <div id="change-password-step3-modal" class="hidden modal-overlay">
             <div style="background: white; border-radius: 16px; padding: 24px; width: 95%; max-width: 420px; text-align: center; position: relative;">
-                <button class="modal-close-btn" onclick="closeChangePasswordModal()">×</button>
                 <h2 style="margin-top: 0; color: var(--primary); font-size: clamp(1.3rem, 4vw, 1.6rem);">Confirm New Password</h2>
                 <p style="color: #666; margin-bottom: 15px; font-size: clamp(0.9rem, 2.5vw, 1rem);">Enter the password again</p>
                 
@@ -2798,7 +2797,6 @@
         <!-- Confirmation Modal for Password Change -->
         <div id="password-confirm-modal" class="hidden modal-overlay-high">
             <div style="background: white; border-radius: 16px; padding: 24px; width: 95%; max-width: 380px; text-align: center; position: relative;">
-                <button class="modal-close-btn" onclick="cancelPasswordChange()">×</button>
                 <h3 style="margin-top: 0; color: var(--text); font-size: clamp(1.2rem, 3.5vw, 1.4rem);">Are you sure?</h3>
                 <p style="font-size: clamp(1rem, 2.5vw, 1.1rem); margin: 15px 0;">Do you want to change the admin password?</p>
                 <div style="display: flex; gap: 10px; margin-top: 24px; justify-content: center;">
@@ -2815,7 +2813,6 @@
         <!-- Validation modal -->
         <div id="validation-modal" class="hidden">
             <div id="validation-content">
-                <button class="modal-close-btn" onclick="closeValidationModal()">×</button>
                 <h3>⚠️ Required Information</h3>
                 <p id="validation-message"></p>
                 <button class="btn-primary" onclick="closeValidationModal()">OK</button>
@@ -2833,7 +2830,6 @@
         <!-- Add Child to Buzzer Modal -->
         <div id="add-child-modal" class="hidden modal-overlay">
             <div style="background: white; border-radius: 16px; padding: 32px; width: 450px; max-width: 90%; position: relative;">
-                <button class="modal-close-btn" onclick="closeAddChildModal()">×</button>
                 <h2 style="margin-top: 0; color: var(--primary);">Add Child to Buzzer <span id="add-child-buzzer-num"></span></h2>
                 <p style="color: #666; margin-bottom: 20px;">For: <strong id="add-child-parent-name"></strong></p>
                 
