@@ -2387,6 +2387,7 @@
         <!-- Custom checkout confirmation modal -->
         <div id="confirm-modal" class="hidden">
             <div id="confirm-content">
+                <button class="modal-close-btn" onclick="closeConfirmModal()">×</button>
                 <h3>Are you sure?</h3>
                 <p>This will check out the selected child.</p>
                 <div class="modal-buttons">
@@ -3801,13 +3802,13 @@
                 }
                 
                 const settingsSnap = await window.getDoc(settingsRef);
-                let correctPassword = '1234'; // Default password
+                let correctPassword = '559408'; // Default password
                 
                 if (settingsSnap.exists()) {
-                    correctPassword = settingsSnap.data().password || '1234';
+                    correctPassword = settingsSnap.data().password || '559408';
                 } else {
                     // First time - set default password
-                    await window.setDoc(settingsRef, { password: '1234' });
+                    await window.setDoc(settingsRef, { password: '559408' });
                 }
                 
                 if (entered !== correctPassword) {
@@ -3992,10 +3993,10 @@
                 }
                 
                 const settingsSnap = await window.getDoc(settingsRef);
-                let correctPassword = '1234';
+                let correctPassword = '559408';
                 
                 if (settingsSnap.exists()) {
-                    correctPassword = settingsSnap.data().password || '1234';
+                    correctPassword = settingsSnap.data().password || '559408';
                 }
                 
                 if (entered !== correctPassword) {
