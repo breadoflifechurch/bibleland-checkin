@@ -318,12 +318,15 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 2000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         #confirm-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         #confirm-content {
@@ -334,11 +337,26 @@
             max-width: 90%;
             text-align: center;
             box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
 
         #confirm-content h3 {
             margin-top: 0;
             color: var(--text);
+        }
+        
+        @media (max-width: 768px) {
+            #confirm-modal:not(.hidden) {
+                align-items: flex-start;
+                padding: 10px;
+            }
+            
+            #confirm-content {
+                padding: 24px 20px;
+                margin-top: 20px;
+            }
         }
 
         #confirm-content .modal-buttons {
@@ -346,6 +364,17 @@
             display: flex;
             justify-content: center;
             gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            #confirm-content .modal-buttons {
+                gap: 10px;
+            }
+            
+            #confirm-content .modal-buttons button {
+                min-width: 100px;
+            }
         }
 
         /* Success modal styles */
@@ -844,6 +873,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .schedule-item {
+                padding: 10px 12px;
+                gap: 6px;
+            }
         }
 
         .schedule-item.open {
@@ -1358,12 +1397,15 @@
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 5000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .centered-modal:not(.hidden) {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .centered-modal-content {
@@ -1374,11 +1416,26 @@
             max-width: 90%;
             text-align: center;
             box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
 
         .centered-modal-content h3 {
             margin-top: 0;
             color: var(--text);
+        }
+        
+        @media (max-width: 768px) {
+            .centered-modal:not(.hidden) {
+                align-items: flex-start;
+                padding: 10px;
+            }
+            
+            .centered-modal-content {
+                padding: 24px 20px;
+                margin-top: 20px;
+            }
         }
 
         /* Login Screen Styles */
@@ -4402,8 +4459,8 @@
         </td>
         <td>${supervisorDropdown}</td>
         <td>
-          <div class="action-buttons">
-            ${slots.length < 2 ? `<button class="btn-success btn-sm" onclick="toggleAddVolunteerForm('${date}')">+ Add</button>` : ''}
+          <div class="action-buttons" style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;">
+            ${slots.length < 2 ? `<button class="btn-success btn-sm" onclick="toggleAddVolunteerForm('${date}')" style="white-space: nowrap;">+ Add</button>` : ''}
             ${v1.name !== '—' ? `<button class="btn-icon btn-delete" onclick="removeVolunteerFromDate('${date}', 0)" title="Remove ${v1.name}">🗑️</button>` : ''}
             ${v2.name !== '—' ? `<button class="btn-icon btn-delete" onclick="removeVolunteerFromDate('${date}', 1)" title="Remove ${v2.name}">🗑️</button>` : ''}
           </div>
@@ -4520,16 +4577,18 @@
             uniqueVols.forEach(vol => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-        <td style="padding: 6px;">${vol.name}</td>
+        <td style="padding: 6px; word-break: break-word;">${vol.name}</td>
         <td style="padding: 6px; white-space: nowrap;">${formatPhoneDisplay(vol.phone)}</td>
-        <td style="padding: 6px;">
-          <select id="assign-date-${vol.phone}" style="padding: 4px 6px; border-radius: 6px; border: 1px solid #d1e3ff; font-size: 0.75rem; width: 100%;">
-            ${sundays.map(date => `<option value="${date}">${date}</option>`).join('')}
-          </select>
-          <button class="btn-primary" onclick="assignVolunteerToDate('${vol.phone}')" style="margin-left: 4px; font-size: 0.7rem; padding: 4px 8px;">Assign</button>
+        <td style="padding: 6px; min-width: 120px;">
+          <div style="display: flex; flex-direction: column; gap: 4px; align-items: stretch;">
+            <select id="assign-date-${vol.phone}" style="padding: 4px 6px; border-radius: 6px; border: 1px solid #d1e3ff; font-size: 0.75rem; width: 100%;">
+              ${sundays.map(date => `<option value="${date}">${date}</option>`).join('')}
+            </select>
+            <button class="btn-primary" onclick="assignVolunteerToDate('${vol.phone}')" style="font-size: 0.7rem; padding: 4px 8px; white-space: nowrap; width: 100%;">Assign</button>
+          </div>
         </td>
         <td style="padding: 6px;">
-          <div class="action-buttons" style="display: flex; gap: 4px; justify-content: center;">
+          <div class="action-buttons" style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
             <button class="btn-icon btn-edit" onclick="editVolunteerInfo('${vol.phone}')" title="Edit" style="font-size: 0.85rem; padding: 4px 8px;">✏️</button>
             <button class="btn-icon btn-delete" onclick="deleteVolunteerFromDatabase('${vol.phone}')" title="Delete" style="font-size: 0.85rem; padding: 4px 8px;">🗑️</button>
           </div>
