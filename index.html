@@ -215,37 +215,7 @@
             position: relative;
         }
 
-        /* Modal close button (X) */
-        .modal-close-btn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: #f0f0f0;
-            border-radius: 50%;
-            font-size: 1.3rem;
-            line-height: 1;
-            cursor: pointer;
-            color: #666;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            z-index: 10;
-            padding: 0;
-        }
 
-        .modal-close-btn:hover {
-            background: #e0e0e0;
-            color: #333;
-            transform: scale(1.1);
-        }
-
-        .modal-close-btn:active {
-            transform: scale(0.95);
-        }
 
         /* Custom confirmation modal */
         #confirm-modal {
@@ -2345,7 +2315,6 @@
         <!-- Admin password modal -->
         <div id="admin-password-modal" class="hidden">
             <div id="password-content">
-                <button class="modal-close-btn" onclick="closeAdminPasswordModal()">×</button>
                 <h2>Enter Admin PIN</h2>
                 <div id="pin-display"></div>
                 <div class="numpad">
@@ -2490,7 +2459,6 @@
         <!-- Centered Alert Modal -->
         <div id="centered-alert" class="centered-modal hidden">
             <div class="centered-modal-content">
-                <button class="modal-close-btn" onclick="closeCenteredAlert()">×</button>
                 <h3 id="alert-title">Alert</h3>
                 <p id="alert-message" style="font-size: 1.1rem; margin: 20px 0;"></p>
                 <button class="btn-primary" onclick="closeCenteredAlert()">OK</button>
