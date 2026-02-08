@@ -13,6 +13,7 @@
         * {
             touch-action: manipulation;
         }
+
         :root {
             --primary: #4a90e2;
             --primary-light: #a3d0ff;
@@ -89,6 +90,26 @@
         #btn-schedule {
             background: #9b59b6;
         }
+
+#admin-content .card-close-btn {
+    position: fixed;
+    top: -3px;
+    right: -3px;
+    z-index: 10000;
+
+    background: #fff;
+    border: none;
+    font-size: 23px;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 5px 8px rgba(0,0,0,0.3);
+}
+
+#admin-content.hidden .card-close-btn {
+    display: none;
+}
 
         #btn-admin {
             background: #7f8c8d;
@@ -2165,7 +2186,7 @@
                 <div class="stat-card">
                     <div class="stat-number" id="stat-checked-in">0</div>
                     <div class="stat-label">Currently Checked In</div>
-                </div>
+                </div><
                 <div class="stat-card green">
                     <div class="stat-number" id="stat-volunteers">0</div>
                     <div class="stat-label">Total Volunteers</div>
