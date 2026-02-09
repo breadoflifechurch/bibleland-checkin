@@ -403,14 +403,14 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-        // Firebase Configuration
+        // Firebase Configuration (must match main index.html)
         const firebaseConfig = {
-            apiKey: "AIzaSyAMd6sW-Hq3f2p6gG39CpXwAUIu2g8RBag",
-            authDomain: "bible-land-9d0e7.firebaseapp.com",
-            projectId: "bible-land-9d0e7",
-            storageBucket: "bible-land-9d0e7.firebasestorage.app",
-            messagingSenderId: "1043780137278",
-            appId: "1:1043780137278:web:8f4fd29084fae5f3dc9607"
+            apiKey: "AIzaSyDchZXJyercgztvVv7I57Ol53NDoLFfEEk",
+            authDomain: "bible-land-check-in.firebaseapp.com",
+            projectId: "bible-land-check-in",
+            storageBucket: "bible-land-check-in.firebasestorage.app",
+            messagingSenderId: "839634881652",
+            appId: "1:839634881652:web:80410e2b38965312b2d521"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -426,8 +426,15 @@
         async function loadDataFromFirebase() {
             try {
                 console.log('📥 Loading data from Firebase...');
+                console.log('Attempting path: churches/bibleland2025/data/shared');
+                
                 const docRef = doc(db, 'churches', 'bibleland2025', 'data', 'shared');
+                console.log('Document reference created:', docRef.path);
+                
                 const docSnap = await getDoc(docRef);
+                
+                console.log('Document exists:', docSnap.exists());
+                console.log('Document data:', docSnap.data());
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -441,12 +448,28 @@
                     document.getElementById('loading-view').classList.add('hidden');
                     document.getElementById('schedule-view').classList.remove('hidden');
                 } else {
-                    console.log('📭 No data found');
+                    console.log('📭 Document does not exist');
                     showError();
                 }
             } catch (error) {
-                console.error('❌ Error loading data:', error);
-                showError();
+                console.error('❌ Full error object:', error);
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error code:', error.code);
+                console.error('Error stack:', error.stack);
+                
+                // Show detailed error message
+                const errorView = document.getElementById('error-view');
+                errorView.innerHTML = `
+                    <div class="error-message">
+                        <p><strong>Error Details:</strong></p>
+                        <p>Code: ${error.code}</p>
+                        <p>Message: ${error.message}</p>
+                        <p>Please contact the administrator.</p>
+                    </div>
+                `;
+                document.getElementById('loading-view').classList.add('hidden');
+                errorView.classList.remove('hidden');
             }
         }
 
