@@ -426,7 +426,7 @@
         async function loadDataFromFirebase() {
             try {
                 console.log('📥 Loading data from Firebase...');
-                const docRef = doc(db, 'churches', CHURCH_CODE);
+                const docRef = doc(db, 'churches', 'bibleland2025', 'data', 'shared');
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
@@ -434,6 +434,7 @@
                     window.scheduledSupervisors = data.scheduledSupervisors || [];
                     window.volunteers = data.volunteers || {};
                     console.log('✅ Data loaded successfully');
+                    console.log('Events found:', window.scheduledSupervisors.length);
                     renderScheduleTable();
                     
                     // Show schedule view
@@ -453,7 +454,7 @@
         async function saveDataToFirebase() {
             try {
                 console.log('💾 Saving to Firebase...');
-                const docRef = doc(db, 'churches', CHURCH_CODE);
+                const docRef = doc(db, 'churches', 'bibleland2025', 'data', 'shared');
                 const currentDoc = await getDoc(docRef);
                 const currentData = currentDoc.exists() ? currentDoc.data() : {};
                 
@@ -475,7 +476,7 @@
         // Real-time sync
         function setupRealtimeSync() {
             try {
-                const docRef = doc(db, 'churches', CHURCH_CODE);
+                const docRef = doc(db, 'churches', 'bibleland2025', 'data', 'shared');
                 
                 const unsubscribe = onSnapshot(docRef, (doc) => {
                     if (doc.exists()) {
