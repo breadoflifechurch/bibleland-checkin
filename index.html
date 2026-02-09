@@ -1027,6 +1027,53 @@
             }
         }
         
+        /* Responsive database cards */
+        @media (max-width: 768px) {
+            /* Volunteer database - stack Quick Assign below name/phone on smaller screens */
+            #volunteer-database-content > div > div {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+            
+            #volunteer-database-content > div > div > div:last-child {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            /* Adjust Quick Assign controls */
+            #volunteer-database-content select,
+            #volunteer-database-content .btn-primary {
+                font-size: 0.7rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Further reduce sizes on very small screens */
+            #volunteer-database-content > div,
+            #family-database-content > div,
+            #supervisor-database-content > div {
+                padding: 10px !important;
+                margin: 8px 0 !important;
+            }
+            
+            #volunteer-database-content strong,
+            #family-database-content strong,
+            #supervisor-database-content strong {
+                font-size: 1rem !important;
+            }
+            
+            #volunteer-database-content span,
+            #family-database-content span,
+            #supervisor-database-content span {
+                font-size: 0.85rem !important;
+            }
+            
+            .btn-icon {
+                padding: 3px 6px !important;
+                font-size: 0.75rem !important;
+            }
+        }
+        
         /* Two-column grid for admin sections */
         .admin-grid {
             display: grid;
@@ -2690,19 +2737,7 @@
                         <button class="btn-success btn-sm" onclick="addToVolunteerDatabase()">Save</button>
                         <button class="btn-outline btn-sm" onclick="toggleAddToDatabaseForm()">Cancel</button>
                     </div>
-                    <div class="admin-table">
-                        <table id="volunteer-db-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Phone</th>
-                                    <th>Quick Assign</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                    <div id="volunteer-database-content"></div>
                 </div>
 
                 <div class="admin-section">
@@ -2722,6 +2757,7 @@
             <!-- Family Database - Full Width -->
             <div class="admin-section full-width">
                 <h2><span class="section-icon">👨‍👩‍👧‍👦</span> Family Database</h2>
+                <button class="btn-success btn-sm" onclick="showAddFamilyModal()" style="margin-bottom: 12px; font-size: 0.85rem; padding: 6px 12px;">+ Add Family</button>
                 <div id="family-database-content"></div>
             </div>
 
@@ -4747,32 +4783,43 @@
                 }
             });
             (volunteers.all || []).forEach(vol => uniqueVols.set(vol.phone, vol));
-            const dbBody = document.querySelector('#volunteer-db-table tbody');
-            dbBody.innerHTML = '';
+            
+            const container = document.getElementById('volunteer-database-content');
+            
+            if (uniqueVols.size === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">No volunteers in database yet</p>';
+                return;
+            }
+            
             const sundays = getUpcomingSundays(13);
+            let html = '';
             
             uniqueVols.forEach(vol => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-        <td style="padding: 6px; word-break: break-word;">${vol.name}</td>
-        <td style="padding: 6px; white-space: nowrap;">${formatPhoneDisplay(vol.phone)}</td>
-        <td style="padding: 6px; min-width: 120px;">
-          <div style="display: flex; flex-direction: column; gap: 4px; align-items: stretch;">
-            <select id="assign-date-${vol.phone}" style="padding: 4px 6px; border-radius: 6px; border: 1px solid #d1e3ff; font-size: 0.75rem; width: 100%;">
-              ${sundays.map(date => `<option value="${date}">${date}</option>`).join('')}
-            </select>
-            <button class="btn-primary" onclick="assignVolunteerToDate('${vol.phone}')" style="font-size: 0.7rem; padding: 4px 8px; white-space: nowrap; width: 100%;">Assign</button>
-          </div>
-        </td>
-        <td style="padding: 6px;">
-          <div class="action-buttons" style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
-            <button class="btn-icon btn-edit" onclick="editVolunteerInfo('${vol.phone}')" title="Edit" style="font-size: 0.85rem; padding: 4px 8px;">✏️</button>
-            <button class="btn-icon btn-delete" onclick="deleteVolunteerFromDatabase('${vol.phone}')" title="Delete" style="font-size: 0.85rem; padding: 4px 8px;">🗑️</button>
-          </div>
-        </td>
-      `;
-                dbBody.appendChild(tr);
+                html += `
+                    <div style="background: white; border-radius: 12px; padding: 12px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <strong style="font-size: 1.1rem; color: var(--text); word-break: break-word;">${vol.name}</strong><br>
+                                <span style="color: var(--primary); font-size: 0.95rem; word-break: break-word;">${formatPhoneDisplay(vol.phone)}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0;">
+                                <div style="display: flex; flex-direction: column; gap: 4px; min-width: 120px;">
+                                    <select id="assign-date-${vol.phone}" style="padding: 4px 6px; border-radius: 6px; border: 1px solid #d1e3ff; font-size: 0.75rem; width: 100%;">
+                                        ${sundays.map(date => `<option value="${date}">${date}</option>`).join('')}
+                                    </select>
+                                    <button class="btn-primary" onclick="assignVolunteerToDate('${vol.phone}')" style="font-size: 0.7rem; padding: 4px 8px; white-space: nowrap; width: 100%;">Assign</button>
+                                </div>
+                                <div style="display: flex; gap: 4px;">
+                                    <button class="btn-icon btn-edit" onclick="editVolunteerInfo('${vol.phone}')" title="Edit" style="font-size: 0.85rem; padding: 4px 8px;">✏️</button>
+                                    <button class="btn-icon btn-delete" onclick="deleteVolunteerFromDatabase('${vol.phone}')" title="Delete" style="font-size: 0.85rem; padding: 4px 8px;">🗑️</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             });
+            
+            container.innerHTML = html;
         }
 
         function editVolunteerName(phone) {
@@ -4993,6 +5040,12 @@
         }
 
         // ─── Family Database Management ─────────────────────────────────────────
+        function showAddFamilyModal() {
+            // Redirect to check-in with non-member option
+            showScreen('checkin-screen');
+            document.getElementById('nonmem-btn').click();
+        }
+
         function renderFamilyDatabase() {
             const container = document.getElementById('family-database-content');
             
@@ -5012,34 +5065,34 @@
                 const kidsArray = Array.isArray(kids) ? kids : [];
                 
                 html += `
-                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e3f2fd; flex-wrap: wrap; gap: 8px;">
-                            <div style="flex: 1; min-width: 0;">
-                                <div><strong style="font-size: 1.2rem; color: var(--text); word-break: break-word;">${firstName} ${lastName}</strong></div>
-                                <div style="margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px;">
-                                    <strong style="font-size: 1.0rem; color: var(--primary); word-break: break-word;">${formatPhoneDisplay(phone)}</strong>
-                                    <span style="display: inline-block; padding: 4px 12px; background: ${type === 'member' ? '#e3f2fd' : '#fff3e0'}; color: ${typeColor}; border-radius: 12px; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">${typeDisplay}</span>
-                                    <span style="color: #666; white-space: nowrap;">(${kidsArray.length} child${kidsArray.length !== 1 ? 'ren' : ''})</span>
+                    <div style="background: white; border-radius: 12px; padding: 12px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <div style="margin-bottom: 4px;">
+                                    <strong style="font-size: 1.1rem; color: var(--text); word-break: break-word;">${firstName} ${lastName}</strong>
+                                </div>
+                                <div style="font-size: 0.9rem; color: var(--primary); margin-bottom: 4px;">
+                                    ${formatPhoneDisplay(phone)}
+                                </div>
+                                <div style="margin-bottom: 8px;">
+                                    <span style="display: inline-block; padding: 3px 10px; background: ${type === 'member' ? '#e3f2fd' : '#fff3e0'}; color: ${typeColor}; border-radius: 10px; font-size: 0.8rem; font-weight: bold;">${typeDisplay}</span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: #666;">`;
+                
+                kidsArray.forEach((kid, index) => {
+                    html += `
+                        <div style="padding: 4px 0; word-break: break-word;">
+                            <strong>${kid.name}</strong> (${kid.age}) ${kid.allergies && kid.allergies !== 'None' ? `<span style="color: #d32f2f;">⚠️ ${kid.allergies}</span>` : ''}
+                        </div>`;
+                });
+                
+                html += `
                                 </div>
                             </div>
                             <div style="display: flex; gap: 4px; flex-shrink: 0;">
                                 <button class="btn-icon btn-edit" onclick="editFamily('${phone}')" title="Edit" style="font-size: 0.85rem; padding: 4px 8px;">✏️</button>
                                 <button class="btn-icon btn-delete" onclick="deleteFamily('${phone}')" title="Delete Family" style="font-size: 0.85rem; padding: 4px 8px;">🗑️</button>
                             </div>
-                        </div>
-                        <div>`;
-                
-                kidsArray.forEach((kid, index) => {
-                    html += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #f8fbff; border-radius: 8px; margin: 6px 0; flex-wrap: wrap; gap: 8px; box-sizing: border-box;">
-                            <div style="flex: 1; min-width: 0; word-break: break-word;">
-                                <strong>${kid.name}</strong> - Age ${kid.age}
-                                ${kid.allergies && kid.allergies !== 'None' ? `<span style="color: #d32f2f;">⚠️ ${kid.allergies}</span>` : ''}
-                            </div>
-                        </div>`;
-                });
-                
-                html += `
                         </div>
                     </div>`;
             });
@@ -5389,7 +5442,7 @@
             let html = '';
             Object.entries(supervisorDatabase).forEach(([phone, supervisor]) => {
                 html += `
-                    <div style="background: white; border-radius: 12px; padding: 16px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
+                    <div style="background: white; border-radius: 12px; padding: 12px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                             <div style="flex: 1; min-width: 0;">
                                 <strong style="font-size: 1.1rem; color: var(--text); word-break: break-word;">${supervisor.firstName} ${supervisor.lastName}</strong><br>
