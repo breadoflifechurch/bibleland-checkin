@@ -235,8 +235,7 @@
         .modal-content h2 {
             color: var(--primary);
             margin-top: 0;
-            margin-bottom: 20px;
-            text-align: center;
+            margin-bottom: 16px;
         }
 
         .form-group {
@@ -250,17 +249,16 @@
             color: var(--text);
         }
 
-        input[type="tel"],
-        input[type="text"] {
-            font-size: 1.1rem;
-            padding: 12px 16px;
-            border: 2px solid #d1e3ff;
-            border-radius: 12px;
+        .form-group input {
             width: 100%;
-            box-sizing: border-box;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.2s;
         }
 
-        input:focus {
+        .form-group input:focus {
             outline: none;
             border-color: var(--primary);
         }
@@ -273,10 +271,10 @@
 
         .modal-buttons button {
             flex: 1;
-            padding: 14px 24px;
+            padding: 12px;
             border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
+            border-radius: 8px;
+            font-size: 1em;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -291,48 +289,54 @@
         }
 
         .btn-secondary {
-            background: #e9ecef;
+            background: #e0e0e0;
             color: var(--text);
         }
 
         .btn-secondary:hover {
-            background: #d3d9df;
+            background: #d0d0d0;
         }
 
-        .success-message {
+        .success-content {
             text-align: center;
-            line-height: 1.6;
+            padding: 20px 0;
         }
 
-        .success-message strong {
+        .success-icon {
+            font-size: 4em;
             color: var(--success);
+            margin-bottom: 16px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1>
+            📅 Bible Land Volunteer Schedule
+        </h1>
+
         <!-- Loading View -->
         <div id="loading-view" class="card">
             <div class="spinner"></div>
-            <div class="loading-text">Loading volunteer opportunities...</div>
+            <div class="loading-text">Loading schedule...</div>
         </div>
 
         <!-- Error View -->
         <div id="error-view" class="card hidden">
             <div class="error-message">
-                <strong>Error Loading Data</strong>
-                <p>Unable to connect to the database. Please try again later or contact the administrator.</p>
+                <strong>Error Details:</strong>
+                <p id="error-details">
+                    Code: unavailable<br><br>
+                    Message: Failed to get document because the client is offline.<br><br>
+                    Please contact the administrator.
+                </p>
             </div>
         </div>
 
         <!-- Schedule View -->
         <div id="schedule-view" class="hidden">
-            <h1>
-                <span>📅</span>
-                Bible Land Volunteer Sign Up
-            </h1>
-            
             <div class="card">
+                <h2 style="margin-top: 0; color: var(--primary);">📋 Upcoming Events</h2>
                 <div id="schedule-table-container">
                     <table id="schedule-table">
                         <thead>
@@ -344,7 +348,7 @@
                             </tr>
                         </thead>
                         <tbody id="schedule-tbody">
-                            <!-- Populated by JS -->
+                            <!-- Rows will be inserted here -->
                         </tbody>
                     </table>
                 </div>
@@ -355,27 +359,27 @@
     <!-- Signup Modal -->
     <div id="signup-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <h2>Volunteer Sign Up</h2>
-            <p id="modal-event-info" style="text-align: center; margin-bottom: 24px; color: #666;"></p>
+            <h2>Sign Up as Volunteer</h2>
+            <p id="modal-event-info" style="color: var(--primary); font-weight: 600; margin-bottom: 20px;"></p>
             
             <div class="form-group">
-                <label for="volunteer-phone">Phone Number</label>
-                <input type="tel" id="volunteer-phone" placeholder="(555) 123-4567" maxlength="14" autocomplete="tel">
+                <label for="volunteer-phone">Phone Number *</label>
+                <input type="tel" id="volunteer-phone" placeholder="(555) 123-4567" maxlength="14">
             </div>
             
             <div class="form-group">
-                <label for="volunteer-fname">First Name</label>
-                <input type="text" id="volunteer-fname" placeholder="First Name" autocomplete="given-name">
+                <label for="volunteer-fname">First Name *</label>
+                <input type="text" id="volunteer-fname" placeholder="John">
             </div>
             
             <div class="form-group">
-                <label for="volunteer-lname">Last Name</label>
-                <input type="text" id="volunteer-lname" placeholder="Last Name" autocomplete="family-name">
+                <label for="volunteer-lname">Last Name *</label>
+                <input type="text" id="volunteer-lname" placeholder="Doe">
             </div>
             
             <div class="modal-buttons">
                 <button class="btn-secondary" onclick="closeSignupModal()">Cancel</button>
-                <button class="btn-primary" onclick="confirmSignup()">Sign Up</button>
+                <button class="btn-primary" onclick="confirmSignup()">Confirm Sign Up</button>
             </div>
         </div>
     </div>
@@ -383,10 +387,11 @@
     <!-- Success Modal -->
     <div id="success-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <h2>✅ Success!</h2>
-            <div id="success-message-text" class="success-message"></div>
-            <div class="modal-buttons" style="margin-top: 24px;">
-                <button class="btn-primary" onclick="closeSuccessModal()">Close</button>
+            <div class="success-content">
+                <div class="success-icon">✅</div>
+                <h2>Successfully Signed Up!</h2>
+                <p id="success-message-text"></p>
+                <button class="btn-primary" style="margin-top: 20px; width: 100%;" onclick="closeSuccessModal()">Close</button>
             </div>
         </div>
     </div>
@@ -394,173 +399,77 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, onSnapshot, runTransaction } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyC60w0oqMECRRnokxD-WdvQ5GUlO4ECMME",
-            authDomain: "bibleland-checkin.firebaseapp.com",
-            projectId: "bibleland-checkin",
-            storageBucket: "bibleland-checkin.firebasestorage.app",
-            messagingSenderId: "326518876862",
-            appId: "1:326518876862:web:ff2a75f13cb6e38c0e1742"
+            apiKey: "AIzaSyAx61loxO6nymxsHGO0LTkmLnmJT3vu-iw",
+            authDomain: "bible-land-check-in.firebaseapp.com",
+            projectId: "bible-land-check-in",
+            storageBucket: "bible-land-check-in.firebasestorage.app",
+            messagingSenderId: "412737285",
+            appId: "1:412737285:web:aeec2e3d50bb9f204ea35e"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const docRef = doc(db, 'churches/bibleland2025/data/shared');
 
-        // Global variables - NOW USING OBJECT STRUCTURE
-        window.scheduledSupervisors = {};
+        // Global variables
         window.volunteers = {};
+        window.scheduledSupervisors = {};
         let currentSignupEvent = null;
+        let unsubscribe = null;
 
-        // Convert object to array for display (sorted by date)
-        function getEventsArray() {
-            const eventsArray = [];
-            for (const eventId in window.scheduledSupervisors) {
-                const event = window.scheduledSupervisors[eventId];
-                if (event && event.date) {
-                    event.eventId = eventId; // Store the key for later reference
-                    eventsArray.push(event);
+        // Setup real-time sync
+        function setupRealtimeSync() {
+            unsubscribe = onSnapshot(docRef, 
+                (docSnap) => {
+                    if (docSnap.exists()) {
+                        console.log('🔄 Real-time update received');
+                        const data = docSnap.data();
+                        window.volunteers = data.volunteers || {};
+                        window.scheduledSupervisors = data.scheduledSupervisors || {};
+                        renderScheduleTable();
+                    }
+                },
+                (error) => {
+                    console.error('❌ Real-time sync error:', error);
                 }
-            }
-            
-            // Sort by date
-            eventsArray.sort((a, b) => {
-                const dateA = new Date(a.date + 'T00:00:00');
-                const dateB = new Date(b.date + 'T00:00:00');
-                return dateA - dateB;
-            });
-            
-            return eventsArray;
+            );
         }
 
         // Load data from Firebase
         async function loadDataFromFirebase() {
             try {
-                console.log('📥 Loading data from Firebase...');
-                console.log('Attempting path: churches/bibleland2025/data/shared');
-                
-                const docRef = doc(db, 'churches', 'bibleland2025', 'data', 'shared');
-                console.log('Document reference created:', docRef.path);
-                
+                console.log('📡 Loading data from Firebase...');
                 const docSnap = await getDoc(docRef);
                 
-                console.log('Document exists:', docSnap.exists());
-                console.log('Document data:', docSnap.data());
-                
                 if (docSnap.exists()) {
+                    console.log('✅ Data loaded successfully');
                     const data = docSnap.data();
                     
-                    // Handle both object and array formats
-                    if (data.scheduledSupervisors) {
-                        if (Array.isArray(data.scheduledSupervisors)) {
-                            // Convert array to object (legacy support)
-                            window.scheduledSupervisors = {};
-                            data.scheduledSupervisors.forEach((event, index) => {
-                                window.scheduledSupervisors[`event_${index}`] = event;
-                            });
-                        } else {
-                            // Already an object
-                            window.scheduledSupervisors = data.scheduledSupervisors;
-                        }
-                    } else {
-                        window.scheduledSupervisors = {};
-                    }
-                    
                     window.volunteers = data.volunteers || {};
+                    window.scheduledSupervisors = data.scheduledSupervisors || {};
                     
-                    console.log('✅ Data loaded successfully');
-                    console.log('Events found:', Object.keys(window.scheduledSupervisors).length);
+                    console.log('📊 Volunteers:', Object.keys(window.volunteers).length);
+                    console.log('📅 Events:', Object.keys(window.scheduledSupervisors).length);
+                    
                     renderScheduleTable();
                     
-                    // Show schedule view
                     document.getElementById('loading-view').classList.add('hidden');
                     document.getElementById('schedule-view').classList.remove('hidden');
                 } else {
-                    console.log('📭 Document does not exist');
+                    console.error('❌ Document does not exist');
                     showError();
                 }
             } catch (error) {
-                console.error('❌ Full error object:', error);
-                console.error('Error name:', error.name);
-                console.error('Error message:', error.message);
-                console.error('Error code:', error.code);
-                console.error('Error stack:', error.stack);
-                
-                // Show detailed error message
-                const errorView = document.getElementById('error-view');
-                errorView.innerHTML = `
-                    <div class="error-message">
-                        <p><strong>Error Details:</strong></p>
-                        <p>Code: ${error.code || 'undefined'}</p>
-                        <p>Message: ${error.message}</p>
-                        <p>Please contact the administrator.</p>
-                    </div>
+                console.error('❌ Error loading data:', error);
+                document.getElementById('error-details').innerHTML = `
+                    <strong>Error code:</strong> ${error.code || 'unknown'}<br><br>
+                    <strong>Message:</strong> ${error.message}<br><br>
+                    Please contact the administrator.
                 `;
-                document.getElementById('loading-view').classList.add('hidden');
-                errorView.classList.remove('hidden');
-            }
-        }
-
-        // Save data to Firebase
-        async function saveDataToFirebase() {
-            try {
-                console.log('💾 Saving to Firebase...');
-                const docRef = doc(db, 'churches', 'bibleland2025', 'data', 'shared');
-                const currentDoc = await getDoc(docRef);
-                const currentData = currentDoc.exists() ? currentDoc.data() : {};
-                
-                await setDoc(docRef, {
-                    ...currentData,
-                    scheduledSupervisors: window.scheduledSupervisors,
-                    volunteers: window.volunteers,
-                    lastUpdated: Date.now(),
-                    lastUpdatedBy: 'volunteer-signup'
-                }, { merge: true });
-                
-                console.log('✅ Data saved successfully');
-            } catch (error) {
-                console.error('❌ Error saving data:', error);
-                alert('Failed to save signup. Please try again.');
-            }
-        }
-
-        // Real-time sync
-        function setupRealtimeSync() {
-            try {
-                const docRef = doc(db, 'churches', 'bibleland2025', 'data', 'shared');
-                
-                const unsubscribe = onSnapshot(docRef, (doc) => {
-                    if (doc.exists()) {
-                        const data = doc.data();
-                        
-                        // Skip self-triggered updates
-                        if (data.lastUpdatedBy === 'volunteer-signup') {
-                            return;
-                        }
-                        
-                        console.log('🔄 Real-time update received');
-                        
-                        // Handle both formats
-                        if (data.scheduledSupervisors) {
-                            if (Array.isArray(data.scheduledSupervisors)) {
-                                window.scheduledSupervisors = {};
-                                data.scheduledSupervisors.forEach((event, index) => {
-                                    window.scheduledSupervisors[`event_${index}`] = event;
-                                });
-                            } else {
-                                window.scheduledSupervisors = data.scheduledSupervisors;
-                            }
-                        }
-                        
-                        window.volunteers = data.volunteers || {};
-                        renderScheduleTable();
-                    }
-                });
-                
-                window.realtimeSyncUnsubscribe = unsubscribe;
-            } catch (error) {
-                console.error('❌ Error setting up real-time sync:', error);
+                showError();
             }
         }
 
@@ -569,26 +478,45 @@
             const tbody = document.getElementById('schedule-tbody');
             tbody.innerHTML = '';
             
-            // Get events as sorted array
-            const eventsArray = getEventsArray();
+            // Get all events
+            const events = Object.entries(window.scheduledSupervisors).map(([eventId, event]) => ({
+                eventId,
+                ...event
+            }));
             
-            if (eventsArray.length === 0) {
-                const row = document.createElement('tr');
-                const cell = document.createElement('td');
+            // Filter upcoming events only
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const upcomingEvents = events.filter(event => {
+                if (!event.date) return false;
+                const eventDate = new Date(event.date + 'T00:00:00');
+                return eventDate >= today;
+            });
+            
+            // Sort by date
+            upcomingEvents.sort((a, b) => {
+                const dateA = new Date(a.date + 'T00:00:00');
+                const dateB = new Date(b.date + 'T00:00:00');
+                return dateA - dateB;
+            });
+            
+            if (upcomingEvents.length === 0) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell();
                 cell.colSpan = 4;
                 cell.style.textAlign = 'center';
-                cell.style.padding = '30px';
+                cell.style.padding = '40px';
                 cell.style.color = '#888';
-                cell.textContent = 'No volunteer opportunities available at this time.';
-                row.appendChild(cell);
-                tbody.appendChild(row);
+                cell.textContent = 'No upcoming events available for signup';
                 return;
             }
             
-            eventsArray.forEach(event => {
-                const row = document.createElement('tr');
+            // Render each event
+            upcomingEvents.forEach(event => {
+                const row = tbody.insertRow();
                 
-                // Date column
+                // Date
                 const dateCell = document.createElement('td');
                 event.dateObj = new Date(event.date + 'T00:00:00');
                 const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
@@ -695,7 +623,7 @@
             }
         });
 
-        // Confirm signup
+        // Confirm signup WITH TRANSACTION (prevents race conditions!)
         window.confirmSignup = async function() {
             const phone = document.getElementById('volunteer-phone').value.replace(/\D/g, '');
             const firstName = document.getElementById('volunteer-fname').value.trim();
@@ -713,43 +641,69 @@
             
             if (!currentSignupEvent) return;
             
-            // Check if already signed up
-            const signedUp = currentSignupEvent.signedUpVolunteers || [];
-            if (signedUp.includes(phone)) {
-                alert('You are already signed up for this event!');
-                return;
-            }
-            
-            // Add volunteer to database
-            window.volunteers[phone] = {
-                firstName: firstName,
-                lastName: lastName,
-                phone: phone
-            };
-            
-            // Add to event signup using eventId
             const eventId = currentSignupEvent.eventId;
             
-            if (eventId && window.scheduledSupervisors[eventId]) {
-                if (!window.scheduledSupervisors[eventId].signedUpVolunteers) {
-                    window.scheduledSupervisors[eventId].signedUpVolunteers = [];
-                }
-                window.scheduledSupervisors[eventId].signedUpVolunteers.push(phone);
+            try {
+                // Use Firestore transaction to prevent race conditions
+                await runTransaction(db, async (transaction) => {
+                    const docSnap = await transaction.get(docRef);
+                    
+                    if (!docSnap.exists()) {
+                        throw new Error('Document does not exist!');
+                    }
+                    
+                    const data = docSnap.data();
+                    const volunteers = data.volunteers || {};
+                    const scheduledSupervisors = data.scheduledSupervisors || {};
+                    
+                    // Check if event exists
+                    if (!scheduledSupervisors[eventId]) {
+                        throw new Error('Event not found!');
+                    }
+                    
+                    // Get current signups
+                    const signedUp = scheduledSupervisors[eventId].signedUpVolunteers || [];
+                    
+                    // Check if already signed up
+                    if (signedUp.includes(phone)) {
+                        throw new Error('You are already signed up for this event!');
+                    }
+                    
+                    // Check if full
+                    const volunteersNeeded = scheduledSupervisors[eventId].volunteersNeeded || 0;
+                    if (signedUp.length >= volunteersNeeded) {
+                        throw new Error('Sorry, this event is now full!');
+                    }
+                    
+                    // Add volunteer to database
+                    volunteers[phone] = {
+                        firstName: firstName,
+                        lastName: lastName,
+                        phone: phone
+                    };
+                    
+                    // Add to signups
+                    scheduledSupervisors[eventId].signedUpVolunteers = [...signedUp, phone];
+                    
+                    // Update Firestore
+                    transaction.update(docRef, {
+                        volunteers: volunteers,
+                        scheduledSupervisors: scheduledSupervisors
+                    });
+                });
                 
-                // Save to Firebase
-                await saveDataToFirebase();
+                console.log('✅ Signup successful!');
                 
-                // Send email notification to admin
+                // Send email notification
                 await sendAdminNotification(currentSignupEvent, firstName, lastName, phone);
                 
-                // Show success message
+                // Show success
                 showSuccessMessage(currentSignupEvent, firstName, lastName);
-                
-                // Close signup modal
                 closeSignupModal();
                 
-                // Refresh table
-                renderScheduleTable();
+            } catch (error) {
+                console.error('❌ Signup error:', error);
+                alert(error.message || 'Failed to sign up. Please try again.');
             }
         };
 
