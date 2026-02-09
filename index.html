@@ -5587,7 +5587,7 @@
         function showScheduleView() {
             const sundays = getUpcomingSundays(13); // 3 months of Sundays
             
-            let scheduleHTML = '<h3 style="margin-top: 0; color: var(--primary);">Upcoming Schedule (Next 3 Months)</h3>';
+            let scheduleHTML = '<h3 style="margin-top: 0; color: var(--primary);">Upcoming Schedule</h3>';
             
             sundays.forEach(date => {
                 const slots = volunteers[date] || [];
