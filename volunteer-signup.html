@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bible Land Volunteer Sign Up</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <style>
+        * {
+            touch-action: manipulation;
+            box-sizing: border-box;
+        }
+        
+        body, div, p, span, td, th {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        :root {
+            --primary: #4a90e2;
+            --primary-light: #a3d0ff;
+            --success: #50c878;
+            --warning: #ffaa33;
+            --bg: #f0f7ff;
+            --card: #ffffff;
+            --text: #2c3e50;
+            --shadow: 0 8px 25px rgba(74, 144, 226, 0.18);
+        }
+
+        body {
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background: linear-gradient(135deg, #e0f2ff, #f0f7ff);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            margin: 20px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 16px;
+                border-radius: 16px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Schedule Table Styles */
+        #schedule-table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+            background: white;
+        }
+
+        #schedule-table th {
+            background: var(--primary);
+            color: white;
+            padding: 14px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #schedule-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e8f2ff;
+        }
+
+        #schedule-table tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .event-name {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .event-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .signup-cell {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .volunteer-name {
+            background: var(--success);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+
+        .signup-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .signup-btn:hover {
+            background: #3a7bc8;
+            transform: translateY(-1px);
+        }
+
+        .signup-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                padding: 24px 20px;
+            }
+        }
+
+        .modal-content h2 {
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        input[type="tel"],
+        input[type="text"] {
+            font-size: 1.1rem;
+            padding: 12px 16px;
+            border: 2px solid #d1e3ff;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #45b068;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: var(--text);
+        }
+
+        .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+
+        /* Success Modal */
+        .success-modal {
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .success-modal h2 {
+            color: var(--success);
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .btn-ok {
+            background: var(--primary);
+            color: white;
+            padding: 14px 48px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-ok:hover {
+            background: #3a7bc8;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffe0e0;
+            color: #c00;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Bible Land Volunteer Sign Up</h1>
+        
+        <div class="card">
+            <div id="loading-view" class="loading">
+                <div class="spinner"></div>
+                <p>Loading schedule...</p>
+            </div>
+            
+            <div id="schedule-view" class="hidden">
+                <div id="schedule-table-container">
+                    <table id="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Event</th>
+                                <th>Volunteers Needed</th>
+                                <th>Signed Up</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-tbody">
+                            <!-- Table rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="error-view" class="hidden">
+                <div class="error-message">
+                    <p>Unable to load schedule. Please try refreshing the page.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signup-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Sign Up for Volunteer Shift</h2>
+            <p id="modal-event-info" style="text-align: center; color: #666; margin-bottom: 20px;"></p>
+            
+            <div class="form-group">
+                <label for="volunteer-phone">Phone Number *</label>
+                <input type="tel" id="volunteer-phone" placeholder="(123) 456-7890" maxlength="14" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="volunteer-fname">First Name *</label>
+                <input type="text" id="volunteer-fname" placeholder="First Name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="volunteer-lname">Last Name *</label>
+                <input type="text" id="volunteer-lname" placeholder="Last Name" required>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeSignupModal()">Cancel</button>
+                <button class="btn-confirm" onclick="confirmSignup()">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal-overlay hidden">
+        <div class="modal-content success-modal">
+            <div class="success-icon">✅</div>
+            <h2>Successfully Signed Up!</h2>
+            <div class="success-message" id="success-message-text"></div>
+            <button class="btn-ok" onclick="closeSuccessModal()">OK</button>
+        </div>
+    </div>
+
+    <!-- Firebase & EmailJS -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMd6sW-Hq3f2p6gG39CpXwAUIu2g8RBag",
+            authDomain: "bible-land-9d0e7.firebaseapp.com",
+            projectId: "bible-land-9d0e7",
+            storageBucket: "bible-land-9d0e7.firebasestorage.app",
+            messagingSenderId: "1043780137278",
+            appId: "1:1043780137278:web:8f4fd29084fae5f3dc9607"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const CHURCH_CODE = 'BL2024';
+
+        // Global variables
+        window.scheduledSupervisors = [];
+        window.volunteers = {};
+        let currentSignupEvent = null;
+
+        // Load data from Firebase
+        async function loadDataFromFirebase() {
+            try {
+                console.log('📥 Loading data from Firebase...');
+                const docRef = doc(db, 'churches', CHURCH_CODE);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    window.scheduledSupervisors = data.scheduledSupervisors || [];
+                    window.volunteers = data.volunteers || {};
+                    console.log('✅ Data loaded successfully');
+                    renderScheduleTable();
+                    
+                    // Show schedule view
+                    document.getElementById('loading-view').classList.add('hidden');
+                    document.getElementById('schedule-view').classList.remove('hidden');
+                } else {
+                    console.log('📭 No data found');
+                    showError();
+                }
+            } catch (error) {
+                console.error('❌ Error loading data:', error);
+                showError();
+            }
+        }
+
+        // Save data to Firebase
+        async function saveDataToFirebase() {
+            try {
+                console.log('💾 Saving to Firebase...');
+                const docRef = doc(db, 'churches', CHURCH_CODE);
+                const currentDoc = await getDoc(docRef);
+                const currentData = currentDoc.exists() ? currentDoc.data() : {};
+                
+                await setDoc(docRef, {
+                    ...currentData,
+                    scheduledSupervisors: window.scheduledSupervisors,
+                    volunteers: window.volunteers,
+                    lastUpdated: Date.now(),
+                    lastUpdatedBy: 'volunteer-signup'
+                }, { merge: true });
+                
+                console.log('✅ Data saved successfully');
+            } catch (error) {
+                console.error('❌ Error saving data:', error);
+                alert('Failed to save signup. Please try again.');
+            }
+        }
+
+        // Real-time sync
+        function setupRealtimeSync() {
+            try {
+                const docRef = doc(db, 'churches', CHURCH_CODE);
+                
+                const unsubscribe = onSnapshot(docRef, (doc) => {
+                    if (doc.exists()) {
+                        const data = doc.data();
+                        
+                        // Skip self-triggered updates
+                        if (data.lastUpdatedBy === 'volunteer-signup') {
+                            return;
+                        }
+                        
+                        console.log('🔄 Real-time update received');
+                        window.scheduledSupervisors = data.scheduledSupervisors || [];
+                        window.volunteers = data.volunteers || {};
+                        renderScheduleTable();
+                    }
+                });
+                
+                window.realtimeSyncUnsubscribe = unsubscribe;
+            } catch (error) {
+                console.error('❌ Error setting up real-time sync:', error);
+            }
+        }
+
+        // Render schedule table
+        function renderScheduleTable() {
+            const tbody = document.getElementById('schedule-tbody');
+            tbody.innerHTML = '';
+            
+            const now = new Date();
+            const threeMonthsFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+            
+            const upcomingEvents = window.scheduledSupervisors
+                .map(event => {
+                    const eventDate = new Date(event.date + 'T00:00:00');
+                    return { ...event, dateObj: eventDate };
+                })
+                .filter(event => event.dateObj >= now && event.dateObj <= threeMonthsFromNow)
+                .sort((a, b) => a.dateObj - b.dateObj);
+            
+            if (upcomingEvents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #888;">No upcoming events in the next 3 months</td></tr>';
+                return;
+            }
+            
+            upcomingEvents.forEach(event => {
+                const row = document.createElement('tr');
+                
+                // Format date
+                const dateCell = document.createElement('td');
+                const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+                dateCell.textContent = event.dateObj.toLocaleDateString('en-US', options);
+                
+                // Event info
+                const eventCell = document.createElement('td');
+                eventCell.innerHTML = `
+                    <div class="event-name">${event.eventName || 'Event'}</div>
+                    <div class="event-details">${event.eventType || ''}</div>
+                `;
+                
+                // Volunteers needed
+                const neededCell = document.createElement('td');
+                neededCell.textContent = event.volunteersNeeded || 0;
+                
+                // Signed up volunteers
+                const signupCell = document.createElement('td');
+                const signupDiv = document.createElement('div');
+                signupDiv.className = 'signup-cell';
+                
+                const signedUp = event.signedUpVolunteers || [];
+                signedUp.forEach(phone => {
+                    const volunteer = window.volunteers[phone];
+                    if (volunteer) {
+                        const badge = document.createElement('span');
+                        badge.className = 'volunteer-name';
+                        badge.textContent = `${volunteer.firstName} ${volunteer.lastName}`;
+                        signupDiv.appendChild(badge);
+                    }
+                });
+                
+                // Add signup button if spots available
+                const spotsRemaining = (event.volunteersNeeded || 0) - signedUp.length;
+                if (spotsRemaining > 0) {
+                    const btn = document.createElement('button');
+                    btn.className = 'signup-btn';
+                    btn.textContent = `Sign Up (${spotsRemaining} spot${spotsRemaining !== 1 ? 's' : ''} left)`;
+                    btn.onclick = () => openSignupModal(event);
+                    signupDiv.appendChild(btn);
+                } else {
+                    const fullText = document.createElement('span');
+                    fullText.style.color = '#888';
+                    fullText.style.fontStyle = 'italic';
+                    fullText.textContent = 'Full';
+                    signupDiv.appendChild(fullText);
+                }
+                
+                signupCell.appendChild(signupDiv);
+                
+                row.appendChild(dateCell);
+                row.appendChild(eventCell);
+                row.appendChild(neededCell);
+                row.appendChild(signupCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Phone formatting
+        function formatPhoneNumber(value) {
+            const cleaned = value.replace(/\D/g, '');
+            if (cleaned.length <= 3) return cleaned;
+            if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+            return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+        }
+
+        // Open signup modal
+        window.openSignupModal = function(event) {
+            currentSignupEvent = event;
+            
+            const eventInfo = document.getElementById('modal-event-info');
+            const dateObj = new Date(event.date + 'T00:00:00');
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            eventInfo.textContent = `${event.eventName || 'Event'} - ${dateObj.toLocaleDateString('en-US', options)}`;
+            
+            // Clear form
+            document.getElementById('volunteer-phone').value = '';
+            document.getElementById('volunteer-fname').value = '';
+            document.getElementById('volunteer-lname').value = '';
+            
+            document.getElementById('signup-modal').classList.remove('hidden');
+        };
+
+        // Close signup modal
+        window.closeSignupModal = function() {
+            document.getElementById('signup-modal').classList.add('hidden');
+            currentSignupEvent = null;
+        };
+
+        // Phone input auto-format and autofill
+        document.getElementById('volunteer-phone').addEventListener('input', function(e) {
+            const formatted = formatPhoneNumber(e.target.value);
+            e.target.value = formatted;
+            
+            // Autofill if volunteer exists
+            const cleaned = formatted.replace(/\D/g, '');
+            if (cleaned.length === 10) {
+                const volunteer = window.volunteers[cleaned];
+                if (volunteer) {
+                    document.getElementById('volunteer-fname').value = volunteer.firstName || '';
+                    document.getElementById('volunteer-lname').value = volunteer.lastName || '';
+                }
+            }
+        });
+
+        // Confirm signup
+        window.confirmSignup = async function() {
+            const phone = document.getElementById('volunteer-phone').value.replace(/\D/g, '');
+            const firstName = document.getElementById('volunteer-fname').value.trim();
+            const lastName = document.getElementById('volunteer-lname').value.trim();
+            
+            if (!phone || phone.length !== 10) {
+                alert('Please enter a valid 10-digit phone number');
+                return;
+            }
+            
+            if (!firstName || !lastName) {
+                alert('Please enter both first and last name');
+                return;
+            }
+            
+            if (!currentSignupEvent) return;
+            
+            // Check if already signed up
+            const signedUp = currentSignupEvent.signedUpVolunteers || [];
+            if (signedUp.includes(phone)) {
+                alert('You are already signed up for this event!');
+                return;
+            }
+            
+            // Add volunteer to database
+            window.volunteers[phone] = {
+                firstName: firstName,
+                lastName: lastName,
+                phone: phone
+            };
+            
+            // Add to event signup
+            const eventIndex = window.scheduledSupervisors.findIndex(e => 
+                e.date === currentSignupEvent.date && 
+                e.eventName === currentSignupEvent.eventName
+            );
+            
+            if (eventIndex !== -1) {
+                if (!window.scheduledSupervisors[eventIndex].signedUpVolunteers) {
+                    window.scheduledSupervisors[eventIndex].signedUpVolunteers = [];
+                }
+                window.scheduledSupervisors[eventIndex].signedUpVolunteers.push(phone);
+                
+                // Save to Firebase
+                await saveDataToFirebase();
+                
+                // Send email notification to admin
+                await sendAdminNotification(currentSignupEvent, firstName, lastName, phone);
+                
+                // Show success message
+                showSuccessMessage(currentSignupEvent, firstName, lastName);
+                
+                // Close signup modal
+                closeSignupModal();
+                
+                // Refresh table
+                renderScheduleTable();
+            }
+        };
+
+        // Send admin notification via EmailJS
+        async function sendAdminNotification(event, firstName, lastName, phone) {
+            try {
+                const dateObj = new Date(event.date + 'T00:00:00');
+                const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+                const formattedDate = dateObj.toLocaleDateString('en-US', options);
+                
+                const templateParams = {
+                    to_email: 'firealexusa@gmail.com',
+                    volunteer_name: `${firstName} ${lastName}`,
+                    volunteer_phone: formatPhoneNumber(phone),
+                    event_name: event.eventName || 'Event',
+                    event_date: formattedDate,
+                    event_type: event.eventType || ''
+                };
+                
+                await emailjs.send(
+                    'service_ogleezd',
+                    'template_rx7jszb',
+                    templateParams,
+                    'QZdN1DbzW4rI_BOAP'
+                );
+                
+                console.log('✅ Admin notification sent');
+            } catch (error) {
+                console.error('❌ Error sending email:', error);
+                // Don't block signup if email fails
+            }
+        }
+
+        // Show success message
+        function showSuccessMessage(event, firstName, lastName) {
+            const dateObj = new Date(event.date + 'T00:00:00');
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            const formattedDate = dateObj.toLocaleDateString('en-US', options);
+            
+            const message = document.getElementById('success-message-text');
+            message.innerHTML = `
+                <strong>${firstName} ${lastName}</strong>, you have successfully signed up for:<br><br>
+                <strong>${event.eventName || 'Event'}</strong><br>
+                ${formattedDate}
+            `;
+            
+            document.getElementById('success-modal').classList.remove('hidden');
+        }
+
+        // Close success modal
+        window.closeSuccessModal = function() {
+            document.getElementById('success-modal').classList.add('hidden');
+        };
+
+        // Show error
+        function showError() {
+            document.getElementById('loading-view').classList.add('hidden');
+            document.getElementById('error-view').classList.remove('hidden');
+        }
+
+        // Initialize
+        console.log('🔥 Initializing volunteer signup...');
+        loadDataFromFirebase();
+        setupRealtimeSync();
+    </script>
+
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script>
+        (function() {
+            emailjs.init('QZdN1DbzW4rI_BOAP');
+        })();
+    </script>
+</body>
+</html>
