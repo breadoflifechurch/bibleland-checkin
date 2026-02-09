@@ -1141,14 +1141,70 @@
         }
 
         .btn-delete {
-            background: #ffebee;
-            color: #d32f2f;
+            background: #ef4444;
+            color: white;
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            min-width: 70px;
+            height: auto;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            white-space: nowrap;
         }
 
         .btn-delete:hover {
-            background: #d32f2f;
+            background: #dc2626;
             color: white;
-            transform: scale(1.1);
+            transform: scale(1.05);
+        }
+        
+        .btn-delete .icon {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        
+        .btn-delete .text {
+            font-size: 0.65rem;
+            line-height: 1.1;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .btn-delete {
+                padding: 6px 8px;
+                min-width: 60px;
+                font-size: 0.65rem;
+                gap: 1px;
+            }
+            
+            .btn-delete .icon {
+                font-size: 1rem;
+            }
+            
+            .btn-delete .text {
+                font-size: 0.55rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .btn-delete {
+                padding: 5px 6px;
+                min-width: 55px;
+                font-size: 0.6rem;
+            }
+            
+            .btn-delete .icon {
+                font-size: 0.9rem;
+            }
+            
+            .btn-delete .text {
+                font-size: 0.5rem;
+            }
         }
 
         .stats-grid {
@@ -2849,24 +2905,24 @@
                 <div style="margin: 15px 0;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Age (1-6):</label>
                     <select id="add-child-age"
-                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
-                        <option value="">-- Select --</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
+                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#bbb;" required onchange="this.style.color='#000'">
+                        <option value="" disabled selected>Select</option>
+                        <option value="1" style="color:#000;">1</option>
+                        <option value="2" style="color:#000;">2</option>
+                        <option value="3" style="color:#000;">3</option>
+                        <option value="4" style="color:#000;">4</option>
+                        <option value="5" style="color:#000;">5</option>
+                        <option value="6" style="color:#000;">6</option>
                     </select>
                 </div>
                 
                 <div style="margin: 15px 0;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Allergies:</label>
-                    <select id="add-child-allergies" onchange="toggleAddChildOtherAllergy()"
-                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
-                        <option value="">-- Select --</option>
-                        <option value="None">None</option>
-                        <option value="Other">Other (specify)</option>
+                    <select id="add-child-allergies" onchange="toggleAddChildOtherAllergy(); this.style.color='#000'"
+                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#bbb;" required>
+                        <option value="" disabled selected>Select</option>
+                        <option value="None" style="color:#000;">None</option>
+                        <option value="Other" style="color:#000;">Other</option>
                     </select>
                     <input type="text" id="add-child-allergies-other" placeholder="Specify allergy" class="hidden"
                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; margin-top: 10px;">
@@ -3194,23 +3250,25 @@
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Age:</strong>
-                      <select class="child-age" style="width: 70px;" required>
-                          <option value="" disabled ${!child.age ? 'selected' : ''} style="color:#bbb;">Age?</option>
-                          ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''}>${age}</option>`).join('')}
+                      <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                          <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
+                          ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                       </select>
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Allergies:</strong>
-                      <select class="child-allergies" style="width: 140px;" required>
-                          <option value="" disabled ${allergiesValue === '' ? 'selected' : ''} style="color:#bbb;">Allergies?</option>
-                          <option value="None" ${allergiesValue === 'None' ? 'selected' : ''}>None</option>
-                          <option value="Other" ${isOther ? 'selected' : ''}>Other</option>
+                      <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                          <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
+                          <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
+                          <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
                       </select>
                   </label>
                   <input type="text" class="child-allergies-other" style="width: 140px; display:${isOther ? 'inline' : 'none'};" value="${otherText}" placeholder="Specify allergy" />
               </div>
-              <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child" style="font-size: 0.85rem; padding: 6px 10px; white-space: nowrap; flex-shrink: 0;">
-                  🗑️ Remove Child
+              
+              <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child">
+                  <span class="icon">🗑️</span>
+                  <span class="text">Remove<br>Child</span>
               </button>
           </div>
         `;
@@ -3240,23 +3298,25 @@
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Age:</strong>
-                      <select class="child-age" style="width: 70px;" required>
-                          <option value="" disabled ${!child.age ? 'selected' : ''} style="color:#bbb;">Age?</option>
-                          ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''}>${age}</option>`).join('')}
+                      <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                          <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
+                          ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                       </select>
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Allergies:</strong>
-                      <select class="child-allergies" style="width: 140px;" required>
-                          <option value="" disabled ${allergiesValue === '' ? 'selected' : ''} style="color:#bbb;">Allergies?</option>
-                          <option value="None" ${allergiesValue === 'None' ? 'selected' : ''}>None</option>
-                          <option value="Other" ${isOther ? 'selected' : ''}>Other</option>
+                      <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                          <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
+                          <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
+                          <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
                       </select>
                   </label>
                   <input type="text" class="child-allergies-other" style="width: 140px; display:${isOther ? 'inline' : 'none'};" value="${otherText}" placeholder="Specify allergy" />
               </div>
-              <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child" style="font-size: 0.85rem; padding: 6px 10px; white-space: nowrap; flex-shrink: 0;">
-                  🗑️ Remove Child
+              
+              <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child">
+                  <span class="icon">🗑️</span>
+                  <span class="text">Remove<br>Child</span>
               </button>
           </div>
         `;
@@ -3490,23 +3550,25 @@
                                 </label>
                                 <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                     <strong>Age:</strong>
-                                    <select class="child-age" style="width: 70px;" required>
-                                        <option value="" disabled ${!child.age ? 'selected' : ''} style="color:#bbb;">Age?</option>
-                                        ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''}>${age}</option>`).join('')}
+                                    <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                                        <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
+                                        ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                     </select>
                                 </label>
                                 <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                     <strong>Allergies:</strong>
-                                    <select class="child-allergies" style="width: 140px;" required>
-                                        <option value="" disabled ${allergiesValue === '' ? 'selected' : ''} style="color:#bbb;">Allergies?</option>
-                                        <option value="None" ${allergiesValue === 'None' ? 'selected' : ''}>None</option>
-                                        <option value="Other" ${isOther ? 'selected' : ''}>Other</option>
+                                    <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                                        <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
+                                        <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
+                                        <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
                                     </select>
                                 </label>
                                 <input type="text" class="child-allergies-other" style="width: 140px; display:${isOther ? 'inline' : 'none'};" value="${otherText}" placeholder="Specify allergy" />
                             </div>
-                            <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child" style="font-size: 0.85rem; padding: 6px 10px; white-space: nowrap; flex-shrink: 0;">
-                                🗑️ Remove Child
+                            
+              <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child">
+                                <span class="icon">🗑️</span>
+                  <span class="text">Remove<br>Child</span>
                             </button>
                         </div>
                     `;
@@ -3535,23 +3597,25 @@
                         </label>
                         <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                             <strong>Age:</strong>
-                            <select class="child-age" style="width: 70px;" required>
-                                <option value="" disabled selected style="color:#bbb;">Age?</option>
-                                ${[1,2,3,4,5,6].map(age => `<option value="${age}">${age}</option>`).join('')}
+                            <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                                <option value="" disabled selected>Select</option>
+                                ${[1,2,3,4,5,6].map(age => `<option value="${age}" style="color:#000;">${age}</option>`).join('')}
                             </select>
                         </label>
                         <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                             <strong>Allergies:</strong>
-                            <select class="child-allergies" style="width: 140px;" required>
-                                <option value="" disabled selected style="color:#bbb;">Allergies?</option>
-                                <option value="None">None</option>
-                                <option value="Other">Other</option>
+                            <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                                <option value="" disabled selected>Select</option>
+                                <option value="None" style="color:#000;">None</option>
+                                <option value="Other" style="color:#000;">Other</option>
                             </select>
                         </label>
                         <input type="text" class="child-allergies-other" style="width: 140px; display:none;" placeholder="Specify allergy" />
                     </div>
-                    <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child" style="font-size: 0.85rem; padding: 6px 10px; white-space: nowrap; flex-shrink: 0;">
-                        🗑️ Remove Child
+                    
+              <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child">
+                        <span class="icon">🗑️</span>
+                  <span class="text">Remove<br>Child</span>
                     </button>
                 </div>
             `;
@@ -3614,23 +3678,25 @@
                                     </label>
                                     <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                         <strong>Age:</strong>
-                                        <select class="child-age" style="width: 70px;" required>
-                                            <option value="" disabled ${!child.age ? 'selected' : ''} style="color:#bbb;">Age?</option>
-                                            ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''}>${age}</option>`).join('')}
+                                        <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                                            <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
+                                            ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                         </select>
                                     </label>
                                     <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                         <strong>Allergies:</strong>
-                                        <select class="child-allergies" style="width: 140px;" required>
-                                            <option value="" disabled ${allergiesValue === '' ? 'selected' : ''} style="color:#bbb;">Allergies?</option>
-                                            <option value="None" ${allergiesValue === 'None' ? 'selected' : ''}>None</option>
-                                            <option value="Other" ${isOther ? 'selected' : ''}>Other</option>
+                                        <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                                            <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
+                                            <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
+                                            <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
                                         </select>
                                     </label>
                                     <input type="text" class="child-allergies-other" style="width: 140px; display:${isOther ? 'inline' : 'none'};" value="${otherText}" placeholder="Specify allergy" />
                                 </div>
-                                <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child" style="font-size: 0.85rem; padding: 6px 10px; white-space: nowrap; flex-shrink: 0;">
-                                    🗑️ Remove Child
+                                
+              <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child">
+                                    <span class="icon">🗑️</span>
+                  <span class="text">Remove<br>Child</span>
                                 </button>
                             </div>
                         `;
@@ -5875,23 +5941,25 @@
                                             </label>
                                             <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                                 <strong>Age:</strong>
-                                                <select class="child-age" style="width: 70px;" required>
-                                                    <option value="" disabled ${!child.age ? 'selected' : ''} style="color:#bbb;">Age?</option>
-                                                    ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''}>${age}</option>`).join('')}
+                                                <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                                                    <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
+                                                    ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                                 </select>
                                             </label>
                                             <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                                 <strong>Allergies:</strong>
-                                                <select class="child-allergies" style="width: 140px;" required>
-                                                    <option value="" disabled ${allergiesValue === '' ? 'selected' : ''} style="color:#bbb;">Allergies?</option>
-                                                    <option value="None" ${allergiesValue === 'None' ? 'selected' : ''}>None</option>
-                                                    <option value="Other" ${isOther ? 'selected' : ''}>Other</option>
+                                                <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                                                    <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
+                                                    <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
+                                                    <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
                                                 </select>
                                             </label>
                                             <input type="text" class="child-allergies-other" style="width: 140px; display:${isOther ? 'inline' : 'none'};" value="${otherText}" placeholder="Specify allergy" />
                                         </div>
-                                        <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child" style="font-size: 0.85rem; padding: 6px 10px; white-space: nowrap; flex-shrink: 0;">
-                                            🗑️ Remove Child
+                                        
+              <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child">
+                                            <span class="icon">🗑️</span>
+                  <span class="text">Remove<br>Child</span>
                                         </button>
                                     </div>
                                 `;
