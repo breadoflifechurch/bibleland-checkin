@@ -117,81 +117,45 @@
             text-align: center;
         }
 
-        .error-message strong {
-            display: block;
-            font-size: 1.2em;
-            margin-bottom: 10px;
-        }
-
-        /* Schedule Table Styles */
-        #schedule-table-container {
-            overflow-x: auto;
-            margin: 20px 0;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        #schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 600px;
-            background: white;
-        }
-
-        #schedule-table th {
-            background: var(--primary);
-            color: white;
-            padding: 14px 10px;
-            text-align: left;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        #schedule-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e8f2ff;
-        }
-
-        #schedule-table tbody tr:hover {
+        /* Schedule blocks */
+        .schedule-date-block {
             background: #f8fbff;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
         }
 
-        .event-name {
-            font-weight: 600;
+        .schedule-date-block h4 {
             color: var(--primary);
-            margin-bottom: 4px;
+            margin: 0 0 15px 0;
+            font-size: 1.2em;
         }
 
-        .event-details {
-            font-size: 0.9em;
-            color: #666;
+        .schedule-date-block p {
+            margin: 8px 0;
+            line-height: 1.6;
         }
 
-        .signup-cell {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .volunteer-name {
+        .volunteer-badge {
+            display: inline-block;
             background: var(--success);
             color: white;
             padding: 6px 12px;
             border-radius: 8px;
+            margin: 4px 4px 4px 0;
             font-size: 0.9em;
-            display: inline-block;
         }
 
         .signup-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 1em;
+            margin-top: 10px;
             transition: all 0.2s;
         }
 
@@ -307,6 +271,11 @@
             color: var(--success);
             margin-bottom: 16px;
         }
+
+        .need-more {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -325,33 +294,15 @@
         <div id="error-view" class="card hidden">
             <div class="error-message">
                 <strong>Error Details:</strong>
-                <p id="error-details">
-                    Code: unavailable<br><br>
-                    Message: Failed to get document because the client is offline.<br><br>
-                    Please contact the administrator.
-                </p>
+                <p id="error-details"></p>
             </div>
         </div>
 
         <!-- Schedule View -->
         <div id="schedule-view" class="hidden">
             <div class="card">
-                <h2 style="margin-top: 0; color: var(--primary);">📋 Upcoming Events</h2>
-                <div id="schedule-table-container">
-                    <table id="schedule-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Event</th>
-                                <th>Volunteers Needed</th>
-                                <th>Sign Up</th>
-                            </tr>
-                        </thead>
-                        <tbody id="schedule-tbody">
-                            <!-- Rows will be inserted here -->
-                        </tbody>
-                    </table>
-                </div>
+                <h2 style="margin-top: 0; color: var(--primary);">📋 Upcoming Schedule</h2>
+                <div id="schedule-container"></div>
             </div>
         </div>
     </div>
@@ -417,8 +368,31 @@
         // Global variables
         window.volunteers = {};
         window.scheduledSupervisors = {};
-        let currentSignupEvent = null;
+        window.allVolunteers = [];
+        let currentSignupDate = null;
         let unsubscribe = null;
+
+        // Get upcoming Sundays (same logic as index.html)
+        function getUpcomingSundays(count) {
+            const sundays = [];
+            const today = new Date();
+            let current = new Date(today);
+            
+            // Find next Sunday
+            const dayOfWeek = current.getDay();
+            const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek;
+            current.setDate(current.getDate() + daysUntilSunday);
+            
+            for (let i = 0; i < count; i++) {
+                const month = String(current.getMonth() + 1).padStart(2, '0');
+                const day = String(current.getDate()).padStart(2, '0');
+                const year = current.getFullYear();
+                sundays.push(`${month}/${day}/${year}`);
+                current.setDate(current.getDate() + 7);
+            }
+            
+            return sundays;
+        }
 
         // Setup real-time sync
         function setupRealtimeSync() {
@@ -429,7 +403,8 @@
                         const data = docSnap.data();
                         window.volunteers = data.volunteers || {};
                         window.scheduledSupervisors = data.scheduledSupervisors || {};
-                        renderScheduleTable();
+                        window.allVolunteers = data.volunteers?.all || [];
+                        renderSchedule();
                     }
                 },
                 (error) => {
@@ -450,17 +425,18 @@
                     
                     window.volunteers = data.volunteers || {};
                     window.scheduledSupervisors = data.scheduledSupervisors || {};
+                    window.allVolunteers = data.volunteers?.all || [];
                     
-                    console.log('📊 Volunteers:', Object.keys(window.volunteers).length);
-                    console.log('📅 Events:', Object.keys(window.scheduledSupervisors).length);
+                    console.log('📊 Volunteers:', window.volunteers);
+                    console.log('📅 Supervisors:', window.scheduledSupervisors);
                     
-                    renderScheduleTable();
+                    renderSchedule();
                     
                     document.getElementById('loading-view').classList.add('hidden');
                     document.getElementById('schedule-view').classList.remove('hidden');
                 } else {
                     console.error('❌ Document does not exist');
-                    showError();
+                    showError('Document does not exist in Firebase');
                 }
             } catch (error) {
                 console.error('❌ Error loading data:', error);
@@ -473,107 +449,60 @@
             }
         }
 
-        // Render schedule table
-        function renderScheduleTable() {
-            const tbody = document.getElementById('schedule-tbody');
-            tbody.innerHTML = '';
+        // Render schedule
+        function renderSchedule() {
+            const container = document.getElementById('schedule-container');
+            const sundays = getUpcomingSundays(13); // 3 months of Sundays
             
-            // Get all events
-            const events = Object.entries(window.scheduledSupervisors).map(([eventId, event]) => ({
-                eventId,
-                ...event
-            }));
+            let html = '';
             
-            // Filter upcoming events only
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            const upcomingEvents = events.filter(event => {
-                if (!event.date) return false;
-                const eventDate = new Date(event.date + 'T00:00:00');
-                return eventDate >= today;
-            });
-            
-            // Sort by date
-            upcomingEvents.sort((a, b) => {
-                const dateA = new Date(a.date + 'T00:00:00');
-                const dateB = new Date(b.date + 'T00:00:00');
-                return dateA - dateB;
-            });
-            
-            if (upcomingEvents.length === 0) {
-                const row = tbody.insertRow();
-                const cell = row.insertCell();
-                cell.colSpan = 4;
-                cell.style.textAlign = 'center';
-                cell.style.padding = '40px';
-                cell.style.color = '#888';
-                cell.textContent = 'No upcoming events available for signup';
-                return;
-            }
-            
-            // Render each event
-            upcomingEvents.forEach(event => {
-                const row = tbody.insertRow();
+            sundays.forEach(date => {
+                const slots = window.volunteers[date] || [];
+                const supervisor = window.scheduledSupervisors[date] || null;
                 
-                // Date
-                const dateCell = document.createElement('td');
-                event.dateObj = new Date(event.date + 'T00:00:00');
-                const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-                dateCell.textContent = event.dateObj.toLocaleDateString('en-US', options);
+                // Format date nicely
+                const [month, day, year] = date.split('/');
+                const dateObj = new Date(year, month - 1, day);
+                const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+                const formattedDate = dateObj.toLocaleDateString('en-US', options);
                 
-                // Event info
-                const eventCell = document.createElement('td');
-                eventCell.innerHTML = `
-                    <div class="event-name">${event.eventName || 'Event'}</div>
-                    <div class="event-details">${event.eventType || ''}</div>
-                `;
-                
-                // Volunteers needed
-                const neededCell = document.createElement('td');
-                neededCell.textContent = event.volunteersNeeded || 0;
-                
-                // Signed up volunteers
-                const signupCell = document.createElement('td');
-                const signupDiv = document.createElement('div');
-                signupDiv.className = 'signup-cell';
-                
-                const signedUp = event.signedUpVolunteers || [];
-                signedUp.forEach(phone => {
-                    const volunteer = window.volunteers[phone];
-                    if (volunteer) {
-                        const badge = document.createElement('span');
-                        badge.className = 'volunteer-name';
-                        badge.textContent = `${volunteer.firstName} ${volunteer.lastName}`;
-                        signupDiv.appendChild(badge);
-                    }
-                });
-                
-                // Add signup button if spots available
-                const spotsRemaining = (event.volunteersNeeded || 0) - signedUp.length;
-                if (spotsRemaining > 0) {
-                    const btn = document.createElement('button');
-                    btn.className = 'signup-btn';
-                    btn.textContent = `Sign Up (${spotsRemaining} spot${spotsRemaining !== 1 ? 's' : ''} left)`;
-                    btn.onclick = () => openSignupModal(event);
-                    signupDiv.appendChild(btn);
+                let volunteersHtml = '';
+                if (slots.length === 0) {
+                    volunteersHtml = '<p style="color: #999;">No volunteers scheduled yet</p>';
                 } else {
-                    const fullText = document.createElement('span');
-                    fullText.style.color = '#888';
-                    fullText.style.fontStyle = 'italic';
-                    fullText.textContent = 'Full';
-                    signupDiv.appendChild(fullText);
+                    volunteersHtml = '<p><strong>Volunteers:</strong></p>';
+                    slots.forEach((vol, idx) => {
+                        volunteersHtml += `<span class="volunteer-badge">${idx + 1}. ${vol.name}</span>`;
+                    });
+                    if (slots.length < 2) {
+                        volunteersHtml += `<p class="need-more">Still need ${2 - slots.length} more volunteer(s)</p>`;
+                    }
                 }
                 
-                signupCell.appendChild(signupDiv);
+                let supervisorHtml = '';
+                if (supervisor) {
+                    supervisorHtml = `<p><strong>Supervisor:</strong> ${supervisor.firstName} ${supervisor.lastName}</p>`;
+                } else {
+                    supervisorHtml = '<p style="color: #999;"><strong>Supervisor:</strong> Not assigned yet</p>';
+                }
                 
-                row.appendChild(dateCell);
-                row.appendChild(eventCell);
-                row.appendChild(neededCell);
-                row.appendChild(signupCell);
+                // Add sign-up button if not full
+                let signUpButton = '';
+                if (slots.length < 2) {
+                    signUpButton = `<button class="signup-btn" onclick="openSignupModal('${date}', '${formattedDate}')">Sign Up for This Date</button>`;
+                }
                 
-                tbody.appendChild(row);
+                html += `
+                    <div class="schedule-date-block">
+                        <h4>${formattedDate}</h4>
+                        ${volunteersHtml}
+                        ${supervisorHtml}
+                        ${signUpButton}
+                    </div>
+                `;
             });
+            
+            container.innerHTML = html;
         }
 
         // Phone formatting
@@ -585,13 +514,11 @@
         }
 
         // Open signup modal
-        window.openSignupModal = function(event) {
-            currentSignupEvent = event;
+        window.openSignupModal = function(date, formattedDate) {
+            currentSignupDate = date;
             
             const eventInfo = document.getElementById('modal-event-info');
-            const dateObj = new Date(event.date + 'T00:00:00');
-            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
-            eventInfo.textContent = `${event.eventName || 'Event'} - ${dateObj.toLocaleDateString('en-US', options)}`;
+            eventInfo.textContent = `Sunday Service - ${formattedDate}`;
             
             // Clear form
             document.getElementById('volunteer-phone').value = '';
@@ -604,7 +531,7 @@
         // Close signup modal
         window.closeSignupModal = function() {
             document.getElementById('signup-modal').classList.add('hidden');
-            currentSignupEvent = null;
+            currentSignupDate = null;
         };
 
         // Phone input auto-format and autofill
@@ -615,10 +542,11 @@
             // Autofill if volunteer exists
             const cleaned = formatted.replace(/\D/g, '');
             if (cleaned.length === 10) {
-                const volunteer = window.volunteers[cleaned];
-                if (volunteer) {
-                    document.getElementById('volunteer-fname').value = volunteer.firstName || '';
-                    document.getElementById('volunteer-lname').value = volunteer.lastName || '';
+                // Check in allVolunteers list
+                const existing = window.allVolunteers.find(v => v.phone === cleaned);
+                if (existing) {
+                    document.getElementById('volunteer-fname').value = existing.name.split(' ')[0] || '';
+                    document.getElementById('volunteer-lname').value = existing.name.split(' ').slice(1).join(' ') || '';
                 }
             }
         });
@@ -639,9 +567,9 @@
                 return;
             }
             
-            if (!currentSignupEvent) return;
+            if (!currentSignupDate) return;
             
-            const eventId = currentSignupEvent.eventId;
+            const fullName = `${firstName} ${lastName}`;
             
             try {
                 // Use Firestore transaction to prevent race conditions
@@ -654,51 +582,47 @@
                     
                     const data = docSnap.data();
                     const volunteers = data.volunteers || {};
-                    const scheduledSupervisors = data.scheduledSupervisors || {};
+                    const allVolunteers = volunteers.all || [];
                     
-                    // Check if event exists
-                    if (!scheduledSupervisors[eventId]) {
-                        throw new Error('Event not found!');
-                    }
-                    
-                    // Get current signups
-                    const signedUp = scheduledSupervisors[eventId].signedUpVolunteers || [];
+                    // Get current slots for this date
+                    const slots = volunteers[currentSignupDate] || [];
                     
                     // Check if already signed up
-                    if (signedUp.includes(phone)) {
-                        throw new Error('You are already signed up for this event!');
+                    if (slots.some(v => v.phone === phone)) {
+                        throw new Error('You are already signed up for this date!');
                     }
                     
                     // Check if full
-                    const volunteersNeeded = scheduledSupervisors[eventId].volunteersNeeded || 0;
-                    if (signedUp.length >= volunteersNeeded) {
-                        throw new Error('Sorry, this event is now full!');
+                    if (slots.length >= 2) {
+                        throw new Error('Sorry, this date is now full!');
                     }
                     
-                    // Add volunteer to database
-                    volunteers[phone] = {
-                        firstName: firstName,
-                        lastName: lastName,
+                    // Add to this date's volunteers
+                    volunteers[currentSignupDate] = [...slots, {
+                        name: fullName,
                         phone: phone
-                    };
+                    }];
                     
-                    // Add to signups
-                    scheduledSupervisors[eventId].signedUpVolunteers = [...signedUp, phone];
+                    // Add to master volunteer list if not exists
+                    if (!allVolunteers.some(v => v.phone === phone)) {
+                        allVolunteers.push({
+                            name: fullName,
+                            phone: phone
+                        });
+                        volunteers.all = allVolunteers;
+                    }
                     
                     // Update Firestore
-                    transaction.update(docRef, {
-                        volunteers: volunteers,
-                        scheduledSupervisors: scheduledSupervisors
-                    });
+                    transaction.update(docRef, { volunteers });
                 });
                 
                 console.log('✅ Signup successful!');
                 
                 // Send email notification
-                await sendAdminNotification(currentSignupEvent, firstName, lastName, phone);
+                await sendAdminNotification(currentSignupDate, firstName, lastName, phone);
                 
                 // Show success
-                showSuccessMessage(currentSignupEvent, firstName, lastName);
+                showSuccessMessage(currentSignupDate, firstName, lastName);
                 closeSignupModal();
                 
             } catch (error) {
@@ -708,9 +632,10 @@
         };
 
         // Send admin notification via EmailJS
-        async function sendAdminNotification(event, firstName, lastName, phone) {
+        async function sendAdminNotification(date, firstName, lastName, phone) {
             try {
-                const dateObj = new Date(event.date + 'T00:00:00');
+                const [month, day, year] = date.split('/');
+                const dateObj = new Date(year, month - 1, day);
                 const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
                 const formattedDate = dateObj.toLocaleDateString('en-US', options);
                 
@@ -718,9 +643,9 @@
                     to_email: 'firealexusa@gmail.com',
                     volunteer_name: `${firstName} ${lastName}`,
                     volunteer_phone: formatPhoneNumber(phone),
-                    event_name: event.eventName || 'Event',
+                    event_name: 'Sunday Service',
                     event_date: formattedDate,
-                    event_type: event.eventType || ''
+                    event_type: 'Volunteer'
                 };
                 
                 await emailjs.send(
@@ -738,15 +663,16 @@
         }
 
         // Show success message
-        function showSuccessMessage(event, firstName, lastName) {
-            const dateObj = new Date(event.date + 'T00:00:00');
+        function showSuccessMessage(date, firstName, lastName) {
+            const [month, day, year] = date.split('/');
+            const dateObj = new Date(year, month - 1, day);
             const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
             const formattedDate = dateObj.toLocaleDateString('en-US', options);
             
             const message = document.getElementById('success-message-text');
             message.innerHTML = `
                 <strong>${firstName} ${lastName}</strong>, you have successfully signed up for:<br><br>
-                <strong>${event.eventName || 'Event'}</strong><br>
+                <strong>Sunday Service</strong><br>
                 ${formattedDate}
             `;
             
@@ -759,7 +685,10 @@
         };
 
         // Show error
-        function showError() {
+        function showError(msg) {
+            if (msg) {
+                document.getElementById('error-details').textContent = msg;
+            }
             document.getElementById('loading-view').classList.add('hidden');
             document.getElementById('error-view').classList.remove('hidden');
         }
