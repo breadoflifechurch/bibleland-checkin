@@ -212,7 +212,7 @@
         input[type="number"],
         input[type="email"],
         select {
-            font-size: 1.3rem;
+            font-size: 16px; /* iOS requires 16px minimum to prevent auto-zoom and ensure keyboard appears */
             padding: 14px 18px;
             border: 2px solid #d1e3ff;
             border-radius: 12px;
@@ -220,12 +220,16 @@
             max-width: 340px;
             margin: 10px 0;
             box-sizing: border-box;
-            /* Ensure inputs are interactive on iOS/iPad */
+            /* Ensure inputs are interactive on iOS/iPad PWA */
             -webkit-appearance: none;
             -webkit-tap-highlight-color: rgba(74, 144, 226, 0.2);
             pointer-events: auto;
+            -webkit-user-select: text;
+            user-select: text;
+            touch-action: manipulation;
         }
         
+        /* Ensure inputs are large enough on all devices for iOS PWA */
         @media (max-width: 768px) {
             input[type="tel"],
             input[type="text"],
@@ -233,7 +237,7 @@
             input[type="number"],
             input[type="email"],
             select {
-                font-size: 1rem;
+                font-size: 16px; /* Must be 16px or larger on iOS to trigger keyboard properly */
                 padding: 12px 14px;
                 max-width: 100%;
             }
@@ -2552,14 +2556,14 @@
             
             <div class="login-form">
                 <label>Email</label>
-                <input type="email" id="auth-email" placeholder="your@email.com" autocomplete="email">
+                <input type="email" id="auth-email" placeholder="your@email.com" autocomplete="email" inputmode="email">
                 
                 <label>Password</label>
                 <input type="password" id="auth-password" placeholder="Enter password (min 6 characters)" autocomplete="current-password">
                 
                 <div id="church-code-field" class="hidden">
                     <label>Church Code (required for signup)</label>
-                    <input type="text" id="church-code" placeholder="Enter church code">
+                    <input type="text" id="church-code" placeholder="Enter church code" inputmode="text">
                 </div>
                 
                 <button class="btn-login" id="btn-login" onclick="handleLogin()">Sign In</button>
@@ -6793,6 +6797,25 @@
                     e.preventDefault();
                     this.click();
                 });
+            });
+            
+            // Fix for iOS PWA keyboard not appearing
+            // Add explicit focus handlers for input fields
+            const inputFields = document.querySelectorAll('input[type="email"], input[type="password"], input[type="text"], input[type="tel"], input[type="number"]');
+            inputFields.forEach(input => {
+                // Ensure inputs are focusable in PWA mode
+                input.addEventListener('touchstart', function(e) {
+                    // Don't prevent default - let iOS handle it
+                    this.focus();
+                }, { passive: true });
+                
+                // Add click handler as backup
+                input.addEventListener('click', function() {
+                    this.focus();
+                });
+                
+                // Ensure readonly is not set
+                input.removeAttribute('readonly');
             });
         });
     </script>

@@ -704,17 +704,36 @@
                     return;
                 }
                 
-                const [month, day, year] = date.split('/');
+                // Safely handle date parsing
+                if (!date || typeof date !== 'string') {
+                    console.error('❌ Invalid date format:', date);
+                    return;
+                }
+                
+                const dateParts = date.split('/');
+                if (dateParts.length !== 3) {
+                    console.error('❌ Date split failed:', date);
+                    return;
+                }
+                
+                const [month, day, year] = dateParts;
                 const dateObj = new Date(year, month - 1, day);
                 const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
                 const formattedDate = dateObj.toLocaleDateString('en-US', options);
                 
                 const serviceName = window.currentService === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)';
                 
+                // Safely format phone number
+                const phoneStr = String(phone || '');
+                const cleanedPhone = phoneStr.replace(/\D/g, '');
+                const formattedPhone = cleanedPhone.length === 10 
+                    ? `(${cleanedPhone.slice(0, 3)}) ${cleanedPhone.slice(3, 6)}-${cleanedPhone.slice(6, 10)}`
+                    : phoneStr;
+                
                 const templateParams = {
                     to_email: 'firealexusa@gmail.com',
                     volunteer_name: `${firstName} ${lastName}`,
-                    volunteer_phone: formatPhoneNumber(phone),
+                    volunteer_phone: formattedPhone,
                     event_name: `Sunday Service - ${serviceName}`,
                     event_date: formattedDate,
                     event_type: 'Volunteer'
