@@ -17,6 +17,13 @@
             box-sizing: border-box;
         }
         
+        /* Allow inputs to be focusable, especially in PWA mode */
+        input, textarea, select {
+            touch-action: auto;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
         /* Prevent text overflow */
         body, div, p, span, td, th {
             word-wrap: break-word;
@@ -3078,6 +3085,9 @@
             numpadValue = inputElement.value.replace(/\D/g, ''); // Get just digits
             updateNumpadDisplay();
             document.getElementById('numpad-overlay').classList.add('show');
+            
+            // Reinitialize touch handlers for iPad
+            setTimeout(setupNumpadButtons, 50);
         }
 
         function hideNumpad() {
@@ -3140,6 +3150,32 @@
                 }
             }
         }
+        
+        // Add touch event listeners to numpad buttons for better iPad support
+        function setupNumpadButtons() {
+            document.querySelectorAll('.numpad-btn').forEach(btn => {
+                // Prevent the button from visually disappearing on iPad
+                btn.addEventListener('touchstart', function(e) {
+                    e.preventDefault(); // Prevent default to avoid focus issues
+                    this.style.background = 'linear-gradient(145deg, #e3f2fd, #d1e7ff)';
+                    this.style.boxShadow = '3px 3px 6px rgba(163, 208, 255, 0.3) inset, -2px -2px 4px rgba(255, 255, 255, 0.5) inset';
+                }, { passive: false });
+                
+                btn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    // Reset style
+                    this.style.background = '';
+                    this.style.boxShadow = '';
+                    // Trigger the click
+                    this.click();
+                }, { passive: false });
+            });
+        }
+        
+        // Call this when numpad is shown
+        setTimeout(() => {
+            setupNumpadButtons();
+        }, 500);
 
         function numpadBackspace() {
             if (numpadValue.length > 0) {
