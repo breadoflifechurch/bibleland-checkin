@@ -698,6 +698,12 @@
         // Send admin notification via EmailJS
         async function sendAdminNotification(date, firstName, lastName, phone) {
             try {
+                // Ensure EmailJS is initialized
+                if (!window.emailjs) {
+                    console.error('❌ EmailJS not loaded');
+                    return;
+                }
+                
                 const [month, day, year] = date.split('/');
                 const dateObj = new Date(year, month - 1, day);
                 const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
@@ -714,16 +720,23 @@
                     event_type: 'Volunteer'
                 };
                 
-                await emailjs.send(
+                console.log('📧 Sending email notification...', templateParams);
+                
+                const response = await emailjs.send(
                     'service_ogleezd',
                     'template_rx7jszb',
                     templateParams,
                     'QZdN1DbzW4rI_BOAP'
                 );
                 
-                console.log('✅ Admin notification sent');
+                console.log('✅ Admin notification sent successfully', response);
             } catch (error) {
                 console.error('❌ Error sending email:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    text: error.text,
+                    status: error.status
+                });
                 // Don't block signup if email fails
             }
         }
@@ -782,7 +795,16 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
         (function() {
+            // Initialize EmailJS with your public key
             emailjs.init('QZdN1DbzW4rI_BOAP');
+            console.log('📧 EmailJS initialized successfully');
+            
+            // Verify EmailJS is ready
+            if (typeof emailjs !== 'undefined') {
+                console.log('✅ EmailJS is ready to send emails');
+            } else {
+                console.error('❌ EmailJS failed to initialize');
+            }
         })();
     </script>
 </body>
