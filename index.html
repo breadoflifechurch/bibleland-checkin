@@ -1612,6 +1612,11 @@
             box-sizing: border-box;
             transition: border-color 0.2s;
             margin: 0;
+            /* Critical for iOS PWA keyboard to appear */
+            -webkit-user-select: text;
+            user-select: text;
+            pointer-events: auto !important;
+            touch-action: auto !important;
         }
 
         .login-form input:focus {
@@ -2068,6 +2073,11 @@
                 font-size: 16px !important; /* Prevents iOS zoom */
                 padding: 12px 14px;
                 -webkit-appearance: none;
+                /* Ensure inputs work in PWA mode */
+                pointer-events: auto !important;
+                touch-action: auto !important;
+                -webkit-user-select: text;
+                user-select: text;
             }
             
             /* Numpad mobile optimized */
@@ -2480,9 +2490,13 @@
             .btn-icon:hover,
             .kid-card:hover,
             button:hover {
-                transform: none !important;
-                box-shadow: none !important;
-                background: inherit !important;
+                transform: none;
+            }
+            
+            /* Keep active state working - don't disable it! */
+            .numpad-btn:active,
+            button:active {
+                opacity: 0.8;
             }
         }
     </style>
