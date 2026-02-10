@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bible Land Check-In ☁️ 🌟</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1392,11 +1393,11 @@
         }
 
         .numpad-btn:active {
-            transform: scale(0.95);
             background: linear-gradient(145deg, #e3f2fd, #d1e7ff);
             box-shadow: 
                 3px 3px 6px rgba(163, 208, 255, 0.3) inset,
                 -2px -2px 4px rgba(255, 255, 255, 0.5) inset;
+            -webkit-tap-highlight-color: transparent;
         }
 
         @media (hover: hover) {
@@ -1436,6 +1437,7 @@
             box-shadow: 
                 3px 3px 6px rgba(211, 47, 47, 0.3) inset,
                 -2px -2px 4px rgba(255, 255, 255, 0.5) inset;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #pin-display {
@@ -3160,12 +3162,24 @@
 
         // Add click listeners to all phone inputs
         function setupPhoneInputs() {
+            // Check if running as PWA (standalone mode)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                               window.navigator.standalone === true;
+            
             document.querySelectorAll('input[type="tel"]').forEach(input => {
                 input.addEventListener('focus', function() {
                     showNumpad(this);
                 });
-                // Prevent keyboard from showing on mobile
-                input.setAttribute('readonly', 'readonly');
+                
+                // In standalone PWA mode, don't set readonly to allow focus
+                // In browser mode, set readonly to prevent native keyboard
+                if (!isStandalone) {
+                    input.setAttribute('readonly', 'readonly');
+                } else {
+                    // In PWA mode: remove readonly but prevent native keyboard with inputmode
+                    input.removeAttribute('readonly');
+                    input.setAttribute('inputmode', 'none');
+                }
             });
         }
 
