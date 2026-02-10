@@ -519,8 +519,8 @@
                 const serviceKey = `${date}_${window.currentService}`;
                 let slots = window.volunteers[serviceKey] || [];
                 
-                // Try supervisor with service key first, then fall back to date only
-                let supervisor = window.scheduledSupervisors[serviceKey] || window.scheduledSupervisors[date] || null;
+                // Get supervisor for this specific service only (no fallback)
+                let supervisor = window.scheduledSupervisors[serviceKey] || null;
                 
                 // Format date nicely
                 const [month, day, year] = date.split('/');

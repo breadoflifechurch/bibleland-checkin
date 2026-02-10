@@ -4704,7 +4704,9 @@
             const sundays = getUpcomingSundays(13);
             let openings = 0;
             sundays.forEach(date => {
-                const slots = volunteers[date] || [];
+                // Use service-specific key
+                const serviceKey = `${date}_${window.currentService}`;
+                const slots = volunteers[serviceKey] || [];
                 openings += (2 - slots.length);
             });
             document.getElementById('stat-upcoming').textContent = openings;
@@ -4714,7 +4716,9 @@
             schedBody.innerHTML = '';
             
             sundays.forEach(date => {
-                const slots = volunteers[date] || [];
+                // Use service-specific key
+                const serviceKey = `${date}_${window.currentService}`;
+                const slots = volunteers[serviceKey] || [];
                 const v1 = slots[0] || {
                     name: '—',
                     phone: '—'
@@ -4723,7 +4727,7 @@
                     name: '—',
                     phone: '—'
                 };
-                const supervisor = scheduledSupervisors[date] || null;
+                const supervisor = scheduledSupervisors[serviceKey] || null;
                 
                 // Create supervisor dropdown
                 let supervisorDropdown = '<select onchange="assignSupervisor(\'' + date + '\', this.value)" style="width: 100%; padding: 6px;">';
@@ -4804,7 +4808,9 @@
         }
 
         function removeVolunteerFromDate(date, index) {
-            let slots = volunteers[date] || [];
+            // Use service-specific key
+            const serviceKey = `${date}_${window.currentService}`;
+            let slots = volunteers[serviceKey] || [];
             if (!slots[index]) return;
             
             const volName = slots[index].name;
@@ -4814,7 +4820,7 @@
                 'Confirm Delete',
                 () => {
                     slots.splice(index, 1);
-                    volunteers[date] = slots;
+                    volunteers[serviceKey] = slots;
                     saveData();
                     updateDisplays();
                 }
@@ -4841,23 +4847,27 @@
                 showCenteredAlert("Please enter full name and valid 10-digit phone number.");
                 return;
             }
-            if (!volunteers[date]) volunteers[date] = [];
+            
+            // Use service-specific key
+            const serviceKey = `${date}_${window.currentService}`;
+            if (!volunteers[serviceKey]) volunteers[serviceKey] = [];
             
             // Check if already scheduled for this date
-            if (volunteers[date].some(v => v.phone === phone)) {
+            if (volunteers[serviceKey].some(v => v.phone === phone)) {
                 showCenteredAlert("This person is already scheduled for this date!");
                 return;
             }
             
-            if (volunteers[date].length >= 2) {
+            if (volunteers[serviceKey].length >= 2) {
                 showCenteredAlert("This date is already full.");
                 return;
             }
             const vol = {
                 name,
-                phone
+                phone,
+                service: window.currentService
             };
-            volunteers[date].push(vol);
+            volunteers[serviceKey].push(vol);
             addToVolunteerAllIfNotExists(vol);
             saveData();
             nameInput.value = '';
@@ -5112,18 +5122,23 @@
                 showCenteredAlert("Volunteer not found.");
                 return;
             }
-            if (!volunteers[date]) volunteers[date] = [];
-            if (volunteers[date].some(v => v.phone === phone)) {
+            
+            // Use service-specific key: "date_service" (e.g., "02/15/2026_russian")
+            const serviceKey = `${date}_${window.currentService}`;
+            
+            if (!volunteers[serviceKey]) volunteers[serviceKey] = [];
+            if (volunteers[serviceKey].some(v => v.phone === phone)) {
                 showCenteredAlert("This volunteer is already assigned to this date.");
                 return;
             }
-            if (volunteers[date].length >= 2) {
+            if (volunteers[serviceKey].length >= 2) {
                 showCenteredAlert("This date is already full (2 volunteers). Delete someone first.");
                 return;
             }
-            volunteers[date].push({
+            volunteers[serviceKey].push({
                 name: vol.name,
-                phone: vol.phone
+                phone: vol.phone,
+                service: window.currentService
             });
             saveData();
             showCenteredAlert(`Assigned ${vol.name} to ${date}!`, 'Success');
@@ -5643,16 +5658,20 @@
         }
 
         function assignSupervisor(date, phone) {
+            // Use service-specific key: "date_service" (e.g., "02/15/2026_russian")
+            const serviceKey = `${date}_${window.currentService}`;
+            
             if (!phone) {
-                // Remove supervisor assignment
-                delete scheduledSupervisors[date];
+                // Remove supervisor assignment for this service
+                delete scheduledSupervisors[serviceKey];
             } else {
                 const supervisor = supervisorDatabase[phone];
                 if (supervisor) {
-                    scheduledSupervisors[date] = {
+                    scheduledSupervisors[serviceKey] = {
                         phone: phone,
                         firstName: supervisor.firstName,
-                        lastName: supervisor.lastName
+                        lastName: supervisor.lastName,
+                        service: window.currentService
                     };
                 }
             }
@@ -5681,8 +5700,10 @@
             let scheduleHTML = '<h3 style="margin-top: 0; color: var(--primary);">Upcoming Schedule</h3>';
             
             sundays.forEach(date => {
-                const slots = volunteers[date] || [];
-                const supervisor = scheduledSupervisors[date] || null;
+                // Use service-specific key
+                const serviceKey = `${date}_${window.currentService}`;
+                const slots = volunteers[serviceKey] || [];
+                const supervisor = scheduledSupervisors[serviceKey] || null;
                 
                 let volunteersText = '';
                 if (slots.length === 0) {
@@ -5813,19 +5834,22 @@
                 return;
             }
             
+            // Use service-specific key
+            const serviceKey = `${date}_${window.currentService}`;
+            
             // CHECK BEFORE SAVING
-            // Initialize volunteers[date] if it doesn't exist
-            if (!volunteers[date]) volunteers[date] = [];
+            // Initialize volunteers[serviceKey] if it doesn't exist
+            if (!volunteers[serviceKey]) volunteers[serviceKey] = [];
             
             // Check if date is already full
-            if (volunteers[date].length >= 2) {
+            if (volunteers[serviceKey].length >= 2) {
                 document.querySelector('.success-modal').remove();
                 showCenteredAlert("This date is already full.");
                 return;
             }
             
             // Check if this phone is already signed up for this date
-            if (volunteers[date].some(v => v.phone === phone)) {
+            if (volunteers[serviceKey].some(v => v.phone === phone)) {
                 document.querySelector('.success-modal').remove();
                 showCenteredAlert("This phone number is already signed up for this date.");
                 return;
@@ -5837,8 +5861,12 @@
             // DIRECT SIGNUP - NO ADMIN APPROVAL NEEDED
             const fullName = `${first} ${last}`;
             
-            // Add to volunteers list for this date
-            volunteers[date].push({ name: fullName, phone: phone });
+            // Add to volunteers list for this date with service key
+            volunteers[serviceKey].push({ 
+                name: fullName, 
+                phone: phone,
+                service: window.currentService
+            });
             
             // Save to volunteers.all database (volunteer database) - keyed by phone
             if (!volunteers.all) volunteers.all = [];
@@ -5868,15 +5896,6 @@
                     volunteers.all[existingVolIndex].signupDates.push(date);
                 }
             }
-            
-            // Save to scheduledSupervisors (for backwards compatibility if needed)
-            scheduledSupervisors[date] = {
-                firstName: first,
-                lastName: last,
-                name: fullName,
-                phone: phone,
-                signupTime: new Date().toISOString()
-            };
             
             // Persist data
             saveData();
