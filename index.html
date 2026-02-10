@@ -3083,21 +3083,21 @@
         // ─── Custom Numpad ──────────────────────────────────────────────
         let numpadCurrentInput = null;
         let numpadValue = '';
+        let numpadProcessing = false; // Prevent rapid clicks
 
         function showNumpad(inputElement) {
             numpadCurrentInput = inputElement;
             numpadValue = inputElement.value.replace(/\D/g, ''); // Get just digits
+            numpadProcessing = false; // Reset processing flag
             updateNumpadDisplay();
             document.getElementById('numpad-overlay').classList.add('show');
-            
-            // Reinitialize touch handlers for iPad
-            setTimeout(setupNumpadButtons, 50);
         }
 
         function hideNumpad() {
             document.getElementById('numpad-overlay').classList.remove('show');
             numpadCurrentInput = null;
             numpadValue = '';
+            numpadProcessing = false; // Reset processing flag
         }
 
         function updateNumpadDisplay() {
@@ -3134,9 +3134,20 @@
         }
 
         function numpadPress(digit) {
+            // Prevent rapid multiple clicks
+            if (numpadProcessing) {
+                return;
+            }
+            
             if (numpadValue.length < 10) {
+                numpadProcessing = true;
                 numpadValue += digit;
                 updateNumpadDisplay();
+                
+                // Reset processing flag after short delay
+                setTimeout(() => {
+                    numpadProcessing = false;
+                }, 100);
                 
                 // Auto-close and apply when 10 digits entered
                 if (numpadValue.length === 10) {
@@ -3154,37 +3165,17 @@
                 }
             }
         }
-        
-        // Add touch event listeners to numpad buttons for better iPad support
-        function setupNumpadButtons() {
-            document.querySelectorAll('.numpad-btn').forEach(btn => {
-                // Prevent the button from visually disappearing on iPad
-                btn.addEventListener('touchstart', function(e) {
-                    e.preventDefault(); // Prevent default to avoid focus issues
-                    this.style.background = 'linear-gradient(145deg, #e3f2fd, #d1e7ff)';
-                    this.style.boxShadow = '3px 3px 6px rgba(163, 208, 255, 0.3) inset, -2px -2px 4px rgba(255, 255, 255, 0.5) inset';
-                }, { passive: false });
-                
-                btn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    // Reset style
-                    this.style.background = '';
-                    this.style.boxShadow = '';
-                    // Trigger the click
-                    this.click();
-                }, { passive: false });
-            });
-        }
-        
-        // Call this when numpad is shown
-        setTimeout(() => {
-            setupNumpadButtons();
-        }, 500);
 
         function numpadBackspace() {
+            if (numpadProcessing) return;
+            
             if (numpadValue.length > 0) {
+                numpadProcessing = true;
                 numpadValue = numpadValue.slice(0, -1);
                 updateNumpadDisplay();
+                setTimeout(() => {
+                    numpadProcessing = false;
+                }, 100);
             }
         }
 
@@ -3207,9 +3198,19 @@
                                window.navigator.standalone === true;
             
             document.querySelectorAll('input[type="tel"]').forEach(input => {
-                input.addEventListener('focus', function() {
-                    showNumpad(this);
-                });
+                // Only add listeners if not already added
+                if (!input.dataset.numpadSetup) {
+                    input.dataset.numpadSetup = 'true';
+                    
+                    // Use click event instead of focus - works better with readonly
+                    input.addEventListener('click', function() {
+                        showNumpad(this);
+                    });
+                    
+                    input.addEventListener('focus', function() {
+                        showNumpad(this);
+                    });
+                }
                 
                 // In standalone PWA mode, don't set readonly to allow focus
                 // In browser mode, set readonly to prevent native keyboard
