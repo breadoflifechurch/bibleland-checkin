@@ -631,6 +631,8 @@
             
             if (!currentSignupDate) return;
             
+            // Save the date to a local variable BEFORE we close the modal and clear it
+            const signupDate = currentSignupDate;
             const fullName = `${firstName} ${lastName}`;
             
             try {
@@ -647,7 +649,7 @@
                     const allVolunteers = volunteers.all || [];
                     
                     // Use service-specific key only
-                    const serviceKey = `${currentSignupDate}_${window.currentService}`;
+                    const serviceKey = `${signupDate}_${window.currentService}`;
                     let slots = volunteers[serviceKey] || [];
                     
                     // Check if already signed up
@@ -683,11 +685,11 @@
                 console.log('✅ Signup successful!');
                 
                 // Show success immediately (don't wait for email)
-                showSuccessMessage(currentSignupDate, firstName, lastName);
+                showSuccessMessage(signupDate, firstName, lastName);
                 closeSignupModal();
                 
-                // Send email notification in background
-                sendAdminNotification(currentSignupDate, firstName, lastName, phone);
+                // Send email notification in background - use saved signupDate variable
+                sendAdminNotification(signupDate, firstName, lastName, phone);
                 
             } catch (error) {
                 console.error('❌ Signup error:', error);
