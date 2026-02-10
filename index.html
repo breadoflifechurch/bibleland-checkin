@@ -2,7 +2,7 @@
 <!-- saved from url=(0055)file:///C:/Users/Alpine/Desktop/test%20no%20sunday.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Bible Land Check-In ☁️ 🌟</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
@@ -220,6 +220,10 @@
             max-width: 340px;
             margin: 10px 0;
             box-sizing: border-box;
+            /* Ensure inputs are interactive on iOS/iPad */
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: rgba(74, 144, 226, 0.2);
+            pointer-events: auto;
         }
         
         @media (max-width: 768px) {
@@ -1835,11 +1839,11 @@
 
         .numpad-btn:hover {
             background: #3a7bc8;
-            transform: scale(1.05);
         }
 
         .numpad-btn:active {
-            transform: scale(0.95);
+            background: #3a7bc8;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .numpad-btn-zero {
@@ -1928,8 +1932,8 @@
         
         /* Better touch feedback */
         button:active, .kid-card:active, .numpad-btn:active {
-            transform: scale(0.97);
             opacity: 0.9;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* TABLET (iPad & larger tablets) */
