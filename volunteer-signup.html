@@ -515,14 +515,9 @@
             let html = '';
             
             sundays.forEach(date => {
-                // Try service-specific key first (new format): "02/15/2026_russian"
+                // Use service-specific key only: "02/15/2026_russian" or "02/15/2026_english"
                 const serviceKey = `${date}_${window.currentService}`;
                 let slots = window.volunteers[serviceKey] || [];
-                
-                // Fall back to old format (just date) if new format not found
-                if (slots.length === 0 && window.volunteers[date]) {
-                    slots = window.volunteers[date] || [];
-                }
                 
                 // Try supervisor with service key first, then fall back to date only
                 let supervisor = window.scheduledSupervisors[serviceKey] || window.scheduledSupervisors[date] || null;
@@ -651,14 +646,9 @@
                     const volunteers = data.volunteers || {};
                     const allVolunteers = volunteers.all || [];
                     
-                    // Use service-specific key (new format)
+                    // Use service-specific key only
                     const serviceKey = `${currentSignupDate}_${window.currentService}`;
                     let slots = volunteers[serviceKey] || [];
-                    
-                    // Fall back to old format (just date) for backwards compatibility
-                    if (slots.length === 0 && volunteers[currentSignupDate]) {
-                        slots = volunteers[currentSignupDate] || [];
-                    }
                     
                     // Check if already signed up
                     if (slots.some(v => v.phone === phone)) {
