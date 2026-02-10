@@ -689,7 +689,10 @@
                 closeSignupModal();
                 
                 // Send email notification in background - use saved signupDate variable
-                sendAdminNotification(signupDate, firstName, lastName, phone);
+                // Don't await - let it run independently and catch any errors
+                sendAdminNotification(signupDate, firstName, lastName, phone).catch(err => {
+                    console.log('Email send completed (may have failed, but signup was successful)');
+                });
                 
             } catch (error) {
                 console.error('❌ Signup error:', error);
@@ -698,68 +701,85 @@
         };
 
         // Send admin notification via EmailJS
-        async function sendAdminNotification(date, firstName, lastName, phone) {
-            try {
-                // Ensure EmailJS is initialized
-                if (!window.emailjs) {
-                    console.error('❌ EmailJS not loaded');
-                    return;
-                }
-                
-                // Safely handle date parsing
-                if (!date || typeof date !== 'string') {
-                    console.error('❌ Invalid date format:', date);
-                    return;
-                }
-                
-                const dateParts = date.split('/');
-                if (dateParts.length !== 3) {
-                    console.error('❌ Date split failed:', date);
-                    return;
-                }
-                
-                const [month, day, year] = dateParts;
-                const dateObj = new Date(year, month - 1, day);
-                const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
-                const formattedDate = dateObj.toLocaleDateString('en-US', options);
-                
-                const serviceName = window.currentService === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)';
-                
-                // Safely format phone number
-                const phoneStr = String(phone || '');
-                const cleanedPhone = phoneStr.replace(/\D/g, '');
-                const formattedPhone = cleanedPhone.length === 10 
-                    ? `(${cleanedPhone.slice(0, 3)}) ${cleanedPhone.slice(3, 6)}-${cleanedPhone.slice(6, 10)}`
-                    : phoneStr;
-                
-                const templateParams = {
-                    to_email: 'firealexusa@gmail.com',
-                    volunteer_name: `${firstName} ${lastName}`,
-                    volunteer_phone: formattedPhone,
-                    event_name: `Sunday Service - ${serviceName}`,
-                    event_date: formattedDate,
-                    event_type: 'Volunteer'
-                };
-                
-                console.log('📧 Sending email notification...', templateParams);
-                
-                const response = await emailjs.send(
-                    'service_ogleezd',
-                    'template_rx7jszb',
-                    templateParams,
-                    'QZdN1DbzW4rI_BOAP'
-                );
-                
-                console.log('✅ Admin notification sent successfully', response);
-            } catch (error) {
-                console.error('❌ Error sending email:', error);
-                console.error('Error details:', {
-                    message: error.message,
-                    text: error.text,
-                    status: error.status
-                });
-                // Don't block signup if email fails
-            }
+        function sendAdminNotification(date, firstName, lastName, phone) {
+            return new Promise((resolve, reject) => {
+                // Run independently with small delay
+                setTimeout(async () => {
+                    try {
+                        // Ensure EmailJS is initialized
+                        if (!window.emailjs) {
+                            console.error('❌ EmailJS not loaded');
+                            resolve(); // Resolve anyway - don't block signup
+                            return;
+                        }
+                        
+                        // Safely handle date parsing
+                        if (!date || typeof date !== 'string') {
+                            console.error('❌ Invalid date format:', date);
+                            resolve(); // Resolve anyway - don't block signup
+                            return;
+                        }
+                        
+                        const dateParts = date.split('/');
+                        if (dateParts.length !== 3) {
+                            console.error('❌ Date split failed:', date);
+                            resolve(); // Resolve anyway - don't block signup
+                            return;
+                        }
+                        
+                        const [month, day, year] = dateParts;
+                        const dateObj = new Date(year, month - 1, day);
+                        const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+                        const formattedDate = dateObj.toLocaleDateString('en-US', options);
+                        
+                        const serviceName = window.currentService === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)';
+                        
+                        // Safely format phone number
+                        const phoneStr = String(phone || '');
+                        const cleanedPhone = phoneStr.replace(/\D/g, '');
+                        const formattedPhone = cleanedPhone.length === 10 
+                            ? `(${cleanedPhone.slice(0, 3)}) ${cleanedPhone.slice(3, 6)}-${cleanedPhone.slice(6, 10)}`
+                            : phoneStr;
+                        
+                        const templateParams = {
+                            to_email: 'firealexusa@gmail.com',
+                            volunteer_name: `${firstName} ${lastName}`,
+                            volunteer_phone: formattedPhone,
+                            event_name: `Sunday Service - ${serviceName}`,
+                            event_date: formattedDate,
+                            event_type: 'Volunteer'
+                        };
+                        
+                        console.log('📧 Sending email notification...', templateParams);
+                        
+                        // Use a timeout to prevent hanging
+                        const timeoutPromise = new Promise((_, rej) => 
+                            setTimeout(() => rej(new Error('Email timeout after 10s')), 10000)
+                        );
+                        
+                        const emailPromise = emailjs.send(
+                            'service_ogleezd',
+                            'template_rx7jszb',
+                            templateParams,
+                            'QZdN1DbzW4rI_BOAP'
+                        );
+                        
+                        const response = await Promise.race([emailPromise, timeoutPromise]);
+                        
+                        console.log('✅ Admin notification sent successfully', response);
+                        resolve(response);
+                    } catch (error) {
+                        console.error('❌ Error sending email:', error);
+                        console.error('Error details:', {
+                            message: error.message,
+                            text: error?.text,
+                            status: error?.status
+                        });
+                        // Don't block signup if email fails - resolve instead of reject
+                        resolve();
+                    }
+                }, 100); // Small delay to ensure signup completes first
+            });
         }
 
         // Show success message
