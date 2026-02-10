@@ -48,12 +48,48 @@
         h1 {
             color: var(--primary);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             font-size: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
+        }
+        
+        .service-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .service-tab {
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: 2px solid #d1e3ff;
+            background: white;
+            color: #666;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .service-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .service-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .service-tab.russian.active {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
         }
 
         .card {
@@ -271,6 +307,13 @@
             color: var(--success);
             margin-bottom: 16px;
         }
+        
+        /* Make success modal close button 3x taller */
+        #success-modal .btn-primary {
+            padding: 36px 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
 
         .need-more {
             color: #ff6b6b;
@@ -283,6 +326,16 @@
         <h1>
             📅 Bible Land Volunteer Schedule
         </h1>
+        
+        <!-- Service Tabs -->
+        <div class="service-tabs">
+            <button class="service-tab russian active" onclick="switchService('russian')">
+                🇷🇺 Russian Service (9:00 AM)
+            </button>
+            <button class="service-tab english" onclick="switchService('english')">
+                🇺🇸 English Service (12:00 PM)
+            </button>
+        </div>
 
         <!-- Loading View -->
         <div id="loading-view" class="card">
@@ -301,7 +354,7 @@
         <!-- Schedule View -->
         <div id="schedule-view" class="hidden">
             <div class="card">
-                <h2 style="margin-top: 0; color: var(--primary);">📋 Upcoming Schedule</h2>
+                <h2 id="schedule-title" style="margin-top: 0; color: var(--primary);">📋 Upcoming Schedule</h2>
                 <div id="schedule-container"></div>
             </div>
         </div>
@@ -369,6 +422,7 @@
         window.volunteers = {};
         window.scheduledSupervisors = {};
         window.allVolunteers = [];
+        window.currentService = 'russian'; // Default to Russian service
         let currentSignupDate = null;
         let unsubscribe = null;
 
@@ -454,11 +508,17 @@
             const container = document.getElementById('schedule-container');
             const sundays = getUpcomingSundays(13); // 3 months of Sundays
             
+            // Update title to show current service
+            const serviceTitle = window.currentService === 'russian' ? '🇷🇺 Russian Service (9:00 AM)' : '🇺🇸 English Service (12:00 PM)';
+            document.getElementById('schedule-title').innerHTML = `📋 Upcoming Schedule - ${serviceTitle}`;
+            
             let html = '';
             
             sundays.forEach(date => {
-                const slots = window.volunteers[date] || [];
-                const supervisor = window.scheduledSupervisors[date] || null;
+                // Use service-specific key: date_service (e.g., "01/15/2025_russian")
+                const serviceKey = `${date}_${window.currentService}`;
+                const slots = window.volunteers[serviceKey] || [];
+                const supervisor = window.scheduledSupervisors[serviceKey] || null;
                 
                 // Format date nicely
                 const [month, day, year] = date.split('/');
@@ -584,8 +644,9 @@
                     const volunteers = data.volunteers || {};
                     const allVolunteers = volunteers.all || [];
                     
-                    // Get current slots for this date
-                    const slots = volunteers[currentSignupDate] || [];
+                    // Use service-specific key
+                    const serviceKey = `${currentSignupDate}_${window.currentService}`;
+                    const slots = volunteers[serviceKey] || [];
                     
                     // Check if already signed up
                     if (slots.some(v => v.phone === phone)) {
@@ -597,10 +658,11 @@
                         throw new Error('Sorry, this date is now full!');
                     }
                     
-                    // Add to this date's volunteers
-                    volunteers[currentSignupDate] = [...slots, {
+                    // Add to this date's volunteers with service key
+                    volunteers[serviceKey] = [...slots, {
                         name: fullName,
-                        phone: phone
+                        phone: phone,
+                        service: window.currentService
                     }];
                     
                     // Add to master volunteer list if not exists
@@ -618,12 +680,12 @@
                 
                 console.log('✅ Signup successful!');
                 
-                // Send email notification
-                await sendAdminNotification(currentSignupDate, firstName, lastName, phone);
-                
-                // Show success
+                // Show success immediately (don't wait for email)
                 showSuccessMessage(currentSignupDate, firstName, lastName);
                 closeSignupModal();
+                
+                // Send email notification in background
+                sendAdminNotification(currentSignupDate, firstName, lastName, phone);
                 
             } catch (error) {
                 console.error('❌ Signup error:', error);
@@ -639,11 +701,13 @@
                 const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
                 const formattedDate = dateObj.toLocaleDateString('en-US', options);
                 
+                const serviceName = window.currentService === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)';
+                
                 const templateParams = {
                     to_email: 'firealexusa@gmail.com',
                     volunteer_name: `${firstName} ${lastName}`,
                     volunteer_phone: formatPhoneNumber(phone),
-                    event_name: 'Sunday Service',
+                    event_name: `Sunday Service - ${serviceName}`,
                     event_date: formattedDate,
                     event_type: 'Volunteer'
                 };
@@ -682,6 +746,19 @@
         // Close success modal
         window.closeSuccessModal = function() {
             document.getElementById('success-modal').classList.add('hidden');
+        };
+        
+        // Switch between services
+        window.switchService = function(service) {
+            window.currentService = service;
+            
+            // Update tab styling
+            const tabs = document.querySelectorAll('.service-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.service-tab.${service}`).classList.add('active');
+            
+            // Re-render schedule for new service
+            renderSchedule();
         };
 
         // Show error

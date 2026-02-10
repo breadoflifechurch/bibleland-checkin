@@ -2536,6 +2536,22 @@
             </div>
         </div>
 
+        <!-- Service Selection Screen (shown after login if no service selected) -->
+        <div id="service-selection-screen" class="card hidden">
+            <h1>Select Your Service</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 40px;">Choose which service you'll be checking in for today</p>
+            <div class="main-buttons">
+                <button style="background: #ff6b6b; font-size: 1.4rem;" onclick="selectService('russian')">
+                    🇷🇺 Russian Service<br>
+                    <span style="font-size: 0.9rem; opacity: 0.9;">9:00 AM</span>
+                </button>
+                <button style="background: #4a90e2; font-size: 1.4rem;" onclick="selectService('english')">
+                    🇺🇸 English Service<br>
+                    <span style="font-size: 0.9rem; opacity: 0.9;">12:00 PM</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Main App Container (shown after login) -->
         <div id="main-app-container" class="hidden">
             <!-- User Info Display -->
@@ -2545,6 +2561,14 @@
                 </div>
                 <div class="profile-dropdown" id="profile-dropdown">
                     <strong id="user-email-display"></strong>
+                    <div style="margin: 10px 0; padding: 8px; background: #f0f7ff; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: #666; margin-bottom: 4px;">Current Service:</div>
+                        <div id="profile-service-display" style="font-weight: 600; color: #1976d2; font-size: 0.9rem;">Loading...</div>
+                        <button onclick="showServiceSwitchModal(); toggleProfileDropdown();" 
+                                style="margin-top: 8px; padding: 6px 12px; font-size: 0.8rem; background: #4a90e2; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            Switch Service
+                        </button>
+                    </div>
                     <a href="#" onclick="event.preventDefault(); requestCurrentPasswordForChange(); toggleProfileDropdown();" 
                        style="font-size: 0.85rem; color: #4a90e2; text-decoration: none; display: block; margin: 8px 0; padding: 4px 0;">
                         Change Admin Password
@@ -2563,6 +2587,11 @@
         <!-- MAIN MENU -->
         <div id="main-screen" class="card">
             <h1>Bible Land Check-In </h1>
+            <div style="text-align: center; margin: -10px 0 10px 0;">
+                <span id="current-service-display" style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 1rem;">
+                    <!-- Service will be displayed here -->
+                </span>
+            </div>
             <div class="datetime-display">
                 <div class="current-date" id="current-date">February 5, 2026</div>
                 <div class="current-time" id="current-time">22:01:39</div>
@@ -2663,6 +2692,18 @@
         <div id="view-checkins" class="card hidden">
             <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
             <h1>Currently Checked In 🎉</h1>
+            
+            <!-- Service Filter -->
+            <div style="text-align: center; margin: 15px 0;">
+                <label style="font-weight: 600; margin-right: 10px;">Filter by Service:</label>
+                <select id="checkin-service-filter" onchange="renderCheckInTable()" 
+                        style="padding: 8px 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem;">
+                    <option value="all">All Services</option>
+                    <option value="russian">🇷🇺 Russian (9 AM)</option>
+                    <option value="english">🇺🇸 English (12 PM)</option>
+                </select>
+            </div>
+            
             <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 20px 0;">
             <table id="checkin-table">
                 <thead>
@@ -2922,6 +2963,27 @@
                 <h3 id="alert-title">Alert</h3>
                 <p id="alert-message" style="font-size: 1.1rem; margin: 20px 0;"></p>
                 <button class="btn-primary" onclick="closeCenteredAlert()">OK</button>
+            </div>
+        </div>
+        
+        <!-- Service Switch Modal -->
+        <div id="service-switch-modal" class="hidden modal-overlay-high">
+            <div style="background: white; border-radius: 20px; padding: 32px; width: 95%; max-width: 450px; text-align: center;">
+                <h2 style="margin-top: 0; color: var(--primary);">Switch Service</h2>
+                <p style="color: #666; margin-bottom: 30px;">Select which service you want to check in for</p>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <button onclick="confirmServiceSwitch('russian')" 
+                            style="padding: 20px; font-size: 1.2rem; background: #ff6b6b; color: white; border: none; border-radius: 12px; cursor: pointer;">
+                        🇷🇺 Russian Service<br>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">9:00 AM</span>
+                    </button>
+                    <button onclick="confirmServiceSwitch('english')" 
+                            style="padding: 20px; font-size: 1.2rem; background: #4a90e2; color: white; border: none; border-radius: 12px; cursor: pointer;">
+                        🇺🇸 English Service<br>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">12:00 PM</span>
+                    </button>
+                </div>
+                <button class="btn-outline" onclick="closeServiceSwitchModal()" style="margin-top: 20px; width: 100%;">Cancel</button>
             </div>
         </div>
         
@@ -3239,10 +3301,26 @@
         function onNonMemberPhoneInput() {
             const raw = document.getElementById('nonmem-phone').value;
             const phone = raw.replace(/\D/g, '');
-            if (phone.length === 10 && parents[phone]) {
-                const p = parents[phone];
-                document.getElementById('firstName').value = p.firstName || '';
-                document.getElementById('lastName').value = p.lastName || '';
+            
+            if (phone.length === 10) {
+                // Check familyDatabase first, then parents
+                if (familyDatabase[phone]) {
+                    const family = familyDatabase[phone];
+                    document.getElementById('firstName').value = family.firstName || '';
+                    document.getElementById('lastName').value = family.lastName || '';
+                } else if (parents[phone]) {
+                    const p = parents[phone];
+                    document.getElementById('firstName').value = p.firstName || '';
+                    document.getElementById('lastName').value = p.lastName || '';
+                } else {
+                    // Unknown phone number - clear the autofilled fields
+                    document.getElementById('firstName').value = '';
+                    document.getElementById('lastName').value = '';
+                }
+            } else if (phone.length < 10) {
+                // Phone number incomplete - clear the autofilled fields
+                document.getElementById('firstName').value = '';
+                document.getElementById('lastName').value = '';
             }
         }
 
@@ -3894,7 +3972,8 @@
                     allergies: child.allergies || 'None',
                     phone: formattedPhone,
                     parentName: `${first} ${last}`,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    service: window.currentService || 'english' // Tag with current service
                 });
             });
             
@@ -4088,7 +4167,8 @@
                 allergies: allergies,
                 phone: phone,
                 parentName: parentName,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                service: window.currentService || 'english' // Tag with current service
             });
             
             // Update family database
@@ -4133,13 +4213,25 @@
             const tbody = document.querySelector('#checkin-table tbody');
             tbody.innerHTML = '';
             
+            // Get service filter
+            const filterSelect = document.getElementById('checkin-service-filter');
+            const serviceFilter = filterSelect ? filterSelect.value : 'all';
+            
+            // Filter check-ins by service
+            let filteredCheckIns = checkIns;
+            if (serviceFilter !== 'all') {
+                filteredCheckIns = checkIns.filter(ci => ci.service === serviceFilter);
+            }
+            
             // Group check-ins by buzzer
             const buzzerGroups = {};
-            checkIns.forEach((ci, idx) => {
+            filteredCheckIns.forEach((ci, idx) => {
+                // Find original index in checkIns array
+                const originalIndex = checkIns.indexOf(ci);
                 if (!buzzerGroups[ci.buzzer]) {
                     buzzerGroups[ci.buzzer] = [];
                 }
-                buzzerGroups[ci.buzzer].push({...ci, originalIndex: idx});
+                buzzerGroups[ci.buzzer].push({...ci, originalIndex: originalIndex});
             });
             
             // Render grouped by buzzer
@@ -6093,6 +6185,25 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('loading-screen').classList.remove('hidden');
                 
+                // Load user profile to check service selection
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                let selectedService = null;
+                
+                if (userDoc.exists()) {
+                    selectedService = userDoc.data().selectedService;
+                }
+                
+                // If no service selected, show service selection screen
+                if (!selectedService) {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    document.getElementById('service-selection-screen').classList.remove('hidden');
+                    return;
+                }
+                
+                // Store current service
+                window.currentService = selectedService;
+                updateServiceDisplay(selectedService);
+                
                 // Load data from Firestore
                 await loadFromFirestore();
                 
@@ -6437,6 +6548,100 @@
         window.handleLogout = async function() {
             if (confirm('Are you sure you want to logout?')) {
                 await signOut(auth);
+            }
+        };
+
+        // Service selection functions
+        window.selectService = async function(service) {
+            if (!window.currentUserId) return;
+            
+            try {
+                // Save service preference to user profile
+                await setDoc(doc(db, 'users', window.currentUserId), {
+                    selectedService: service,
+                    email: auth.currentUser.email
+                }, { merge: true });
+                
+                window.currentService = service;
+                updateServiceDisplay(service);
+                
+                // Hide service selection, show loading
+                document.getElementById('service-selection-screen').classList.add('hidden');
+                document.getElementById('loading-screen').classList.remove('hidden');
+                
+                // Load data from Firestore
+                await loadFromFirestore();
+                
+                // Show main app
+                setTimeout(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    document.getElementById('main-app-container').classList.remove('hidden');
+                    show('main-screen');
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error saving service selection:', error);
+                alert('Failed to save service selection. Please try again.');
+            }
+        };
+
+        window.updateServiceDisplay = function(service) {
+            const serviceName = service === 'russian' ? '🇷🇺 Russian Service (9:00 AM)' : '🇺🇸 English Service (12:00 PM)';
+            const serviceColor = service === 'russian' ? '#ff6b6b' : '#4a90e2';
+            
+            const mainDisplay = document.getElementById('current-service-display');
+            const profileDisplay = document.getElementById('profile-service-display');
+            
+            if (mainDisplay) {
+                mainDisplay.textContent = serviceName;
+                mainDisplay.style.background = service === 'russian' ? '#ffe6e6' : '#e3f2fd';
+                mainDisplay.style.color = serviceColor;
+            }
+            
+            if (profileDisplay) {
+                profileDisplay.textContent = serviceName;
+                profileDisplay.style.color = serviceColor;
+            }
+        };
+
+        window.showServiceSwitchModal = function() {
+            document.getElementById('service-switch-modal').classList.remove('hidden');
+        };
+
+        window.closeServiceSwitchModal = function() {
+            document.getElementById('service-switch-modal').classList.add('hidden');
+        };
+
+        window.confirmServiceSwitch = async function(service) {
+            if (service === window.currentService) {
+                alert('You are already on this service.');
+                closeServiceSwitchModal();
+                return;
+            }
+            
+            if (confirm(`Switch to ${service === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)'} service?`)) {
+                try {
+                    await setDoc(doc(db, 'users', window.currentUserId), {
+                        selectedService: service
+                    }, { merge: true });
+                    
+                    window.currentService = service;
+                    updateServiceDisplay(service);
+                    closeServiceSwitchModal();
+                    
+                    // Refresh current view to show data for new service
+                    const currentView = document.querySelector('.card:not(.hidden)');
+                    if (currentView && currentView.id === 'view-checkins') {
+                        renderCheckInTable();
+                    }
+                    
+                    alert('Service switched successfully!');
+                } catch (error) {
+                    console.error('Error switching service:', error);
+                    alert('Failed to switch service. Please try again.');
+                }
+            } else {
+                closeServiceSwitchModal();
             }
         };
 
