@@ -515,10 +515,17 @@
             let html = '';
             
             sundays.forEach(date => {
-                // Use service-specific key: date_service (e.g., "01/15/2025_russian")
+                // Try service-specific key first (new format): "02/15/2026_russian"
                 const serviceKey = `${date}_${window.currentService}`;
-                const slots = window.volunteers[serviceKey] || [];
-                const supervisor = window.scheduledSupervisors[serviceKey] || null;
+                let slots = window.volunteers[serviceKey] || [];
+                
+                // Fall back to old format (just date) if new format not found
+                if (slots.length === 0 && window.volunteers[date]) {
+                    slots = window.volunteers[date] || [];
+                }
+                
+                // Try supervisor with service key first, then fall back to date only
+                let supervisor = window.scheduledSupervisors[serviceKey] || window.scheduledSupervisors[date] || null;
                 
                 // Format date nicely
                 const [month, day, year] = date.split('/');
@@ -644,9 +651,14 @@
                     const volunteers = data.volunteers || {};
                     const allVolunteers = volunteers.all || [];
                     
-                    // Use service-specific key
+                    // Use service-specific key (new format)
                     const serviceKey = `${currentSignupDate}_${window.currentService}`;
-                    const slots = volunteers[serviceKey] || [];
+                    let slots = volunteers[serviceKey] || [];
+                    
+                    // Fall back to old format (just date) for backwards compatibility
+                    if (slots.length === 0 && volunteers[currentSignupDate]) {
+                        slots = volunteers[currentSignupDate] || [];
+                    }
                     
                     // Check if already signed up
                     if (slots.some(v => v.phone === phone)) {
