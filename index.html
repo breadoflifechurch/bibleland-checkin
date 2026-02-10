@@ -2542,11 +2542,11 @@
             <p style="text-align: center; color: #666; margin-bottom: 40px;">Choose which service you'll be checking in for today</p>
             <div class="main-buttons">
                 <button style="background: #ff6b6b; font-size: 1.4rem;" onclick="selectService('russian')">
-                    Russian Service<br>
+                    🇷🇺 Russian Service<br>
                     <span style="font-size: 0.9rem; opacity: 0.9;">9:00 AM</span>
                 </button>
                 <button style="background: #4a90e2; font-size: 1.4rem;" onclick="selectService('english')">
-                    English Service<br>
+                    🇺🇸 English Service<br>
                     <span style="font-size: 0.9rem; opacity: 0.9;">12:00 PM</span>
                 </button>
             </div>
@@ -4385,13 +4385,13 @@
                 }
                 
                 const settingsSnap = await window.getDoc(settingsRef);
-                let correctPassword = '559408'; // Default password
+                let correctPassword = '0000'; // Default password
                 
                 if (settingsSnap.exists()) {
-                    correctPassword = settingsSnap.data().password || '559408';
+                    correctPassword = settingsSnap.data().password || '0000';
                 } else {
                     // First time - set default password
-                    await window.setDoc(settingsRef, { password: '559408' });
+                    await window.setDoc(settingsRef, { password: '0000' });
                 }
                 
                 if (entered !== correctPassword) {
@@ -4583,10 +4583,10 @@
                 }
                 
                 const settingsSnap = await window.getDoc(settingsRef);
-                let correctPassword = '559408';
+                let correctPassword = '0000';
                 
                 if (settingsSnap.exists()) {
-                    correctPassword = settingsSnap.data().password || '559408';
+                    correctPassword = settingsSnap.data().password || '0000';
                 }
                 
                 if (entered !== correctPassword) {
