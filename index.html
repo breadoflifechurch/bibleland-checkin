@@ -877,6 +877,25 @@
             margin: 40px 0;
         }
 
+        /* Membership toggle button styles */
+        .membership-toggle-btn.selected {
+            background: #4a90e2 !important;
+            color: white !important;
+            border-color: #4a90e2 !important;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+            transform: scale(1.05);
+        }
+
+        .membership-toggle-btn:hover:not(.selected) {
+            border-color: #4a90e2;
+            background: #f0f7ff;
+            transform: translateY(-2px);
+        }
+
+        .membership-toggle-btn:active {
+            transform: scale(0.98);
+        }
+
         .schedule-list {
             margin: 20px 0;
         }
@@ -2645,9 +2664,58 @@
                 <div class="day-name" id="day-name">Thursday</div>
             </div>
             <div class="main-buttons">
-                <button id="btn-checkin" onclick="showMembership()">Check In Child(ren)</button>
+                <button id="btn-checkin" onclick="showPhoneEntry()">Check In Child(ren)</button>
                 <button id="btn-view" onclick="showViewCheckInsPasswordModal()">View Current Check-Ins</button>
                 <button id="btn-schedule" onclick="showScheduleView()">View Schedule</button>
+            </div>
+        </div>
+        <!-- NEW: Phone Entry Screen (First Step) -->
+        <div id="phone-entry-screen" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
+            <h1>Parent Phone Number 📱</h1>
+            <p style="text-align:center; color:#555; margin-bottom: 30px;">Enter your phone number to begin check-in</p>
+            <div style="text-align: center;">
+                <div style="display: inline-block; position: relative;">
+                    <input type="tel" id="checkin-phone" placeholder="(000) 000-0000" readonly 
+                           style="font-size: 2rem; text-align: center; width: 100%; max-width: 320px; padding: 20px; 
+                                  border: 3px solid #4a90e2; border-radius: 16px; background: white; cursor: pointer;"
+                           onclick="showNumpad('checkin-phone')">
+                </div>
+            </div>
+            <div style="text-align:center; margin-top: 40px;">
+                <button class="btn-primary" style="font-size: 1.3rem; padding: 18px 48px;" onclick="handlePhoneEntry()">Continue →</button>
+                <br><br>
+                <button class="btn-outline" onclick="backToMain()">Cancel</button>
+            </div>
+        </div>
+        <!-- NEW: Parent Info Screen (For Unknown Phone Numbers) -->
+        <div id="parent-info-screen" class="card hidden">
+            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
+            <h1>Parent Information 👤</h1>
+            <p style="text-align:center; color:#555; margin-bottom: 20px;">Please provide your information</p>
+            <label>First Name: <input type="text" id="parent-first-name" placeholder="First name"></label><br>
+            <label>Last Name: <input type="text" id="parent-last-name" placeholder="Last name"></label><br>
+            <div style="margin: 30px 0;">
+                <label style="display: block; margin-bottom: 15px; font-weight: 600; font-size: 1.1rem;">Membership Status: *</label>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button id="member-btn" class="membership-toggle-btn" onclick="selectMembershipStatus('member')" 
+                            style="flex: 1; min-width: 140px; max-width: 200px; padding: 16px 24px; font-size: 1.1rem; 
+                                   border: 3px solid #ddd; background: white; color: #666; border-radius: 12px; 
+                                   cursor: pointer; transition: all 0.2s; font-weight: 600;">
+                        ✓ Member
+                    </button>
+                    <button id="non-member-btn" class="membership-toggle-btn" onclick="selectMembershipStatus('non-member')" 
+                            style="flex: 1; min-width: 140px; max-width: 200px; padding: 16px 24px; font-size: 1.1rem; 
+                                   border: 3px solid #ddd; background: white; color: #666; border-radius: 12px; 
+                                   cursor: pointer; transition: all 0.2s; font-weight: 600;">
+                        Non-Member
+                    </button>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top: 40px;">
+                <button class="btn-primary" style="font-size: 1.2rem; padding: 16px 40px;" onclick="continueFromParentInfo()">Continue →</button>
+                <br><br>
+                <button class="btn-outline" onclick="backToMain()">Cancel</button>
             </div>
         </div>
         <!-- Membership -->
@@ -3120,8 +3188,13 @@
         let numpadProcessing = false; // Prevent rapid clicks
 
         function showNumpad(inputElement) {
-            numpadCurrentInput = inputElement;
-            numpadValue = inputElement.value.replace(/\D/g, ''); // Get just digits
+            // Handle both element ID strings and element objects
+            if (typeof inputElement === 'string') {
+                numpadCurrentInput = document.getElementById(inputElement);
+            } else {
+                numpadCurrentInput = inputElement;
+            }
+            numpadValue = numpadCurrentInput.value.replace(/\D/g, ''); // Get just digits
             numpadProcessing = false; // Reset processing flag
             updateNumpadDisplay();
             document.getElementById('numpad-overlay').classList.add('show');
@@ -3368,6 +3441,202 @@
             show('info-form');
         }
         // ─── Check-in flow ──────────────────────────────────────────────────────
+        // Global variable to track selected membership status
+        let selectedMembershipStatus = null;
+        
+        // NEW: Show phone entry screen (first step)
+        function showPhoneEntry() {
+            document.getElementById('checkin-phone').value = '';
+            selectedMembershipStatus = null;
+            show('phone-entry-screen');
+        }
+
+        // NEW: Handle phone entry and check if phone exists
+        function handlePhoneEntry() {
+            const phoneInput = document.getElementById('checkin-phone');
+            const phoneClean = phoneInput.value.replace(/\D/g, '').trim();
+
+            if (phoneClean.length !== 10) {
+                showCenteredAlert("Please enter a valid 10-digit phone number");
+                return;
+            }
+
+            // Check if phone exists in database
+            const family = familyDatabase[phoneClean];
+            const parent = parents[phoneClean];
+
+            if (family || parent) {
+                // Phone number EXISTS - prefill all data and go to info form
+                const data = family || parent;
+                document.getElementById('phone').value = phoneInput.value;
+                document.getElementById('firstName').value = data.firstName || '';
+                document.getElementById('lastName').value = data.lastName || '';
+                
+                // Set membership status if available
+                if (data.isMember !== undefined) {
+                    selectedMembershipStatus = data.isMember ? 'member' : 'non-member';
+                }
+                
+                // Clear and prefill children
+                document.getElementById('children-list').innerHTML = '';
+                childCounter = 0;
+                
+                const kidsArray = family ? family.kids : (parent.children || []);
+                if (kidsArray && kidsArray.length > 0) {
+                    kidsArray.forEach(child => {
+                        childCounter++;
+                        const div = document.createElement('div');
+                        div.className = 'child-entry';
+                        const allergiesValue = child.allergies || '';
+                        const isOther = allergiesValue !== '' && allergiesValue !== 'None';
+                        const otherText = isOther ? allergiesValue : '';
+                        
+                        div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <div style="flex: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;">
+                        <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
+                            <strong>Child:</strong>
+                            <input type="text" class="child-name" value="${child.name || ''}" required style="width: 140px;" placeholder="Name" />
+                        </label>
+                        <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
+                            <strong>Age:</strong>
+                            <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                                <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
+                                ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
+                            </select>
+                        </label>
+                        <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
+                            <strong>Allergies:</strong>
+                            <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                                <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
+                                <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
+                                <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
+                            </select>
+                        </label>
+                        <input type="text" class="child-allergies-other" style="width: 140px; display:${isOther ? 'inline' : 'none'};" value="${otherText}" placeholder="Specify allergy" />
+                    </div>
+                    
+                    <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child">
+                        <span class="icon">🗑️</span>
+                        <span class="text">Remove<br>Child</span>
+                    </button>
+                </div>
+            `;
+                        document.getElementById('children-list').appendChild(div);
+                        attachAllergyHandler(div);
+                    });
+                } else {
+                    // No kids saved, add empty entry
+                    addChildEntry();
+                }
+                
+                // Go directly to info form with prefilled data
+                show('info-form');
+            } else {
+                // Phone number DOES NOT EXIST - go to parent info screen
+                document.getElementById('phone').value = phoneInput.value;
+                document.getElementById('parent-first-name').value = '';
+                document.getElementById('parent-last-name').value = '';
+                selectedMembershipStatus = null;
+                
+                // Reset button styles
+                document.getElementById('member-btn').classList.remove('selected');
+                document.getElementById('non-member-btn').classList.remove('selected');
+                
+                show('parent-info-screen');
+            }
+        }
+
+        // NEW: Select membership status (member or non-member)
+        function selectMembershipStatus(status) {
+            selectedMembershipStatus = status;
+            
+            const memberBtn = document.getElementById('member-btn');
+            const nonMemberBtn = document.getElementById('non-member-btn');
+            
+            if (status === 'member') {
+                memberBtn.classList.add('selected');
+                nonMemberBtn.classList.remove('selected');
+            } else {
+                nonMemberBtn.classList.add('selected');
+                memberBtn.classList.remove('selected');
+            }
+        }
+
+        // NEW: Continue from parent info screen
+        function continueFromParentInfo() {
+            const firstName = document.getElementById('parent-first-name').value.trim();
+            const lastName = document.getElementById('parent-last-name').value.trim();
+
+            if (!firstName || !lastName) {
+                showCenteredAlert("Please enter both first and last name");
+                return;
+            }
+
+            if (!selectedMembershipStatus) {
+                // Show modal asking them to select membership status
+                showMembershipSelectionAlert();
+                return;
+            }
+
+            // Transfer data to info form
+            document.getElementById('firstName').value = firstName;
+            document.getElementById('lastName').value = lastName;
+            
+            // Clear children list and add one empty entry
+            document.getElementById('children-list').innerHTML = '';
+            childCounter = 0;
+            addChildEntry();
+            
+            // Go to info form
+            show('info-form');
+        }
+
+        // NEW: Show membership selection alert
+        function showMembershipSelectionAlert() {
+            const modal = document.getElementById('centered-alert');
+            document.getElementById('alert-title').textContent = 'Membership Status Required';
+            document.getElementById('alert-message').textContent = 'Please select whether you are a Member or Non-Member';
+            
+            const okBtn = modal.querySelector('.btn-primary');
+            
+            // Change to Yes/No buttons for membership selection
+            okBtn.textContent = 'Member';
+            okBtn.onclick = () => {
+                selectMembershipStatus('member');
+                modal.classList.add('hidden');
+                okBtn.textContent = 'OK';
+                okBtn.onclick = closeCenteredAlert;
+                // Remove the No button if it exists
+                const noBtn = modal.querySelector('.btn-cancel-temp');
+                if (noBtn) noBtn.style.display = 'none';
+                // Trigger continue after selection
+                continueFromParentInfo();
+            };
+            
+            // Add Non-Member button
+            let noBtn = modal.querySelector('.btn-cancel-temp');
+            if (!noBtn) {
+                noBtn = document.createElement('button');
+                noBtn.className = 'btn-outline btn-cancel-temp';
+                noBtn.textContent = 'Non-Member';
+                modal.querySelector('.centered-modal-content').appendChild(noBtn);
+            }
+            noBtn.textContent = 'Non-Member';
+            noBtn.style.display = 'inline-block';
+            noBtn.onclick = () => {
+                selectMembershipStatus('non-member');
+                modal.classList.add('hidden');
+                okBtn.textContent = 'OK';
+                okBtn.onclick = closeCenteredAlert;
+                noBtn.style.display = 'none';
+                // Trigger continue after selection
+                continueFromParentInfo();
+            };
+            
+            modal.classList.remove('hidden');
+        }
+
         function showMembership() {
             show('membership-screen');
         }
@@ -4066,16 +4335,12 @@
                 });
             });
             
-            if (!parents[phone]) parents[phone] = {};
-            parents[phone].firstName = first;
-            parents[phone].lastName = last;
-            parents[phone].children = currentChildren;
-            
             // Update family database - only add NEW children, don't remove existing ones
             if (!familyDatabase[phone]) {
                 // First time for this phone - create new entry
                 familyDatabase[phone] = {
-                    type: isMemberPath ? 'member' : 'nonmember',
+                    type: (selectedMembershipStatus === 'member') ? 'member' : 'nonmember',
+                    isMember: (selectedMembershipStatus === 'member'),
                     firstName: first,
                     lastName: last,
                     kids: currentChildren.map(child => ({
@@ -4105,7 +4370,19 @@
                 // Update parent names in case they changed
                 familyDatabase[phone].firstName = first;
                 familyDatabase[phone].lastName = last;
+                // Update membership status if it was set during this check-in
+                if (selectedMembershipStatus) {
+                    familyDatabase[phone].type = (selectedMembershipStatus === 'member') ? 'member' : 'nonmember';
+                    familyDatabase[phone].isMember = (selectedMembershipStatus === 'member');
+                }
             }
+            
+            // Also update parents object with membership status
+            if (!parents[phone]) parents[phone] = {};
+            parents[phone].firstName = first;
+            parents[phone].lastName = last;
+            parents[phone].children = currentChildren;
+            parents[phone].isMember = familyDatabase[phone].isMember;
             
             usedBuzzers.add(currentBuzzer);
             saveData();
