@@ -42,7 +42,7 @@
         }
 
         body {
-            font-family: "Segoe UI", system-ui, sans-serif;
+            font-family: "Segoe UI", "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", system-ui, sans-serif;
             background: linear-gradient(135deg, #e0f2ff, #f0f7ff);
             color: var(--text);
             margin: 0;
@@ -724,14 +724,6 @@
 
         .phone-cell {
             display: table-cell;
-            filter: blur(5px);
-            cursor: pointer;
-            transition: filter 0.3s;
-        }
-
-        .phone-revealed .phone-cell {
-            filter: none;
-            cursor: default;
         }
 
         .volunteer-name,
@@ -4616,7 +4608,7 @@
                     <td>${firstChild.age}</td>
                     <td${allergiesStyle}>${firstChild.allergies}</td>
                     <td rowspan="${group.length}">${firstChild.parentName}</td>
-                    <td rowspan="${group.length}" class="phone-cell" onclick="requestAdminAction('show-phone', ${firstChild.originalIndex})">${firstChild.phone}</td>
+                    <td rowspan="${group.length}" class="phone-cell">${firstChild.phone}</td>
                     <td rowspan="${group.length}">
                         <button class="btn-danger btn-sm" onclick="requestCheckoutByBuzzer(${buzzerNum})" style="display: block; margin: 4px auto;">Check Out</button>
                         <button class="btn-primary btn-sm" onclick="requestAddChildToBuzzer(${buzzerNum}, '${firstChild.phone}', '${firstChild.parentName}')" style="display: block; margin: 4px auto;">+ Add Child</button>
@@ -5700,7 +5692,7 @@
             const newType = document.getElementById('edit-type').value;
             
             if (!newFirstName || !newLastName || newPhone.length !== 10) {
-                alert('Please enter valid first name, last name, and 10-digit phone number');
+                showCenteredAlert('Please enter valid first name, last name, and 10-digit phone number', 'Invalid Input');
                 return;
             }
             
@@ -5880,12 +5872,12 @@
             const phone = phoneFormatted.replace(/\D/g, '');
             
             if (!firstName || !lastName || phone.length !== 10) {
-                alert('Please enter first name, last name, and valid 10-digit phone number.');
+                showCenteredAlert('Please enter first name, last name, and valid 10-digit phone number.', 'Invalid Input');
                 return;
             }
             
             if (supervisorDatabase[phone]) {
-                alert('Supervisor with this phone already exists.');
+                showCenteredAlert('Supervisor with this phone already exists.', 'Duplicate Entry');
                 return;
             }
             
@@ -5970,7 +5962,7 @@
             const newPhone = newPhoneFormatted.replace(/\D/g, '');
             
             if (!newFirstName || !newLastName || newPhone.length !== 10) {
-                alert('Please enter valid first name, last name, and 10-digit phone number');
+                showCenteredAlert('Please enter valid first name, last name, and 10-digit phone number', 'Invalid Input');
                 return;
             }
             
@@ -6417,7 +6409,7 @@
                 memBtn.addEventListener('click', () => {
                     const phone = document.getElementById('vol-phone-first').value.replace(/\D/g, '');
                     if (phone.length !== 10) {
-                        alert('Please enter a valid 10-digit phone number');
+                        showCenteredAlert('Please enter a valid 10-digit phone number', 'Invalid Phone');
                         return;
                     }
                     
@@ -6931,9 +6923,14 @@
 
         // Handle logout
         window.handleLogout = async function() {
-            if (confirm('Are you sure you want to logout?')) {
-                await signOut(auth);
-            }
+            showConfirmModal(
+                'Are you sure you want to logout?',
+                'Confirm Logout',
+                async () => {
+                    await signOut(auth);
+                },
+                null
+            );
         };
 
         // Service selection functions
@@ -6966,7 +6963,7 @@
                 
             } catch (error) {
                 console.error('Error saving service selection:', error);
-                alert('Failed to save service selection. Please try again.');
+                showCenteredAlert('Failed to save service selection. Please try again.', 'Error');
             }
         };
 
@@ -6999,35 +6996,40 @@
 
         window.confirmServiceSwitch = async function(service) {
             if (service === window.currentService) {
-                alert('You are already on this service.');
+                showCenteredAlert('You are already on this service.', 'Same Service');
                 closeServiceSwitchModal();
                 return;
             }
             
-            if (confirm(`Switch to ${service === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)'} service?`)) {
-                try {
-                    await setDoc(doc(db, 'users', window.currentUserId), {
-                        selectedService: service
-                    }, { merge: true });
-                    
-                    window.currentService = service;
-                    updateServiceDisplay(service);
-                    closeServiceSwitchModal();
-                    
-                    // Refresh current view to show data for new service
-                    const currentView = document.querySelector('.card:not(.hidden)');
-                    if (currentView && currentView.id === 'view-checkins') {
-                        renderCheckInTable();
+            showConfirmModal(
+                `Switch to ${service === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)'} service?`,
+                'Confirm Service Switch',
+                async () => {
+                    try {
+                        await setDoc(doc(db, 'users', window.currentUserId), {
+                            selectedService: service
+                        }, { merge: true });
+                        
+                        window.currentService = service;
+                        updateServiceDisplay(service);
+                        closeServiceSwitchModal();
+                        
+                        // Refresh current view to show data for new service
+                        const currentView = document.querySelector('.card:not(.hidden)');
+                        if (currentView && currentView.id === 'view-checkins') {
+                            renderCheckInTable();
+                        }
+                        
+                        showCenteredAlert('Service switched successfully!', 'Success');
+                    } catch (error) {
+                        console.error('Error switching service:', error);
+                        showCenteredAlert('Failed to switch service. Please try again.', 'Error');
                     }
-                    
-                    alert('Service switched successfully!');
-                } catch (error) {
-                    console.error('Error switching service:', error);
-                    alert('Failed to switch service. Please try again.');
+                },
+                () => {
+                    closeServiceSwitchModal();
                 }
-            } else {
-                closeServiceSwitchModal();
-            }
+            );
         };
 
         // Enter key support for login
