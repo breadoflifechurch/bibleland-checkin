@@ -42,7 +42,7 @@
         }
 
         body {
-            font-family: "Segoe UI", "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", system-ui, sans-serif;
+            font-family: "Segoe UI", system-ui, sans-serif;
             background: linear-gradient(135deg, #e0f2ff, #f0f7ff);
             color: var(--text);
             margin: 0;
@@ -3797,12 +3797,19 @@
         }
 
         // ─── Centered Alert Modal ───────────────────────────────────────────────
-        function showCenteredAlert(message, title = 'Alert') {
+        function showCenteredAlert(message, title = 'Alert', autoDismissSeconds = null) {
             // Close numpad first to prevent overlay issues
             hideNumpad();
             document.getElementById('alert-title').textContent = title;
             document.getElementById('alert-message').textContent = message;
             document.getElementById('centered-alert').classList.remove('hidden');
+            
+            // Auto-dismiss if timeout specified
+            if (autoDismissSeconds) {
+                setTimeout(() => {
+                    closeCenteredAlert();
+                }, autoDismissSeconds * 1000);
+            }
         }
 
         function closeCenteredAlert() {
@@ -7020,7 +7027,7 @@
                             renderCheckInTable();
                         }
                         
-                        showCenteredAlert('Service switched successfully!', 'Success');
+                        showCenteredAlert('Service switched successfully!', 'Success', 2);
                     } catch (error) {
                         console.error('Error switching service:', error);
                         showCenteredAlert('Failed to switch service. Please try again.', 'Error');
