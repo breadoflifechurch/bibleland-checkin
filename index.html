@@ -7026,8 +7026,6 @@
                         if (currentView && currentView.id === 'view-checkins') {
                             renderCheckInTable();
                         }
-                        
-                        showCenteredAlert('Service switched successfully!', 'Success', 2);
                     } catch (error) {
                         console.error('Error switching service:', error);
                         showCenteredAlert('Failed to switch service. Please try again.', 'Error');
