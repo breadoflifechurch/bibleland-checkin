@@ -3109,7 +3109,7 @@
                 <div style="margin: 15px 0;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Age (1-6):</label>
                     <select id="add-child-age"
-                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#bbb;" required onchange="this.style.color='#000'">
+                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#000;" required onchange="this.style.color='#000'">
                         <option value="" disabled selected>Select</option>
                         <option value="1" style="color:#000;">1</option>
                         <option value="2" style="color:#000;">2</option>
@@ -3123,7 +3123,7 @@
                 <div style="margin: 15px 0;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Allergies:</label>
                     <select id="add-child-allergies" onchange="toggleAddChildOtherAllergy(); this.style.color='#000'"
-                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#bbb;" required>
+                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#000;" required>
                         <option value="" disabled selected>Select</option>
                         <option value="None" style="color:#000;">None</option>
                         <option value="Other" style="color:#000;">Other</option>
@@ -3492,14 +3492,14 @@
                         </label>
                         <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                             <strong>Age:</strong>
-                            <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                            <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
                                 <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                                 ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                             </select>
                         </label>
                         <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                             <strong>Allergies:</strong>
-                            <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                            <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
                                 <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                                 <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                                 <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -3713,14 +3713,14 @@
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Age:</strong>
-                      <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                      <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
                           <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                           ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                       </select>
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Allergies:</strong>
-                      <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                      <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
                           <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                           <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                           <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -3761,14 +3761,14 @@
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Age:</strong>
-                      <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                      <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
                           <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                           ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                       </select>
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Allergies:</strong>
-                      <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                      <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
                           <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                           <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                           <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -4020,14 +4020,14 @@
                                 </label>
                                 <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                     <strong>Age:</strong>
-                                    <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                                    <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
                                         <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                                         ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                     </select>
                                 </label>
                                 <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                     <strong>Allergies:</strong>
-                                    <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                                    <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
                                         <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                                         <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                                         <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -4067,14 +4067,14 @@
                         </label>
                         <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                             <strong>Age:</strong>
-                            <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                            <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
                                 <option value="" disabled selected>Select</option>
                                 ${[1,2,3,4,5,6].map(age => `<option value="${age}" style="color:#000;">${age}</option>`).join('')}
                             </select>
                         </label>
                         <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                             <strong>Allergies:</strong>
-                            <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                            <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
                                 <option value="" disabled selected>Select</option>
                                 <option value="None" style="color:#000;">None</option>
                                 <option value="Other" style="color:#000;">Other</option>
@@ -4148,14 +4148,14 @@
                                     </label>
                                     <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                         <strong>Age:</strong>
-                                        <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                                        <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
                                             <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                                             ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                         </select>
                                     </label>
                                     <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                         <strong>Allergies:</strong>
-                                        <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                                        <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
                                             <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                                             <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                                             <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -5114,7 +5114,7 @@
               <strong>${v1.name}</strong><br>
               <small style="color:#666;">${v1.phone !== '—' ? formatPhoneDisplay(v1.phone) : ''}</small>
             </div>
-          ` : '<span style="color:#bbb;">Empty slot</span>'}
+          ` : '<span style="color:#000;">Empty slot</span>'}
         </td>
         <td>
           ${v2.name !== '—' ? `
@@ -5122,7 +5122,7 @@
               <strong>${v2.name}</strong><br>
               <small style="color:#666;">${v2.phone !== '—' ? formatPhoneDisplay(v2.phone) : ''}</small>
             </div>
-          ` : '<span style="color:#bbb;">Empty slot</span>'}
+          ` : '<span style="color:#000;">Empty slot</span>'}
         </td>
         <td>${supervisorDropdown}</td>
         <td>
@@ -6469,14 +6469,14 @@
                                             </label>
                                             <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                                 <strong>Age:</strong>
-                                                <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
+                                                <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
                                                     <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                                                     ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                                 </select>
                                             </label>
                                             <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                                 <strong>Allergies:</strong>
-                                                <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
+                                                <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
                                                     <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                                                     <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                                                     <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
