@@ -2840,21 +2840,6 @@
                     </div>
                     <div id="supervisor-database-content"></div>
                 </div>
-                
-                <!-- Supervisor Helper Database -->
-                <div class="admin-section">
-                    <h2><span class="section-icon">🤝</span> Supervisor Helper Database</h2>
-                    <p style="color: #666; font-size: 0.9em; margin-top: -8px; margin-bottom: 12px;">Helpers assist at the beginning and end of service only</p>
-                    <button class="btn-success btn-sm" onclick="toggleAddSupervisorHelperForm()" style="margin-bottom: 12px; font-size: 0.85rem; padding: 6px 12px;">+ Add Helper</button>
-                    <div id="add-supervisor-helper-form" class="hidden add-vol-form">
-                        <label>Phone: <input type="tel" id="super-helper-phone" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this)"></label><br>
-                        <label>First Name: <input type="text" id="super-helper-first-name" placeholder="John"></label><br>
-                        <label>Last Name: <input type="text" id="super-helper-last-name" placeholder="Doe"></label><br>
-                        <button class="btn-success btn-sm" onclick="addSupervisorHelperToDatabase()">Save</button>
-                        <button class="btn-outline btn-sm" onclick="toggleAddSupervisorHelperForm()">Cancel</button>
-                    </div>
-                    <div id="supervisor-helper-database-content"></div>
-                </div>
             </div>
 
             <!-- Family Database - Full Width -->
@@ -3110,7 +3095,6 @@
             weeklyReports: 'kids_checkin_weekly_reports',
             supervisors: 'kids_checkin_supervisors',
             scheduledSupervisors: 'kids_checkin_scheduled_supervisors',
-            supervisorHelpers: 'kids_checkin_supervisor_helpers',
             scheduledSupervisorHelpers: 'kids_checkin_scheduled_supervisor_helpers'
         };
         // Initialize on window so Firebase can sync
@@ -3121,7 +3105,6 @@
         var familyDatabase = window.familyDatabase = window.familyDatabase || {};
         var supervisorDatabase = window.supervisorDatabase = window.supervisorDatabase || {};
         var scheduledSupervisors = window.scheduledSupervisors = window.scheduledSupervisors || {};
-        var supervisorHelperDatabase = window.supervisorHelperDatabase = window.supervisorHelperDatabase || {};
         var scheduledSupervisorHelpers = window.scheduledSupervisorHelpers = window.scheduledSupervisorHelpers || {};
         var weeklyReports = window.weeklyReports = window.weeklyReports || {};
         let currentBuzzer = null;
@@ -3319,7 +3302,6 @@
             const loadedWeeklyReports = JSON.parse(localStorage.getItem(storageKeys.weeklyReports)) || {};
             const loadedSupervisorDatabase = JSON.parse(localStorage.getItem(storageKeys.supervisors)) || {};
             const loadedScheduledSupervisors = JSON.parse(localStorage.getItem(storageKeys.scheduledSupervisors)) || {};
-            const loadedSupervisorHelperDatabase = JSON.parse(localStorage.getItem(storageKeys.supervisorHelpers)) || {};
             const loadedScheduledSupervisorHelpers = JSON.parse(localStorage.getItem(storageKeys.scheduledSupervisorHelpers)) || {};
             
             // Replace arrays/objects (don't append)
@@ -3347,9 +3329,6 @@
             Object.keys(scheduledSupervisors).forEach(k => delete scheduledSupervisors[k]);
             Object.assign(scheduledSupervisors, loadedScheduledSupervisors);
             
-            Object.keys(supervisorHelperDatabase).forEach(k => delete supervisorHelperDatabase[k]);
-            Object.assign(supervisorHelperDatabase, loadedSupervisorHelperDatabase);
-            
             Object.keys(scheduledSupervisorHelpers).forEach(k => delete scheduledSupervisorHelpers[k]);
             Object.assign(scheduledSupervisorHelpers, loadedScheduledSupervisorHelpers);
             
@@ -3366,7 +3345,6 @@
             localStorage.setItem(storageKeys.weeklyReports, JSON.stringify(weeklyReports));
             localStorage.setItem(storageKeys.supervisors, JSON.stringify(supervisorDatabase));
             localStorage.setItem(storageKeys.scheduledSupervisors, JSON.stringify(scheduledSupervisors));
-            localStorage.setItem(storageKeys.supervisorHelpers, JSON.stringify(supervisorHelperDatabase));
             localStorage.setItem(storageKeys.scheduledSupervisorHelpers, JSON.stringify(scheduledSupervisorHelpers));
         }
         // ─── Navigation ─────────────────────────────────────────────────────────
@@ -4864,10 +4842,10 @@
                 });
                 supervisorDropdown += '</select>';
                 
-                // Create supervisor helper dropdown
+                // Create supervisor helper dropdown (uses same supervisorDatabase)
                 let supervisorHelperDropdown = '<select onchange="assignSupervisorHelper(\'' + date + '\', this.value)" style="width: 100%; padding: 6px;">';
                 supervisorHelperDropdown += '<option value="">— Select Helper —</option>';
-                Object.entries(supervisorHelperDatabase).forEach(([phone, sup]) => {
+                Object.entries(supervisorDatabase).forEach(([phone, sup]) => {
                     const selected = supervisorHelper && supervisorHelper.phone === phone ? 'selected' : '';
                     supervisorHelperDropdown += `<option value="${phone}" ${selected}>${sup.firstName} ${sup.lastName} - ${formatPhoneDisplay(phone)}</option>`;
                 });
@@ -4949,9 +4927,6 @@
             
             // Render supervisor database
             renderSupervisorDatabase();
-            
-            // Render supervisor helper database
-            renderSupervisorHelperDatabase();
             
             // Render reports
             renderReports();
@@ -5836,161 +5811,6 @@
             updateDisplays();
         }
 
-        // ─── Supervisor Helper Management Functions ──────────────────────────────
-        function toggleAddSupervisorHelperForm() {
-            document.getElementById('add-supervisor-helper-form').classList.toggle('hidden');
-        }
-
-        function addSupervisorHelperToDatabase() {
-            const firstName = document.getElementById('super-helper-first-name').value.trim();
-            const lastName = document.getElementById('super-helper-last-name').value.trim();
-            const phoneFormatted = document.getElementById('super-helper-phone').value;
-            const phone = phoneFormatted.replace(/\D/g, '');
-            
-            if (!firstName || !lastName || phone.length !== 10) {
-                alert('Please enter first name, last name, and valid 10-digit phone number.');
-                return;
-            }
-            
-            if (supervisorHelperDatabase[phone]) {
-                alert('Supervisor helper with this phone already exists.');
-                return;
-            }
-            
-            supervisorHelperDatabase[phone] = {
-                firstName: firstName,
-                lastName: lastName
-            };
-            
-            saveData();
-            document.getElementById('super-helper-first-name').value = '';
-            document.getElementById('super-helper-last-name').value = '';
-            document.getElementById('super-helper-phone').value = '';
-            toggleAddSupervisorHelperForm();
-            renderSupervisorHelperDatabase();
-            updateDisplays();
-        }
-
-        function renderSupervisorHelperDatabase() {
-            const container = document.getElementById('supervisor-helper-database-content');
-            
-            if (Object.keys(supervisorHelperDatabase).length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999;">No supervisor helpers in database yet</p>';
-                return;
-            }
-            
-            let html = '';
-            Object.entries(supervisorHelperDatabase).forEach(([phone, helper]) => {
-                html += `
-                    <div style="background: white; border-radius: 12px; padding: 12px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <div style="flex: 1; min-width: 0;">
-                                <strong style="font-size: 1.1rem; color: var(--text); word-break: break-word;">${helper.firstName} ${helper.lastName}</strong><br>
-                                <span style="color: var(--primary); font-size: 0.95rem; word-break: break-word;">${formatPhoneDisplay(phone)}</span>
-                            </div>
-                            <div style="display: flex; gap: 4px; flex-shrink: 0;">
-                                <button class="btn-icon btn-edit" onclick="editSupervisorHelper('${phone}')" title="Edit" style="font-size: 0.85rem; padding: 4px 8px;">✏️</button>
-                                <button class="btn-icon btn-delete" onclick="deleteSupervisorHelper('${phone}')" title="Delete" style="font-size: 0.85rem; padding: 4px 8px;">🗑️</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        function editSupervisorHelper(phone) {
-            if (!supervisorHelperDatabase[phone]) return;
-            
-            const helper = supervisorHelperDatabase[phone];
-            
-            const modal = document.createElement('div');
-            modal.className = 'success-modal';
-            modal.innerHTML = `
-                <div class="success-content">
-                    <h2>Edit Supervisor Helper</h2>
-                    <div style="text-align: left; margin: 20px 0;">
-                        <div style="margin-bottom: 16px;">
-                            <label>Phone: <input type="tel" id="edit-super-helper-phone" value="${formatPhoneDisplay(phone)}" inputmode="numeric" maxlength="14" style="width: 200px; padding: 8px;"></label>
-                        </div>
-                        <div style="margin-bottom: 16px;">
-                            <label>First Name: <input type="text" id="edit-super-helper-first" value="${helper.firstName}" style="width: 200px; padding: 8px;"></label>
-                        </div>
-                        <div style="margin-bottom: 16px;">
-                            <label>Last Name: <input type="text" id="edit-super-helper-last" value="${helper.lastName}" style="width: 200px; padding: 8px;"></label>
-                        </div>
-                    </div>
-                    <button class="btn-success" onclick="saveEditSupervisorHelper('${phone}')">Save Changes</button>
-                    <button class="btn-outline" onclick="this.closest('.success-modal').remove()">Cancel</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // Setup numpad for phone input
-            setTimeout(setupPhoneInputs, 50);
-        }
-
-        function saveEditSupervisorHelper(oldPhone) {
-            const newFirstName = document.getElementById('edit-super-helper-first').value.trim();
-            const newLastName = document.getElementById('edit-super-helper-last').value.trim();
-            const newPhoneFormatted = document.getElementById('edit-super-helper-phone').value;
-            const newPhone = newPhoneFormatted.replace(/\D/g, '');
-            
-            if (!newFirstName || !newLastName || newPhone.length !== 10) {
-                alert('Please enter valid first name, last name, and 10-digit phone number');
-                return;
-            }
-            
-            // If phone changed, delete old entry
-            if (oldPhone !== newPhone) {
-                delete supervisorHelperDatabase[oldPhone];
-                
-                // Update any scheduled supervisor helpers
-                Object.keys(scheduledSupervisorHelpers).forEach(date => {
-                    if (scheduledSupervisorHelpers[date] && scheduledSupervisorHelpers[date].phone === oldPhone) {
-                        scheduledSupervisorHelpers[date].phone = newPhone;
-                    }
-                });
-            }
-            
-            // Save updated supervisor helper
-            supervisorHelperDatabase[newPhone] = {
-                firstName: newFirstName,
-                lastName: newLastName
-            };
-            
-            saveData();
-            renderSupervisorHelperDatabase();
-            updateDisplays();
-            document.querySelector('.success-modal').remove();
-        }
-
-        function deleteSupervisorHelper(phone) {
-            if (!supervisorHelperDatabase[phone]) return;
-            
-            const helper = supervisorHelperDatabase[phone];
-            
-            showConfirmModal(
-                `Delete supervisor helper ${helper.firstName} ${helper.lastName} (${formatPhoneDisplay(phone)})?`,
-                'Confirm Delete',
-                () => {
-                    delete supervisorHelperDatabase[phone];
-                    
-                    // Remove from any scheduled dates
-                    Object.keys(scheduledSupervisorHelpers).forEach(date => {
-                        if (scheduledSupervisorHelpers[date] && scheduledSupervisorHelpers[date].phone === phone) {
-                            delete scheduledSupervisorHelpers[date];
-                        }
-                    });
-                    
-                    saveData();
-                    renderSupervisorHelperDatabase();
-                    updateDisplays();
-                }
-            );
-        }
-
         function assignSupervisorHelper(date, phone) {
             // Use service-specific key: "date_service" (e.g., "02/15/2026_russian")
             const serviceKey = `${date}_${window.currentService}`;
@@ -5999,7 +5819,7 @@
                 // Remove supervisor helper assignment for this service
                 delete scheduledSupervisorHelpers[serviceKey];
             } else {
-                const helper = supervisorHelperDatabase[phone];
+                const helper = supervisorDatabase[phone];
                 if (helper) {
                     scheduledSupervisorHelpers[serviceKey] = {
                         phone: phone,
@@ -6596,7 +6416,6 @@
                     if (data.weeklyReports) window.weeklyReports = data.weeklyReports;
                     if (data.supervisorDatabase) window.supervisorDatabase = data.supervisorDatabase;
                     if (data.scheduledSupervisors) window.scheduledSupervisors = data.scheduledSupervisors;
-                    if (data.supervisorHelperDatabase) window.supervisorHelperDatabase = data.supervisorHelperDatabase;
                     if (data.scheduledSupervisorHelpers) window.scheduledSupervisorHelpers = data.scheduledSupervisorHelpers;
                     
                     // Also save to localStorage for backup
@@ -6614,7 +6433,6 @@
                     window.weeklyReports = window.weeklyReports || {};
                     window.supervisorDatabase = window.supervisorDatabase || {};
                     window.scheduledSupervisors = window.scheduledSupervisors || {};
-                    window.supervisorHelperDatabase = window.supervisorHelperDatabase || {};
                     window.scheduledSupervisorHelpers = window.scheduledSupervisorHelpers || {};
                     
                     // Create the document with empty structures
@@ -6632,7 +6450,6 @@
                 window.weeklyReports = window.weeklyReports || {};
                 window.supervisorDatabase = window.supervisorDatabase || {};
                 window.scheduledSupervisors = window.scheduledSupervisors || {};
-                window.supervisorHelperDatabase = window.supervisorHelperDatabase || {};
                 window.scheduledSupervisorHelpers = window.scheduledSupervisorHelpers || {};
                 updateSyncIndicator('synced');
             }
@@ -6674,7 +6491,6 @@
                     weeklyReports: window.weeklyReports || {},
                     supervisorDatabase: window.supervisorDatabase || {},
                     scheduledSupervisors: window.scheduledSupervisors || {},
-                    supervisorHelperDatabase: window.supervisorHelperDatabase || {},
                     scheduledSupervisorHelpers: window.scheduledSupervisorHelpers || {},
                     lastUpdated: new Date().toISOString(),
                     lastUpdatedBy: window.currentUserId
@@ -6752,7 +6568,6 @@
                         if (data.weeklyReports) window.weeklyReports = data.weeklyReports;
                         if (data.supervisorDatabase) window.supervisorDatabase = data.supervisorDatabase;
                         if (data.scheduledSupervisors) window.scheduledSupervisors = data.scheduledSupervisors;
-                        if (data.supervisorHelperDatabase) window.supervisorHelperDatabase = data.supervisorHelperDatabase;
                         if (data.scheduledSupervisorHelpers) window.scheduledSupervisorHelpers = data.scheduledSupervisorHelpers;
                         
                         // Save to localStorage as backup
@@ -6774,11 +6589,6 @@
                                 const supervisorDbView = document.getElementById('supervisor-db-view');
                                 if (supervisorDbView && !supervisorDbView.classList.contains('hidden')) {
                                     renderSupervisorDatabase();
-                                }
-                                // Refresh supervisor helper database if visible
-                                const supervisorHelperDbView = document.getElementById('supervisor-helper-database-content');
-                                if (supervisorHelperDbView && supervisorHelperDbView.parentElement && !supervisorHelperDbView.parentElement.classList.contains('hidden')) {
-                                    renderSupervisorHelperDatabase();
                                 }
                             }
                         }
