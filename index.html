@@ -724,6 +724,14 @@
 
         .phone-cell {
             display: table-cell;
+            filter: blur(5px);
+            cursor: pointer;
+            transition: filter 0.3s;
+        }
+
+        .phone-revealed .phone-cell {
+            filter: none;
+            cursor: default;
         }
 
         .volunteer-name,
@@ -867,25 +875,6 @@
             justify-content: center;
             gap: 20px;
             margin: 40px 0;
-        }
-
-        /* Membership toggle button styles */
-        .membership-toggle-btn.selected {
-            background: #4a90e2 !important;
-            color: white !important;
-            border-color: #4a90e2 !important;
-            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
-            transform: scale(1.05);
-        }
-
-        .membership-toggle-btn:hover:not(.selected) {
-            border-color: #4a90e2;
-            background: #f0f7ff;
-            transform: translateY(-2px);
-        }
-
-        .membership-toggle-btn:active {
-            transform: scale(0.98);
         }
 
         .schedule-list {
@@ -2656,58 +2645,9 @@
                 <div class="day-name" id="day-name">Thursday</div>
             </div>
             <div class="main-buttons">
-                <button id="btn-checkin" onclick="showPhoneEntry()">Check In Child(ren)</button>
+                <button id="btn-checkin" onclick="showMembership()">Check In Child(ren)</button>
                 <button id="btn-view" onclick="showViewCheckInsPasswordModal()">View Current Check-Ins</button>
                 <button id="btn-schedule" onclick="showScheduleView()">View Schedule</button>
-            </div>
-        </div>
-        <!-- NEW: Phone Entry Screen (First Step) -->
-        <div id="phone-entry-screen" class="card hidden">
-            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
-            <h1>Parent Phone Number 📱</h1>
-            <p style="text-align:center; color:#555; margin-bottom: 30px;">Enter your phone number to begin check-in</p>
-            <div style="text-align: center;">
-                <div style="display: inline-block; position: relative;">
-                    <input type="tel" id="checkin-phone" placeholder="(000) 000-0000" readonly 
-                           style="font-size: 2rem; text-align: center; width: 100%; max-width: 320px; padding: 20px; 
-                                  border: 3px solid #4a90e2; border-radius: 16px; background: white; cursor: pointer;"
-                           onclick="showNumpad('checkin-phone')">
-                </div>
-            </div>
-            <div style="text-align:center; margin-top: 40px;">
-                <button class="btn-primary" style="font-size: 1.3rem; padding: 18px 48px;" onclick="handlePhoneEntry()">Continue →</button>
-                <br><br>
-                <button class="btn-outline" onclick="backToMain()">Cancel</button>
-            </div>
-        </div>
-        <!-- NEW: Parent Info Screen (For Unknown Phone Numbers) -->
-        <div id="parent-info-screen" class="card hidden">
-            <button class="card-close-btn" onclick="backToMain()" title="Close">×</button>
-            <h1>Parent Information 👤</h1>
-            <p style="text-align:center; color:#555; margin-bottom: 20px;">Please provide your information</p>
-            <label>First Name: <input type="text" id="parent-first-name" placeholder="First name"></label><br>
-            <label>Last Name: <input type="text" id="parent-last-name" placeholder="Last name"></label><br>
-            <div style="margin: 30px 0;">
-                <label style="display: block; margin-bottom: 15px; font-weight: 600; font-size: 1.1rem;">Membership Status: *</label>
-                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                    <button id="member-btn" class="membership-toggle-btn" onclick="selectMembershipStatus('member')" 
-                            style="flex: 1; min-width: 140px; max-width: 200px; padding: 16px 24px; font-size: 1.1rem; 
-                                   border: 3px solid #ddd; background: white; color: #666; border-radius: 12px; 
-                                   cursor: pointer; transition: all 0.2s; font-weight: 600;">
-                        ✓ Member
-                    </button>
-                    <button id="non-member-btn" class="membership-toggle-btn" onclick="selectMembershipStatus('non-member')" 
-                            style="flex: 1; min-width: 140px; max-width: 200px; padding: 16px 24px; font-size: 1.1rem; 
-                                   border: 3px solid #ddd; background: white; color: #666; border-radius: 12px; 
-                                   cursor: pointer; transition: all 0.2s; font-weight: 600;">
-                        Non-Member
-                    </button>
-                </div>
-            </div>
-            <div style="text-align:center; margin-top: 40px;">
-                <button class="btn-primary" style="font-size: 1.2rem; padding: 16px 40px;" onclick="continueFromParentInfo()">Continue →</button>
-                <br><br>
-                <button class="btn-outline" onclick="backToMain()">Cancel</button>
             </div>
         </div>
         <!-- Membership -->
@@ -2864,6 +2804,7 @@
                                 <th>DATE</th>
                                 <th>Volunteer #1</th>
                                 <th>Volunteer #2</th>
+                                <th>Volunteer #3</th>
                                 <th>Supervisor</th>
                                 <th>Actions</th>
                             </tr>
@@ -2898,6 +2839,21 @@
                         <button class="btn-outline btn-sm" onclick="toggleAddSupervisorForm()">Cancel</button>
                     </div>
                     <div id="supervisor-database-content"></div>
+                </div>
+                
+                <!-- Supervisor Helper Database -->
+                <div class="admin-section">
+                    <h2><span class="section-icon">🤝</span> Supervisor Helper Database</h2>
+                    <p style="color: #666; font-size: 0.9em; margin-top: -8px; margin-bottom: 12px;">Helpers assist at the beginning and end of service only</p>
+                    <button class="btn-success btn-sm" onclick="toggleAddSupervisorHelperForm()" style="margin-bottom: 12px; font-size: 0.85rem; padding: 6px 12px;">+ Add Helper</button>
+                    <div id="add-supervisor-helper-form" class="hidden add-vol-form">
+                        <label>Phone: <input type="tel" id="super-helper-phone" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this)"></label><br>
+                        <label>First Name: <input type="text" id="super-helper-first-name" placeholder="John"></label><br>
+                        <label>Last Name: <input type="text" id="super-helper-last-name" placeholder="Doe"></label><br>
+                        <button class="btn-success btn-sm" onclick="addSupervisorHelperToDatabase()">Save</button>
+                        <button class="btn-outline btn-sm" onclick="toggleAddSupervisorHelperForm()">Cancel</button>
+                    </div>
+                    <div id="supervisor-helper-database-content"></div>
                 </div>
             </div>
 
@@ -3109,7 +3065,7 @@
                 <div style="margin: 15px 0;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Age (1-6):</label>
                     <select id="add-child-age"
-                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#000;" required onchange="this.style.color='#000'">
+                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#bbb;" required onchange="this.style.color='#000'">
                         <option value="" disabled selected>Select</option>
                         <option value="1" style="color:#000;">1</option>
                         <option value="2" style="color:#000;">2</option>
@@ -3123,7 +3079,7 @@
                 <div style="margin: 15px 0;">
                     <label style="display: block; margin-bottom: 5px; font-weight: 600;">Allergies:</label>
                     <select id="add-child-allergies" onchange="toggleAddChildOtherAllergy(); this.style.color='#000'"
-                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#000;" required>
+                            style="width: 100%; padding: 12px; border: 2px solid #d1e3ff; border-radius: 8px; font-size: 1rem; color:#bbb;" required>
                         <option value="" disabled selected>Select</option>
                         <option value="None" style="color:#000;">None</option>
                         <option value="Other" style="color:#000;">Other</option>
@@ -3153,7 +3109,9 @@
             familyDatabase: 'kids_checkin_family_database',
             weeklyReports: 'kids_checkin_weekly_reports',
             supervisors: 'kids_checkin_supervisors',
-            scheduledSupervisors: 'kids_checkin_scheduled_supervisors'
+            scheduledSupervisors: 'kids_checkin_scheduled_supervisors',
+            supervisorHelpers: 'kids_checkin_supervisor_helpers',
+            scheduledSupervisorHelpers: 'kids_checkin_scheduled_supervisor_helpers'
         };
         // Initialize on window so Firebase can sync
         var checkIns = window.checkIns = window.checkIns || [];
@@ -3163,6 +3121,8 @@
         var familyDatabase = window.familyDatabase = window.familyDatabase || {};
         var supervisorDatabase = window.supervisorDatabase = window.supervisorDatabase || {};
         var scheduledSupervisors = window.scheduledSupervisors = window.scheduledSupervisors || {};
+        var supervisorHelperDatabase = window.supervisorHelperDatabase = window.supervisorHelperDatabase || {};
+        var scheduledSupervisorHelpers = window.scheduledSupervisorHelpers = window.scheduledSupervisorHelpers || {};
         var weeklyReports = window.weeklyReports = window.weeklyReports || {};
         let currentBuzzer = null;
         let childCounter = 0;
@@ -3180,13 +3140,8 @@
         let numpadProcessing = false; // Prevent rapid clicks
 
         function showNumpad(inputElement) {
-            // Handle both element ID strings and element objects
-            if (typeof inputElement === 'string') {
-                numpadCurrentInput = document.getElementById(inputElement);
-            } else {
-                numpadCurrentInput = inputElement;
-            }
-            numpadValue = numpadCurrentInput.value.replace(/\D/g, ''); // Get just digits
+            numpadCurrentInput = inputElement;
+            numpadValue = inputElement.value.replace(/\D/g, ''); // Get just digits
             numpadProcessing = false; // Reset processing flag
             updateNumpadDisplay();
             document.getElementById('numpad-overlay').classList.add('show');
@@ -3364,6 +3319,8 @@
             const loadedWeeklyReports = JSON.parse(localStorage.getItem(storageKeys.weeklyReports)) || {};
             const loadedSupervisorDatabase = JSON.parse(localStorage.getItem(storageKeys.supervisors)) || {};
             const loadedScheduledSupervisors = JSON.parse(localStorage.getItem(storageKeys.scheduledSupervisors)) || {};
+            const loadedSupervisorHelperDatabase = JSON.parse(localStorage.getItem(storageKeys.supervisorHelpers)) || {};
+            const loadedScheduledSupervisorHelpers = JSON.parse(localStorage.getItem(storageKeys.scheduledSupervisorHelpers)) || {};
             
             // Replace arrays/objects (don't append)
             Object.keys(parents).forEach(k => delete parents[k]);
@@ -3390,6 +3347,12 @@
             Object.keys(scheduledSupervisors).forEach(k => delete scheduledSupervisors[k]);
             Object.assign(scheduledSupervisors, loadedScheduledSupervisors);
             
+            Object.keys(supervisorHelperDatabase).forEach(k => delete supervisorHelperDatabase[k]);
+            Object.assign(supervisorHelperDatabase, loadedSupervisorHelperDatabase);
+            
+            Object.keys(scheduledSupervisorHelpers).forEach(k => delete scheduledSupervisorHelpers[k]);
+            Object.assign(scheduledSupervisorHelpers, loadedScheduledSupervisorHelpers);
+            
             if (!volunteers.all) volunteers.all = [];
             checkAndSaveWeeklyReport(); // Check if we need to save today's report
         }
@@ -3403,6 +3366,8 @@
             localStorage.setItem(storageKeys.weeklyReports, JSON.stringify(weeklyReports));
             localStorage.setItem(storageKeys.supervisors, JSON.stringify(supervisorDatabase));
             localStorage.setItem(storageKeys.scheduledSupervisors, JSON.stringify(scheduledSupervisors));
+            localStorage.setItem(storageKeys.supervisorHelpers, JSON.stringify(supervisorHelperDatabase));
+            localStorage.setItem(storageKeys.scheduledSupervisorHelpers, JSON.stringify(scheduledSupervisorHelpers));
         }
         // ─── Navigation ─────────────────────────────────────────────────────────
         function hideAll() {
@@ -3433,202 +3398,6 @@
             show('info-form');
         }
         // ─── Check-in flow ──────────────────────────────────────────────────────
-        // Global variable to track selected membership status
-        let selectedMembershipStatus = null;
-        
-        // NEW: Show phone entry screen (first step)
-        function showPhoneEntry() {
-            document.getElementById('checkin-phone').value = '';
-            selectedMembershipStatus = null;
-            show('phone-entry-screen');
-        }
-
-        // NEW: Handle phone entry and check if phone exists
-        function handlePhoneEntry() {
-            const phoneInput = document.getElementById('checkin-phone');
-            const phoneClean = phoneInput.value.replace(/\D/g, '').trim();
-
-            if (phoneClean.length !== 10) {
-                showCenteredAlert("Please enter a valid 10-digit phone number");
-                return;
-            }
-
-            // Check if phone exists in database
-            const family = familyDatabase[phoneClean];
-            const parent = parents[phoneClean];
-
-            if (family || parent) {
-                // Phone number EXISTS - prefill all data and go to info form
-                const data = family || parent;
-                document.getElementById('phone').value = phoneInput.value;
-                document.getElementById('firstName').value = data.firstName || '';
-                document.getElementById('lastName').value = data.lastName || '';
-                
-                // Set membership status if available
-                if (data.isMember !== undefined) {
-                    selectedMembershipStatus = data.isMember ? 'member' : 'non-member';
-                }
-                
-                // Clear and prefill children
-                document.getElementById('children-list').innerHTML = '';
-                childCounter = 0;
-                
-                const kidsArray = family ? family.kids : (parent.children || []);
-                if (kidsArray && kidsArray.length > 0) {
-                    kidsArray.forEach(child => {
-                        childCounter++;
-                        const div = document.createElement('div');
-                        div.className = 'child-entry';
-                        const allergiesValue = child.allergies || '';
-                        const isOther = allergiesValue !== '' && allergiesValue !== 'None';
-                        const otherText = isOther ? allergiesValue : '';
-                        
-                        div.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <div style="flex: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;">
-                        <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
-                            <strong>Child:</strong>
-                            <input type="text" class="child-name" value="${child.name || ''}" required style="width: 140px;" placeholder="Name" />
-                        </label>
-                        <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
-                            <strong>Age:</strong>
-                            <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
-                                <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
-                                ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
-                            </select>
-                        </label>
-                        <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
-                            <strong>Allergies:</strong>
-                            <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
-                                <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
-                                <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
-                                <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
-                            </select>
-                        </label>
-                        <input type="text" class="child-allergies-other" style="width: 140px; display:${isOther ? 'inline' : 'none'};" value="${otherText}" placeholder="Specify allergy" />
-                    </div>
-                    
-                    <button class="btn-icon btn-delete" onclick="this.parentElement.parentElement.remove(); renumberChildren()" title="Remove this child">
-                        <span class="icon">🗑️</span>
-                        <span class="text">Remove<br>Child</span>
-                    </button>
-                </div>
-            `;
-                        document.getElementById('children-list').appendChild(div);
-                        attachAllergyHandler(div);
-                    });
-                } else {
-                    // No kids saved, add empty entry
-                    addChildEntry();
-                }
-                
-                // Go directly to info form with prefilled data
-                show('info-form');
-            } else {
-                // Phone number DOES NOT EXIST - go to parent info screen
-                document.getElementById('phone').value = phoneInput.value;
-                document.getElementById('parent-first-name').value = '';
-                document.getElementById('parent-last-name').value = '';
-                selectedMembershipStatus = null;
-                
-                // Reset button styles
-                document.getElementById('member-btn').classList.remove('selected');
-                document.getElementById('non-member-btn').classList.remove('selected');
-                
-                show('parent-info-screen');
-            }
-        }
-
-        // NEW: Select membership status (member or non-member)
-        function selectMembershipStatus(status) {
-            selectedMembershipStatus = status;
-            
-            const memberBtn = document.getElementById('member-btn');
-            const nonMemberBtn = document.getElementById('non-member-btn');
-            
-            if (status === 'member') {
-                memberBtn.classList.add('selected');
-                nonMemberBtn.classList.remove('selected');
-            } else {
-                nonMemberBtn.classList.add('selected');
-                memberBtn.classList.remove('selected');
-            }
-        }
-
-        // NEW: Continue from parent info screen
-        function continueFromParentInfo() {
-            const firstName = document.getElementById('parent-first-name').value.trim();
-            const lastName = document.getElementById('parent-last-name').value.trim();
-
-            if (!firstName || !lastName) {
-                showCenteredAlert("Please enter both first and last name");
-                return;
-            }
-
-            if (!selectedMembershipStatus) {
-                // Show modal asking them to select membership status
-                showMembershipSelectionAlert();
-                return;
-            }
-
-            // Transfer data to info form
-            document.getElementById('firstName').value = firstName;
-            document.getElementById('lastName').value = lastName;
-            
-            // Clear children list and add one empty entry
-            document.getElementById('children-list').innerHTML = '';
-            childCounter = 0;
-            addChildEntry();
-            
-            // Go to info form
-            show('info-form');
-        }
-
-        // NEW: Show membership selection alert
-        function showMembershipSelectionAlert() {
-            const modal = document.getElementById('centered-alert');
-            document.getElementById('alert-title').textContent = 'Membership Status Required';
-            document.getElementById('alert-message').textContent = 'Please select whether you are a Member or Non-Member';
-            
-            const okBtn = modal.querySelector('.btn-primary');
-            
-            // Change to Yes/No buttons for membership selection
-            okBtn.textContent = 'Member';
-            okBtn.onclick = () => {
-                selectMembershipStatus('member');
-                modal.classList.add('hidden');
-                okBtn.textContent = 'OK';
-                okBtn.onclick = closeCenteredAlert;
-                // Remove the No button if it exists
-                const noBtn = modal.querySelector('.btn-cancel-temp');
-                if (noBtn) noBtn.style.display = 'none';
-                // Trigger continue after selection
-                continueFromParentInfo();
-            };
-            
-            // Add Non-Member button
-            let noBtn = modal.querySelector('.btn-cancel-temp');
-            if (!noBtn) {
-                noBtn = document.createElement('button');
-                noBtn.className = 'btn-outline btn-cancel-temp';
-                noBtn.textContent = 'Non-Member';
-                modal.querySelector('.centered-modal-content').appendChild(noBtn);
-            }
-            noBtn.textContent = 'Non-Member';
-            noBtn.style.display = 'inline-block';
-            noBtn.onclick = () => {
-                selectMembershipStatus('non-member');
-                modal.classList.add('hidden');
-                okBtn.textContent = 'OK';
-                okBtn.onclick = closeCenteredAlert;
-                noBtn.style.display = 'none';
-                // Trigger continue after selection
-                continueFromParentInfo();
-            };
-            
-            modal.classList.remove('hidden');
-        }
-
         function showMembership() {
             show('membership-screen');
         }
@@ -3713,14 +3482,14 @@
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Age:</strong>
-                      <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
+                      <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
                           <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                           ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                       </select>
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Allergies:</strong>
-                      <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
+                      <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
                           <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                           <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                           <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -3761,14 +3530,14 @@
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Age:</strong>
-                      <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
+                      <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
                           <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                           ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                       </select>
                   </label>
                   <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                       <strong>Allergies:</strong>
-                      <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
+                      <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
                           <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                           <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                           <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -3797,19 +3566,12 @@
         }
 
         // ─── Centered Alert Modal ───────────────────────────────────────────────
-        function showCenteredAlert(message, title = 'Alert', autoDismissSeconds = null) {
+        function showCenteredAlert(message, title = 'Alert') {
             // Close numpad first to prevent overlay issues
             hideNumpad();
             document.getElementById('alert-title').textContent = title;
             document.getElementById('alert-message').textContent = message;
             document.getElementById('centered-alert').classList.remove('hidden');
-            
-            // Auto-dismiss if timeout specified
-            if (autoDismissSeconds) {
-                setTimeout(() => {
-                    closeCenteredAlert();
-                }, autoDismissSeconds * 1000);
-            }
         }
 
         function closeCenteredAlert() {
@@ -3936,7 +3698,7 @@
 
             sundays.forEach(date => {
                 const slots = volunteers[date] || [];
-                const isFull = slots.length >= 2;
+                const isFull = slots.length >= 3;
                 const alreadySignedUp = slots.some(v => v.phone === phone);
                 
                 const div = document.createElement('div');
@@ -3946,11 +3708,13 @@
                 if (alreadySignedUp) {
                     statusText = '✓ You are signed up';
                 } else if (isFull) {
-                    statusText = 'Full (2/2)';
+                    statusText = 'Full (3/3)';
+                } else if (slots.length === 2) {
+                    statusText = 'Need 1 more (2/3)';
                 } else if (slots.length === 1) {
-                    statusText = 'Need 1 more (1/2)';
+                    statusText = 'Need 2 more (1/3)';
                 } else {
-                    statusText = 'Open (0/2)';
+                    statusText = 'Open (0/3)';
                 }
 
                 div.innerHTML = `
@@ -4020,14 +3784,14 @@
                                 </label>
                                 <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                     <strong>Age:</strong>
-                                    <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
+                                    <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
                                         <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                                         ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                     </select>
                                 </label>
                                 <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                     <strong>Allergies:</strong>
-                                    <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
+                                    <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
                                         <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                                         <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                                         <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -4067,14 +3831,14 @@
                         </label>
                         <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                             <strong>Age:</strong>
-                            <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
+                            <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
                                 <option value="" disabled selected>Select</option>
                                 ${[1,2,3,4,5,6].map(age => `<option value="${age}" style="color:#000;">${age}</option>`).join('')}
                             </select>
                         </label>
                         <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                             <strong>Allergies:</strong>
-                            <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
+                            <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
                                 <option value="" disabled selected>Select</option>
                                 <option value="None" style="color:#000;">None</option>
                                 <option value="Other" style="color:#000;">Other</option>
@@ -4148,14 +3912,14 @@
                                     </label>
                                     <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                         <strong>Age:</strong>
-                                        <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
+                                        <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
                                             <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                                             ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                         </select>
                                     </label>
                                     <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                         <strong>Allergies:</strong>
-                                        <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
+                                        <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
                                             <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                                             <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                                             <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -4334,12 +4098,16 @@
                 });
             });
             
+            if (!parents[phone]) parents[phone] = {};
+            parents[phone].firstName = first;
+            parents[phone].lastName = last;
+            parents[phone].children = currentChildren;
+            
             // Update family database - only add NEW children, don't remove existing ones
             if (!familyDatabase[phone]) {
                 // First time for this phone - create new entry
                 familyDatabase[phone] = {
-                    type: (selectedMembershipStatus === 'member') ? 'member' : 'nonmember',
-                    isMember: (selectedMembershipStatus === 'member'),
+                    type: isMemberPath ? 'member' : 'nonmember',
                     firstName: first,
                     lastName: last,
                     kids: currentChildren.map(child => ({
@@ -4369,19 +4137,7 @@
                 // Update parent names in case they changed
                 familyDatabase[phone].firstName = first;
                 familyDatabase[phone].lastName = last;
-                // Update membership status if it was set during this check-in
-                if (selectedMembershipStatus) {
-                    familyDatabase[phone].type = (selectedMembershipStatus === 'member') ? 'member' : 'nonmember';
-                    familyDatabase[phone].isMember = (selectedMembershipStatus === 'member');
-                }
             }
-            
-            // Also update parents object with membership status
-            if (!parents[phone]) parents[phone] = {};
-            parents[phone].firstName = first;
-            parents[phone].lastName = last;
-            parents[phone].children = currentChildren;
-            parents[phone].isMember = familyDatabase[phone].isMember;
             
             usedBuzzers.add(currentBuzzer);
             saveData();
@@ -4615,7 +4371,7 @@
                     <td>${firstChild.age}</td>
                     <td${allergiesStyle}>${firstChild.allergies}</td>
                     <td rowspan="${group.length}">${firstChild.parentName}</td>
-                    <td rowspan="${group.length}" class="phone-cell">${firstChild.phone}</td>
+                    <td rowspan="${group.length}" class="phone-cell" onclick="requestAdminAction('show-phone', ${firstChild.originalIndex})">${firstChild.phone}</td>
                     <td rowspan="${group.length}">
                         <button class="btn-danger btn-sm" onclick="requestCheckoutByBuzzer(${buzzerNum})" style="display: block; margin: 4px auto;">Check Out</button>
                         <button class="btn-primary btn-sm" onclick="requestAddChildToBuzzer(${buzzerNum}, '${firstChild.phone}', '${firstChild.parentName}')" style="display: block; margin: 4px auto;">+ Add Child</button>
@@ -5072,7 +4828,7 @@
                 // Use service-specific key
                 const serviceKey = `${date}_${window.currentService}`;
                 const slots = volunteers[serviceKey] || [];
-                openings += (2 - slots.length);
+                openings += (3 - slots.length);
             });
             document.getElementById('stat-upcoming').textContent = openings;
 
@@ -5092,10 +4848,15 @@
                     name: '—',
                     phone: '—'
                 };
+                const v3 = slots[2] || {
+                    name: '—',
+                    phone: '—'
+                };
                 const supervisor = scheduledSupervisors[serviceKey] || null;
+                const supervisorHelper = scheduledSupervisorHelpers[serviceKey] || null;
                 
                 // Create supervisor dropdown
-                let supervisorDropdown = '<select onchange="assignSupervisor(\'' + date + '\', this.value)" style="width: 100%; padding: 6px;">';
+                let supervisorDropdown = '<select onchange="assignSupervisor(\'' + date + '\', this.value)" style="width: 100%; padding: 6px; margin-bottom: 8px;">';
                 supervisorDropdown += '<option value="">— Select Supervisor —</option>';
                 Object.entries(supervisorDatabase).forEach(([phone, sup]) => {
                     const selected = supervisor && supervisor.phone === phone ? 'selected' : '';
@@ -5103,8 +4864,18 @@
                 });
                 supervisorDropdown += '</select>';
                 
-                const status = slots.length === 0 ? 'Open – need 2' :
-                    slots.length === 1 ? '1/2 signed up' : 'Full';
+                // Create supervisor helper dropdown
+                let supervisorHelperDropdown = '<select onchange="assignSupervisorHelper(\'' + date + '\', this.value)" style="width: 100%; padding: 6px;">';
+                supervisorHelperDropdown += '<option value="">— Select Helper —</option>';
+                Object.entries(supervisorHelperDatabase).forEach(([phone, sup]) => {
+                    const selected = supervisorHelper && supervisorHelper.phone === phone ? 'selected' : '';
+                    supervisorHelperDropdown += `<option value="${phone}" ${selected}>${sup.firstName} ${sup.lastName} - ${formatPhoneDisplay(phone)}</option>`;
+                });
+                supervisorHelperDropdown += '</select>';
+                
+                const status = slots.length === 0 ? 'Open – need 3' :
+                    slots.length === 1 ? '1/3 signed up' : 
+                    slots.length === 2 ? '2/3 signed up' : 'Full';
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
         <td><strong>${date}</strong><br><small style="color:#666;">${status}</small></td>
@@ -5114,7 +4885,7 @@
               <strong>${v1.name}</strong><br>
               <small style="color:#666;">${v1.phone !== '—' ? formatPhoneDisplay(v1.phone) : ''}</small>
             </div>
-          ` : '<span style="color:#000;">Empty slot</span>'}
+          ` : '<span style="color:#bbb;">Empty slot</span>'}
         </td>
         <td>
           ${v2.name !== '—' ? `
@@ -5122,24 +4893,42 @@
               <strong>${v2.name}</strong><br>
               <small style="color:#666;">${v2.phone !== '—' ? formatPhoneDisplay(v2.phone) : ''}</small>
             </div>
-          ` : '<span style="color:#000;">Empty slot</span>'}
+          ` : '<span style="color:#bbb;">Empty slot</span>'}
         </td>
-        <td>${supervisorDropdown}</td>
+        <td>
+          ${v3.name !== '—' ? `
+            <div style="margin-bottom: 4px;">
+              <strong>${v3.name}</strong><br>
+              <small style="color:#666;">${v3.phone !== '—' ? formatPhoneDisplay(v3.phone) : ''}</small>
+            </div>
+          ` : '<span style="color:#bbb;">Empty slot</span>'}
+        </td>
+        <td>
+          <div style="margin-bottom: 4px;">
+            <small style="color:#666; display: block; margin-bottom: 4px;">Supervisor (full service):</small>
+            ${supervisorDropdown}
+          </div>
+          <div>
+            <small style="color:#666; display: block; margin-bottom: 4px;">Helper (start/end only):</small>
+            ${supervisorHelperDropdown}
+          </div>
+        </td>
         <td>
           <div class="action-buttons" style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;">
-            ${slots.length < 2 ? `<button class="btn-success btn-sm" onclick="toggleAddVolunteerForm('${date}')" style="white-space: nowrap;">+ Add</button>` : ''}
+            ${slots.length < 3 ? `<button class="btn-success btn-sm" onclick="toggleAddVolunteerForm('${date}')" style="white-space: nowrap;">+ Add</button>` : ''}
             ${v1.name !== '—' ? `<button class="btn-icon btn-delete" onclick="removeVolunteerFromDate('${date}', 0)" title="Remove ${v1.name}">🗑️</button>` : ''}
             ${v2.name !== '—' ? `<button class="btn-icon btn-delete" onclick="removeVolunteerFromDate('${date}', 1)" title="Remove ${v2.name}">🗑️</button>` : ''}
+            ${v3.name !== '—' ? `<button class="btn-icon btn-delete" onclick="removeVolunteerFromDate('${date}', 2)" title="Remove ${v3.name}">🗑️</button>` : ''}
           </div>
         </td>
       `;
                 schedBody.appendChild(tr);
-                if (slots.length < 2) {
+                if (slots.length < 3) {
                     const formTr = document.createElement('tr');
                     formTr.id = `add-vol-form-row-${date}`;
                     formTr.className = 'hidden';
                     formTr.innerHTML = `
-          <td colspan="4" style="padding:0;">
+          <td colspan="6" style="padding:0;">
             <div class="add-vol-form">
               <label>Phone: <input type="tel" id="add-vol-phone-${date}" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this)" /></label><br>
               <label>First & Last: <input type="text" id="add-vol-name-${date}" placeholder="John Doe" /></label><br>
@@ -5160,6 +4949,9 @@
             
             // Render supervisor database
             renderSupervisorDatabase();
+            
+            // Render supervisor helper database
+            renderSupervisorHelperDatabase();
             
             // Render reports
             renderReports();
@@ -5699,7 +5491,7 @@
             const newType = document.getElementById('edit-type').value;
             
             if (!newFirstName || !newLastName || newPhone.length !== 10) {
-                showCenteredAlert('Please enter valid first name, last name, and 10-digit phone number', 'Invalid Input');
+                alert('Please enter valid first name, last name, and 10-digit phone number');
                 return;
             }
             
@@ -5879,12 +5671,12 @@
             const phone = phoneFormatted.replace(/\D/g, '');
             
             if (!firstName || !lastName || phone.length !== 10) {
-                showCenteredAlert('Please enter first name, last name, and valid 10-digit phone number.', 'Invalid Input');
+                alert('Please enter first name, last name, and valid 10-digit phone number.');
                 return;
             }
             
             if (supervisorDatabase[phone]) {
-                showCenteredAlert('Supervisor with this phone already exists.', 'Duplicate Entry');
+                alert('Supervisor with this phone already exists.');
                 return;
             }
             
@@ -5969,7 +5761,7 @@
             const newPhone = newPhoneFormatted.replace(/\D/g, '');
             
             if (!newFirstName || !newLastName || newPhone.length !== 10) {
-                showCenteredAlert('Please enter valid first name, last name, and 10-digit phone number', 'Invalid Input');
+                alert('Please enter valid first name, last name, and 10-digit phone number');
                 return;
             }
             
@@ -6044,6 +5836,183 @@
             updateDisplays();
         }
 
+        // ─── Supervisor Helper Management Functions ──────────────────────────────
+        function toggleAddSupervisorHelperForm() {
+            document.getElementById('add-supervisor-helper-form').classList.toggle('hidden');
+        }
+
+        function addSupervisorHelperToDatabase() {
+            const firstName = document.getElementById('super-helper-first-name').value.trim();
+            const lastName = document.getElementById('super-helper-last-name').value.trim();
+            const phoneFormatted = document.getElementById('super-helper-phone').value;
+            const phone = phoneFormatted.replace(/\D/g, '');
+            
+            if (!firstName || !lastName || phone.length !== 10) {
+                alert('Please enter first name, last name, and valid 10-digit phone number.');
+                return;
+            }
+            
+            if (supervisorHelperDatabase[phone]) {
+                alert('Supervisor helper with this phone already exists.');
+                return;
+            }
+            
+            supervisorHelperDatabase[phone] = {
+                firstName: firstName,
+                lastName: lastName
+            };
+            
+            saveData();
+            document.getElementById('super-helper-first-name').value = '';
+            document.getElementById('super-helper-last-name').value = '';
+            document.getElementById('super-helper-phone').value = '';
+            toggleAddSupervisorHelperForm();
+            renderSupervisorHelperDatabase();
+            updateDisplays();
+        }
+
+        function renderSupervisorHelperDatabase() {
+            const container = document.getElementById('supervisor-helper-database-content');
+            
+            if (Object.keys(supervisorHelperDatabase).length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">No supervisor helpers in database yet</p>';
+                return;
+            }
+            
+            let html = '';
+            Object.entries(supervisorHelperDatabase).forEach(([phone, helper]) => {
+                html += `
+                    <div style="background: white; border-radius: 12px; padding: 12px; margin: 12px 0; border: 2px solid #d1e3ff; box-sizing: border-box; overflow: hidden;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <strong style="font-size: 1.1rem; color: var(--text); word-break: break-word;">${helper.firstName} ${helper.lastName}</strong><br>
+                                <span style="color: var(--primary); font-size: 0.95rem; word-break: break-word;">${formatPhoneDisplay(phone)}</span>
+                            </div>
+                            <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                                <button class="btn-icon btn-edit" onclick="editSupervisorHelper('${phone}')" title="Edit" style="font-size: 0.85rem; padding: 4px 8px;">✏️</button>
+                                <button class="btn-icon btn-delete" onclick="deleteSupervisorHelper('${phone}')" title="Delete" style="font-size: 0.85rem; padding: 4px 8px;">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function editSupervisorHelper(phone) {
+            if (!supervisorHelperDatabase[phone]) return;
+            
+            const helper = supervisorHelperDatabase[phone];
+            
+            const modal = document.createElement('div');
+            modal.className = 'success-modal';
+            modal.innerHTML = `
+                <div class="success-content">
+                    <h2>Edit Supervisor Helper</h2>
+                    <div style="text-align: left; margin: 20px 0;">
+                        <div style="margin-bottom: 16px;">
+                            <label>Phone: <input type="tel" id="edit-super-helper-phone" value="${formatPhoneDisplay(phone)}" inputmode="numeric" maxlength="14" style="width: 200px; padding: 8px;"></label>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label>First Name: <input type="text" id="edit-super-helper-first" value="${helper.firstName}" style="width: 200px; padding: 8px;"></label>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label>Last Name: <input type="text" id="edit-super-helper-last" value="${helper.lastName}" style="width: 200px; padding: 8px;"></label>
+                        </div>
+                    </div>
+                    <button class="btn-success" onclick="saveEditSupervisorHelper('${phone}')">Save Changes</button>
+                    <button class="btn-outline" onclick="this.closest('.success-modal').remove()">Cancel</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Setup numpad for phone input
+            setTimeout(setupPhoneInputs, 50);
+        }
+
+        function saveEditSupervisorHelper(oldPhone) {
+            const newFirstName = document.getElementById('edit-super-helper-first').value.trim();
+            const newLastName = document.getElementById('edit-super-helper-last').value.trim();
+            const newPhoneFormatted = document.getElementById('edit-super-helper-phone').value;
+            const newPhone = newPhoneFormatted.replace(/\D/g, '');
+            
+            if (!newFirstName || !newLastName || newPhone.length !== 10) {
+                alert('Please enter valid first name, last name, and 10-digit phone number');
+                return;
+            }
+            
+            // If phone changed, delete old entry
+            if (oldPhone !== newPhone) {
+                delete supervisorHelperDatabase[oldPhone];
+                
+                // Update any scheduled supervisor helpers
+                Object.keys(scheduledSupervisorHelpers).forEach(date => {
+                    if (scheduledSupervisorHelpers[date] && scheduledSupervisorHelpers[date].phone === oldPhone) {
+                        scheduledSupervisorHelpers[date].phone = newPhone;
+                    }
+                });
+            }
+            
+            // Save updated supervisor helper
+            supervisorHelperDatabase[newPhone] = {
+                firstName: newFirstName,
+                lastName: newLastName
+            };
+            
+            saveData();
+            renderSupervisorHelperDatabase();
+            updateDisplays();
+            document.querySelector('.success-modal').remove();
+        }
+
+        function deleteSupervisorHelper(phone) {
+            if (!supervisorHelperDatabase[phone]) return;
+            
+            const helper = supervisorHelperDatabase[phone];
+            
+            showConfirmModal(
+                `Delete supervisor helper ${helper.firstName} ${helper.lastName} (${formatPhoneDisplay(phone)})?`,
+                'Confirm Delete',
+                () => {
+                    delete supervisorHelperDatabase[phone];
+                    
+                    // Remove from any scheduled dates
+                    Object.keys(scheduledSupervisorHelpers).forEach(date => {
+                        if (scheduledSupervisorHelpers[date] && scheduledSupervisorHelpers[date].phone === phone) {
+                            delete scheduledSupervisorHelpers[date];
+                        }
+                    });
+                    
+                    saveData();
+                    renderSupervisorHelperDatabase();
+                    updateDisplays();
+                }
+            );
+        }
+
+        function assignSupervisorHelper(date, phone) {
+            // Use service-specific key: "date_service" (e.g., "02/15/2026_russian")
+            const serviceKey = `${date}_${window.currentService}`;
+            
+            if (!phone) {
+                // Remove supervisor helper assignment for this service
+                delete scheduledSupervisorHelpers[serviceKey];
+            } else {
+                const helper = supervisorHelperDatabase[phone];
+                if (helper) {
+                    scheduledSupervisorHelpers[serviceKey] = {
+                        phone: phone,
+                        firstName: helper.firstName,
+                        lastName: helper.lastName,
+                        service: window.currentService
+                    };
+                }
+            }
+            saveData();
+            updateDisplays();
+        }
+
         // ─── Phone formatting ───────────────────────────────────────────────────
         function formatPhone(input) {
             let digits = input.value.replace(/\D/g, '').slice(0, 10);
@@ -6078,8 +6047,8 @@
                     slots.forEach((vol, idx) => {
                         volunteersText += `<p>${idx + 1}. ${vol.name}</p>`;
                     });
-                    if (slots.length < 2) {
-                        volunteersText += '<p style="color: #ff6b6b;">Still need ' + (2 - slots.length) + ' more volunteer(s)</p>';
+                    if (slots.length < 3) {
+                        volunteersText += '<p style="color: #ff6b6b;">Still need ' + (3 - slots.length) + ' more volunteer(s)</p>';
                     }
                 }
                 
@@ -6092,7 +6061,7 @@
                 
                 // Add sign-up button if not full
                 let signUpButton = '';
-                if (slots.length < 2) {
+                if (slots.length < 3) {
                     signUpButton = `<button class="btn-success btn-sm" onclick="showScheduleSignUpForm('${date}')" style="margin-top: 8px;">Sign Up for This Date</button>`;
                 }
                 
@@ -6416,7 +6385,7 @@
                 memBtn.addEventListener('click', () => {
                     const phone = document.getElementById('vol-phone-first').value.replace(/\D/g, '');
                     if (phone.length !== 10) {
-                        showCenteredAlert('Please enter a valid 10-digit phone number', 'Invalid Phone');
+                        alert('Please enter a valid 10-digit phone number');
                         return;
                     }
                     
@@ -6469,14 +6438,14 @@
                                             </label>
                                             <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                                 <strong>Age:</strong>
-                                                <select class="child-age" style="width: 110px; color:#000;" required onchange="this.style.color='#000'">
+                                                <select class="child-age" style="width: 110px; color:#bbb;" required onchange="this.style.color='#000'">
                                                     <option value="" disabled ${!child.age ? 'selected' : ''}>Select</option>
                                                     ${[1,2,3,4,5,6].map(age => `<option value="${age}" ${child.age == age ? 'selected' : ''} style="color:#000;">${age}</option>`).join('')}
                                                 </select>
                                             </label>
                                             <label style="margin: 0; display: flex; align-items: center; gap: 4px;">
                                                 <strong>Allergies:</strong>
-                                                <select class="child-allergies" style="width: 140px; color:#000;" required onchange="this.style.color='#000'">
+                                                <select class="child-allergies" style="width: 140px; color:#bbb;" required onchange="this.style.color='#000'">
                                                     <option value="" disabled ${allergiesValue === '' ? 'selected' : ''}>Select</option>
                                                     <option value="None" ${allergiesValue === 'None' ? 'selected' : ''} style="color:#000;">None</option>
                                                     <option value="Other" ${isOther ? 'selected' : ''} style="color:#000;">Other</option>
@@ -6627,6 +6596,8 @@
                     if (data.weeklyReports) window.weeklyReports = data.weeklyReports;
                     if (data.supervisorDatabase) window.supervisorDatabase = data.supervisorDatabase;
                     if (data.scheduledSupervisors) window.scheduledSupervisors = data.scheduledSupervisors;
+                    if (data.supervisorHelperDatabase) window.supervisorHelperDatabase = data.supervisorHelperDatabase;
+                    if (data.scheduledSupervisorHelpers) window.scheduledSupervisorHelpers = data.scheduledSupervisorHelpers;
                     
                     // Also save to localStorage for backup
                     originalSaveData();
@@ -6643,6 +6614,8 @@
                     window.weeklyReports = window.weeklyReports || {};
                     window.supervisorDatabase = window.supervisorDatabase || {};
                     window.scheduledSupervisors = window.scheduledSupervisors || {};
+                    window.supervisorHelperDatabase = window.supervisorHelperDatabase || {};
+                    window.scheduledSupervisorHelpers = window.scheduledSupervisorHelpers || {};
                     
                     // Create the document with empty structures
                     await window.saveData();
@@ -6659,6 +6632,8 @@
                 window.weeklyReports = window.weeklyReports || {};
                 window.supervisorDatabase = window.supervisorDatabase || {};
                 window.scheduledSupervisors = window.scheduledSupervisors || {};
+                window.supervisorHelperDatabase = window.supervisorHelperDatabase || {};
+                window.scheduledSupervisorHelpers = window.scheduledSupervisorHelpers || {};
                 updateSyncIndicator('synced');
             }
         }
@@ -6699,6 +6674,8 @@
                     weeklyReports: window.weeklyReports || {},
                     supervisorDatabase: window.supervisorDatabase || {},
                     scheduledSupervisors: window.scheduledSupervisors || {},
+                    supervisorHelperDatabase: window.supervisorHelperDatabase || {},
+                    scheduledSupervisorHelpers: window.scheduledSupervisorHelpers || {},
                     lastUpdated: new Date().toISOString(),
                     lastUpdatedBy: window.currentUserId
                 });
@@ -6775,6 +6752,8 @@
                         if (data.weeklyReports) window.weeklyReports = data.weeklyReports;
                         if (data.supervisorDatabase) window.supervisorDatabase = data.supervisorDatabase;
                         if (data.scheduledSupervisors) window.scheduledSupervisors = data.scheduledSupervisors;
+                        if (data.supervisorHelperDatabase) window.supervisorHelperDatabase = data.supervisorHelperDatabase;
+                        if (data.scheduledSupervisorHelpers) window.scheduledSupervisorHelpers = data.scheduledSupervisorHelpers;
                         
                         // Save to localStorage as backup
                         originalSaveData();
@@ -6795,6 +6774,11 @@
                                 const supervisorDbView = document.getElementById('supervisor-db-view');
                                 if (supervisorDbView && !supervisorDbView.classList.contains('hidden')) {
                                     renderSupervisorDatabase();
+                                }
+                                // Refresh supervisor helper database if visible
+                                const supervisorHelperDbView = document.getElementById('supervisor-helper-database-content');
+                                if (supervisorHelperDbView && supervisorHelperDbView.parentElement && !supervisorHelperDbView.parentElement.classList.contains('hidden')) {
+                                    renderSupervisorHelperDatabase();
                                 }
                             }
                         }
@@ -6930,14 +6914,9 @@
 
         // Handle logout
         window.handleLogout = async function() {
-            showConfirmModal(
-                'Are you sure you want to logout?',
-                'Confirm Logout',
-                async () => {
-                    await signOut(auth);
-                },
-                null
-            );
+            if (confirm('Are you sure you want to logout?')) {
+                await signOut(auth);
+            }
         };
 
         // Service selection functions
@@ -6970,7 +6949,7 @@
                 
             } catch (error) {
                 console.error('Error saving service selection:', error);
-                showCenteredAlert('Failed to save service selection. Please try again.', 'Error');
+                alert('Failed to save service selection. Please try again.');
             }
         };
 
@@ -7003,38 +6982,35 @@
 
         window.confirmServiceSwitch = async function(service) {
             if (service === window.currentService) {
-                showCenteredAlert('You are already on this service.', 'Same Service');
+                alert('You are already on this service.');
                 closeServiceSwitchModal();
                 return;
             }
             
-            showConfirmModal(
-                `Switch to ${service === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)'} service?`,
-                'Confirm Service Switch',
-                async () => {
-                    try {
-                        await setDoc(doc(db, 'users', window.currentUserId), {
-                            selectedService: service
-                        }, { merge: true });
-                        
-                        window.currentService = service;
-                        updateServiceDisplay(service);
-                        closeServiceSwitchModal();
-                        
-                        // Refresh current view to show data for new service
-                        const currentView = document.querySelector('.card:not(.hidden)');
-                        if (currentView && currentView.id === 'view-checkins') {
-                            renderCheckInTable();
-                        }
-                    } catch (error) {
-                        console.error('Error switching service:', error);
-                        showCenteredAlert('Failed to switch service. Please try again.', 'Error');
-                    }
-                },
-                () => {
+            if (confirm(`Switch to ${service === 'russian' ? 'Russian (9 AM)' : 'English (12 PM)'} service?`)) {
+                try {
+                    await setDoc(doc(db, 'users', window.currentUserId), {
+                        selectedService: service
+                    }, { merge: true });
+                    
+                    window.currentService = service;
+                    updateServiceDisplay(service);
                     closeServiceSwitchModal();
+                    
+                    // Refresh current view to show data for new service
+                    const currentView = document.querySelector('.card:not(.hidden)');
+                    if (currentView && currentView.id === 'view-checkins') {
+                        renderCheckInTable();
+                    }
+                    
+                    alert('Service switched successfully!');
+                } catch (error) {
+                    console.error('Error switching service:', error);
+                    alert('Failed to switch service. Please try again.');
                 }
-            );
+            } else {
+                closeServiceSwitchModal();
+            }
         };
 
         // Enter key support for login

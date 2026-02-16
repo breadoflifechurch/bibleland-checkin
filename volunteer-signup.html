@@ -536,8 +536,8 @@
                     slots.forEach((vol, idx) => {
                         volunteersHtml += `<span class="volunteer-badge">${idx + 1}. ${vol.name}</span>`;
                     });
-                    if (slots.length < 2) {
-                        volunteersHtml += `<p class="need-more">Still need ${2 - slots.length} more volunteer(s)</p>`;
+                    if (slots.length < 3) {
+                        volunteersHtml += `<p class="need-more">Still need ${3 - slots.length} more volunteer(s)</p>`;
                     }
                 }
                 
@@ -658,7 +658,7 @@
                     }
                     
                     // Check if full
-                    if (slots.length >= 2) {
+                    if (slots.length >= 3) {
                         throw new Error('Sorry, this date is now full!');
                     }
                     
