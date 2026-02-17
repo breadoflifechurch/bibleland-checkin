@@ -3642,27 +3642,40 @@
                 saveData();
             }
 
-            // Check if already scheduled in next 2 months
-            const next2Months = getUpcomingSundays(13); // 3 months of Sundays
+            // Check if already scheduled in next 3 months (use service-specific keys)
+            const next3Months = getUpcomingSundays(13);
             let isAlreadyScheduled = false;
             
-            for (const date of next2Months) {
-                const slots = volunteers[date] || [];
+            for (const date of next3Months) {
+                const serviceKey = `${date}_${window.currentService}`;
+                const slots = volunteers[serviceKey] || [];
                 if (slots.some(v => v.phone === phone)) {
                     isAlreadyScheduled = true;
                     break;
                 }
             }
 
-            // If already scheduled, skip to buzzer selection
+            // If already scheduled, skip straight to child check-in
             if (isAlreadyScheduled) {
-                continueToChildCheckInFromVolunteer();
+                skipVolunteerSchedule();
                 return;
             }
 
-            // Otherwise show volunteer schedule
-            renderVolunteerSchedule();
-            show('volunteer-screen');
+            // Not yet signed up — save pending check-in state and redirect to volunteer-signup.html
+            localStorage.setItem('pendingVolunteerCheckin', JSON.stringify({
+                phone: phoneRaw,
+                firstName: first,
+                lastName: last
+            }));
+
+            const params = new URLSearchParams({
+                phone: phone,
+                fname: first,
+                lname: last,
+                service: window.currentService || 'russian',
+                return: 'true'
+            });
+            window.location.href = `volunteer-signup.html?${params.toString()}`;
         }
 
         // ─── Render volunteer schedule ──────────────────────────────────────────
@@ -6841,6 +6854,43 @@
         document.getElementById('church-code').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleLogin();
         });
+
+        // ─── Resume check-in after returning from volunteer-signup.html ────────
+        (function checkVolunteerReturn() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('volunteer_done') !== 'true') return;
+
+            // Clean the URL so refreshing doesn't re-trigger
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            const pending = JSON.parse(localStorage.getItem('pendingVolunteerCheckin') || 'null');
+            if (!pending) return;
+            localStorage.removeItem('pendingVolunteerCheckin');
+
+            // Wait for Firebase auth + data load before resuming
+            const waitForReady = setInterval(() => {
+                if (!window.currentUserId) return; // auth not ready yet
+                clearInterval(waitForReady);
+
+                // Restore volunteer state and proceed directly to child check-in
+                memberPhone    = pending.phone;
+                memberFirst    = pending.firstName;
+                memberLast     = pending.lastName;
+
+                // Ensure they're in volunteers.all
+                const phoneClean = pending.phone.replace(/\D/g, '');
+                addToVolunteerAllIfNotExists({ name: `${pending.firstName} ${pending.lastName}`, phone: phoneClean });
+
+                // Make sure main app is visible
+                document.getElementById('main-app-container').classList.remove('hidden');
+                show('main-screen');
+
+                // Small delay so UI settles, then jump to child check-in
+                setTimeout(() => {
+                    skipVolunteerSchedule();
+                }, 400);
+            }, 300);
+        })();
 
         console.log('🔥 Firebase initialized');
         console.log('✅ Cloud database connected');
