@@ -989,6 +989,13 @@
     display: none;
 }
 
+/* Admin card: fixed height with inner scroll so page doesn't scroll */
+#admin-content {
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 /* Ensure button is on top in both landscape and portrait */
 @media (orientation: portrait) {
     #admin-content .card-close-btn,
@@ -1009,24 +1016,33 @@
 }
 
         .admin-section {
-            background: #f8fbff;
-            border-radius: 12px;
-            padding: 18px;
-            margin: 15px 0;
-            border: 1px solid #d1e3ff;
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px 16px 10px;
+            margin: 12px 0;
+            border: 1.5px solid #deeaff;
             box-sizing: border-box;
-            overflow: hidden;
             max-width: 100%;
+        }
+
+        /* Each section scrolls independently, max 320px tall */
+        .admin-section .db-table-wrap,
+        .admin-section .admin-scroll {
+            max-height: 320px;
+            overflow-y: auto;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 6px;
         }
 
         .admin-section h2 {
             color: var(--primary);
-            font-size: 1.3rem;
+            font-size: 1rem;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         @media (max-width: 768px) {
@@ -1071,6 +1087,7 @@
             border-bottom: 2px solid #deeaff;
             text-align: left;
             white-space: nowrap;
+            position: sticky; top: 0; z-index: 1;
         }
         .db-table tbody tr {
             border-bottom: 1px solid #eef3ff;
@@ -1129,84 +1146,69 @@
         /* Two-column grid for admin sections */
         .admin-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            margin: 20px 0;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 12px 0;
         }
-        
-        .admin-grid .admin-section {
-            margin: 0;
-        }
-        
-        /* Make some sections full-width */
-        .admin-section.full-width {
-            grid-column: 1 / -1;
-        }
-        
+        .admin-grid .admin-section { margin: 0; }
+        .admin-section.full-width  { grid-column: 1 / -1; }
+
         @media (max-width: 900px) {
-            .admin-grid {
-                grid-template-columns: 1fr;
-            }
+            .admin-grid { grid-template-columns: 1fr; }
         }
+        .section-icon { font-size: 1rem; }
 
-        .section-icon {
-            font-size: 1.5rem;
-        }
-
-        .admin-table {
-            background: white;
-            border-radius: 12px;
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 400px;
-            -webkit-overflow-scrolling: touch;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-
-        .admin-table table {
-            margin: 0;
-        }
-
-        .admin-table th {
-            background: linear-gradient(135deg, var(--primary), #6bb6ff);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-            padding: 6px 4px;
-            white-space: nowrap;
-        }
-        
         @media (max-width: 768px) {
-            .admin-table th {
-                font-size: 0.65rem;
-                padding: 5px 3px;
-                letter-spacing: 0.1px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .admin-table th {
-                font-size: 0.6rem;
-                padding: 4px 2px;
-            }
+            .admin-section { padding: 10px 12px 8px; margin: 8px 0; }
+            .admin-section h2 { font-size: 0.9rem; }
+            .admin-section .db-table-wrap,
+            .admin-section .admin-scroll { max-height: 260px; }
         }
 
-        .admin-table td {
-            padding: 6px 4px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.75rem;
+        /* Schedule table — same visual language as db-table */
+        .sched-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .sched-table thead th {
+            background: #f0f6ff;
+            color: #5580aa;
+            font-weight: 600;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 7px 10px;
+            border-bottom: 2px solid #deeaff;
+            text-align: left;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            position: sticky; top: 0; z-index: 1;
         }
+        .sched-table tbody tr { border-bottom: 1px solid #eef3ff; transition: background 0.12s; }
+        .sched-table tbody tr:last-child { border-bottom: none; }
+        .sched-table tbody tr:hover { background: #f7fbff; }
+        .sched-table td { padding: 7px 10px; vertical-align: middle; font-size: 0.82rem; }
+        .sched-table td.date-cell { font-weight: 700; color: var(--text); white-space: nowrap; min-width: 90px; }
+        .sched-table td.vol-cell { min-width: 130px; }
+        .sched-table td.sup-cell { min-width: 150px; }
+        .sched-table .vol-name { font-weight: 600; font-size: 0.82rem; }
+        .sched-table .vol-phone { font-size: 0.74rem; color: #888; }
+        .sched-table .slot-empty { color: #ccc; font-size: 0.78rem; font-style: italic; }
+        .sched-table .status-pill {
+            display: inline-block; padding: 2px 7px; border-radius: 8px;
+            font-size: 0.68rem; font-weight: 600; margin-top: 3px;
+        }
+        .sched-table .status-full  { background: #e8f5e9; color: #2e7d32; }
+        .sched-table .status-open  { background: #fff3e0; color: #e65100; }
+        .sched-table .status-part  { background: #e3f2fd; color: #1565c0; }
+        .sched-table select.sched-select {
+            font-size: 0.75rem; padding: 3px 5px; border: 1.5px solid #d1e3ff;
+            border-radius: 6px; width: 100%; color: var(--text); background: #fff;
+            margin-bottom: 4px;
+        }
+        .sched-table select.sched-select:focus { outline: none; border-color: var(--primary); }
+        .sched-add-form { padding: 10px 14px; background: #f8fbff; border-top: 1px solid #eef3ff; }
+        .sched-add-form label { font-size: 0.82rem; margin-right: 10px; }
+        .sched-add-form input { font-size: 0.82rem; padding: 5px 8px; border: 1.5px solid #d1e3ff; border-radius: 6px; }
 
-        .admin-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .admin-table tr:hover td {
-            background: #f8fbff;
-        }
+        /* Keep old admin-table as fallback (won't be used) */
+        .admin-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
         .action-buttons {
             display: flex;
@@ -2843,17 +2845,21 @@
 
             <!-- Volunteer Schedule - Full Width -->
             <div class="admin-section full-width">
-                <h2><span class="section-icon">📅</span> Volunteer Schedule</h2>
-                <div class="admin-table">
-                    <table id="admin-schedule-table">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                    <h2 style="margin:0;font-size:1rem;"><span class="section-icon">📅</span> Volunteer Schedule</h2>
+                    <span id="sched-service-label" style="font-size:0.78rem;color:#888;"></span>
+                </div>
+                <div class="admin-scroll">
+                    <table id="admin-schedule-table" class="sched-table">
                         <thead>
                             <tr>
-                                <th>DATE</th>
-                                <th>Volunteer #1</th>
-                                <th>Volunteer #2</th>
-                                <th>Volunteer #3</th>
+                                <th>Date</th>
+                                <th>Volunteer 1</th>
+                                <th>Volunteer 2</th>
+                                <th>Volunteer 3</th>
                                 <th>Supervisor</th>
-                                <th>Actions</th>
+                                <th>Helper</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -4901,111 +4907,89 @@
             });
             document.getElementById('stat-upcoming').textContent = openings;
 
-            // Render schedule table
+            // ── Render schedule table ──────────────────────────────────────────
             const schedBody = document.querySelector('#admin-schedule-table tbody');
             schedBody.innerHTML = '';
-            
+
+            // Update service label
+            const schedLabel = document.getElementById('sched-service-label');
+            if (schedLabel) {
+                const svcName = window.currentService === 'russian' ? '🇷🇺 Russian (9 AM)' : '🇺🇸 English (12 PM)';
+                schedLabel.textContent = svcName;
+            }
+
+            // Sort supervisorDatabase entries by last name for the dropdowns
+            const sortedSupEntries = Object.entries(supervisorDatabase).sort((a, b) =>
+                (a[1].lastName || '').localeCompare(b[1].lastName || ''));
+
+            function volCell(vol) {
+                if (!vol) return '<span class="slot-empty">Empty</span>';
+                return `<span class="vol-name">${vol.name}</span><br><span class="vol-phone">${formatPhoneDisplay(vol.phone)}</span>`;
+            }
+
             sundays.forEach(date => {
-                // Use service-specific key
                 const serviceKey = `${date}_${window.currentService}`;
                 const slots = volunteers[serviceKey] || [];
-                const v1 = slots[0] || {
-                    name: '—',
-                    phone: '—'
-                };
-                const v2 = slots[1] || {
-                    name: '—',
-                    phone: '—'
-                };
-                const v3 = slots[2] || {
-                    name: '—',
-                    phone: '—'
-                };
                 const supervisor = scheduledSupervisors[serviceKey] || null;
                 const supervisorHelper = scheduledSupervisorHelpers[serviceKey] || null;
-                
-                // Create supervisor dropdown
-                let supervisorDropdown = '<select onchange="assignSupervisor(\'' + date + '\', this.value)" style="width: 100%; padding: 6px; margin-bottom: 8px;">';
-                supervisorDropdown += '<option value="">— Select Supervisor —</option>';
-                Object.entries(supervisorDatabase).forEach(([phone, sup]) => {
-                    const selected = supervisor && supervisor.phone === phone ? 'selected' : '';
-                    supervisorDropdown += `<option value="${phone}" ${selected}>${sup.firstName} ${sup.lastName} - ${formatPhoneDisplay(phone)}</option>`;
+
+                const statusClass = slots.length === 3 ? 'status-full' : slots.length === 0 ? 'status-open' : 'status-part';
+                const statusText = slots.length === 3 ? 'Full' : slots.length === 0 ? 'Need 3' : `${slots.length}/3`;
+
+                // Build supervisor dropdowns (sorted by last name)
+                const supOpts = sortedSupEntries.map(([ph, s]) =>
+                    `<option value="${ph}" ${supervisor && supervisor.phone === ph ? 'selected' : ''}>${s.lastName}, ${s.firstName}</option>`
+                ).join('');
+                const helpOpts = sortedSupEntries.map(([ph, s]) =>
+                    `<option value="${ph}" ${supervisorHelper && supervisorHelper.phone === ph ? 'selected' : ''}>${s.lastName}, ${s.firstName}</option>`
+                ).join('');
+
+                // Action buttons: remove buttons per filled slot + add button if not full
+                let actBtns = '';
+                if (slots.length < 3) actBtns += `<button class="db-btn assign" onclick="toggleAddVolunteerForm('${date}')" title="Add volunteer" style="margin-bottom:2px;">+</button>`;
+                slots.forEach((_, i) => {
+                    actBtns += `<button class="db-btn del" onclick="removeVolunteerFromDate('${date}', ${i})" title="Remove #${i+1}">🗑</button>`;
                 });
-                supervisorDropdown += '</select>';
-                
-                // Create supervisor helper dropdown (uses same supervisorDatabase)
-                let supervisorHelperDropdown = '<select onchange="assignSupervisorHelper(\'' + date + '\', this.value)" style="width: 100%; padding: 6px;">';
-                supervisorHelperDropdown += '<option value="">— Select Helper —</option>';
-                Object.entries(supervisorDatabase).forEach(([phone, sup]) => {
-                    const selected = supervisorHelper && supervisorHelper.phone === phone ? 'selected' : '';
-                    supervisorHelperDropdown += `<option value="${phone}" ${selected}>${sup.firstName} ${sup.lastName} - ${formatPhoneDisplay(phone)}</option>`;
-                });
-                supervisorHelperDropdown += '</select>';
-                
-                const status = slots.length === 0 ? 'Open – need 3' :
-                    slots.length === 1 ? '1/3 signed up' : 
-                    slots.length === 2 ? '2/3 signed up' : 'Full';
-                let tr = document.createElement('tr');
+
+                const tr = document.createElement('tr');
                 tr.innerHTML = `
-        <td><strong>${date}</strong><br><small style="color:#666;">${status}</small></td>
-        <td>
-          ${v1.name !== '—' ? `
-            <div style="margin-bottom: 4px;">
-              <strong>${v1.name}</strong><br>
-              <small style="color:#666;">${v1.phone !== '—' ? formatPhoneDisplay(v1.phone) : ''}</small>
-            </div>
-          ` : '<span style="color:#bbb;">Empty slot</span>'}
-        </td>
-        <td>
-          ${v2.name !== '—' ? `
-            <div style="margin-bottom: 4px;">
-              <strong>${v2.name}</strong><br>
-              <small style="color:#666;">${v2.phone !== '—' ? formatPhoneDisplay(v2.phone) : ''}</small>
-            </div>
-          ` : '<span style="color:#bbb;">Empty slot</span>'}
-        </td>
-        <td>
-          ${v3.name !== '—' ? `
-            <div style="margin-bottom: 4px;">
-              <strong>${v3.name}</strong><br>
-              <small style="color:#666;">${v3.phone !== '—' ? formatPhoneDisplay(v3.phone) : ''}</small>
-            </div>
-          ` : '<span style="color:#bbb;">Empty slot</span>'}
-        </td>
-        <td>
-          <div style="margin-bottom: 4px;">
-            <small style="color:#666; display: block; margin-bottom: 4px;">Supervisor (full service):</small>
-            ${supervisorDropdown}
-          </div>
-          <div>
-            <small style="color:#666; display: block; margin-bottom: 4px;">Helper (start/end only):</small>
-            ${supervisorHelperDropdown}
-          </div>
-        </td>
-        <td>
-          <div class="action-buttons" style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;">
-            ${slots.length < 3 ? `<button class="btn-success btn-sm" onclick="toggleAddVolunteerForm('${date}')" style="white-space: nowrap;">+ Add</button>` : ''}
-            ${v1.name !== '—' ? `<button class="btn-icon btn-delete" onclick="removeVolunteerFromDate('${date}', 0)" title="Remove ${v1.name}">🗑️</button>` : ''}
-            ${v2.name !== '—' ? `<button class="btn-icon btn-delete" onclick="removeVolunteerFromDate('${date}', 1)" title="Remove ${v2.name}">🗑️</button>` : ''}
-            ${v3.name !== '—' ? `<button class="btn-icon btn-delete" onclick="removeVolunteerFromDate('${date}', 2)" title="Remove ${v3.name}">🗑️</button>` : ''}
-          </div>
-        </td>
-      `;
+                    <td class="date-cell">
+                        ${date}<br>
+                        <span class="status-pill ${statusClass}">${statusText}</span>
+                    </td>
+                    <td class="vol-cell">${volCell(slots[0])}</td>
+                    <td class="vol-cell">${volCell(slots[1])}</td>
+                    <td class="vol-cell">${volCell(slots[2])}</td>
+                    <td class="sup-cell">
+                        <select class="sched-select" onchange="assignSupervisor('${date}', this.value)">
+                            <option value="">— None —</option>${supOpts}
+                        </select>
+                    </td>
+                    <td class="sup-cell">
+                        <select class="sched-select" onchange="assignSupervisorHelper('${date}', this.value)">
+                            <option value="">— None —</option>${helpOpts}
+                        </select>
+                    </td>
+                    <td class="actions-cell" style="white-space:nowrap;text-align:right;">
+                        <div style="display:flex;gap:3px;justify-content:flex-end;flex-wrap:wrap;">${actBtns}</div>
+                    </td>`;
                 schedBody.appendChild(tr);
+
+                // Inline add-volunteer form row (hidden by default)
                 if (slots.length < 3) {
                     const formTr = document.createElement('tr');
                     formTr.id = `add-vol-form-row-${date}`;
                     formTr.className = 'hidden';
+                    formTr.style.background = '#f8fbff';
                     formTr.innerHTML = `
-          <td colspan="6" style="padding:0;">
-            <div class="add-vol-form">
-              <label>Phone: <input type="tel" id="add-vol-phone-${date}" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this)" /></label><br>
-              <label>First & Last: <input type="text" id="add-vol-name-${date}" placeholder="John Doe" /></label><br>
-              <button class="btn-success btn-sm" onclick="addVolunteerToDate('${date}')">Save</button>
-              <button class="btn-outline btn-sm" onclick="toggleAddVolunteerForm('${date}')">Cancel</button>
-            </div>
-          </td>
-        `;
+                        <td colspan="7" style="padding:0;">
+                            <div class="sched-add-form">
+                                <label>Phone: <input type="tel" id="add-vol-phone-${date}" placeholder="(000) 000-0000" inputmode="numeric" maxlength="14" oninput="formatPhone(this)" style="width:150px;"></label>
+                                <label>Name: <input type="text" id="add-vol-name-${date}" placeholder="First Last" style="width:160px;"></label>
+                                <button class="db-btn assign" onclick="addVolunteerToDate('${date}')" style="width:auto;padding:4px 10px;font-size:0.78rem;">Save</button>
+                                <button class="db-btn edit" onclick="toggleAddVolunteerForm('${date}')" style="width:auto;padding:4px 10px;font-size:0.78rem;">Cancel</button>
+                            </div>
+                        </td>`;
                     schedBody.appendChild(formTr);
                 }
             });
