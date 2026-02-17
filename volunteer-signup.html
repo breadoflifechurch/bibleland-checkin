@@ -489,6 +489,19 @@
                     
                     document.getElementById('loading-view').classList.add('hidden');
                     document.getElementById('schedule-view').classList.remove('hidden');
+
+                    // If returning from check-in and already signed up for a date this service → go straight back
+                    if (_returnToCheckin && _prePhone) {
+                        const upcoming = getUpcomingSundays(13);
+                        const alreadyBooked = upcoming.some(date => {
+                            const key = date + '_' + window.currentService;
+                            return (window.volunteers[key] || []).some(v => v.phone === _prePhone);
+                        });
+                        if (alreadyBooked) {
+                            window.location.href = 'index.html?volunteer_done=true';
+                            return;
+                        }
+                    }
                 } else {
                     console.error('❌ Document does not exist');
                     showError('Document does not exist in Firebase');
@@ -549,9 +562,14 @@
                     supervisorHtml = '<p style="color: #999;"><strong>Supervisor:</strong> Not assigned yet</p>';
                 }
                 
-                // Add sign-up button if not full
+                // Check if this person is already signed up for this date
+                const _alreadySigned = _prePhone && slots.some(v => v.phone === _prePhone);
+                
+                // Add sign-up button if not full and not already signed up
                 let signUpButton = '';
-                if (slots.length < 3) {
+                if (_alreadySigned) {
+                    signUpButton = '<p style="color:#50c878;font-weight:600;">✓ You are signed up for this date</p>';
+                } else if (slots.length < 3) {
                     signUpButton = `<button class="signup-btn" onclick="openSignupModal('${date}', '${formattedDate}')">Sign Up for This Date</button>`;
                 }
                 
@@ -697,7 +715,14 @@
                 
             } catch (error) {
                 console.error('❌ Signup error:', error);
-                alert(error.message || 'Failed to sign up. Please try again.');
+                const msg = error.message || '';
+                // If returning from check-in and slot is full or already signed up → just go back
+                if (_returnToCheckin && (msg.includes('already signed up') || msg.includes('now full'))) {
+                    closeSignupModal();
+                    window.location.href = 'index.html?volunteer_done=true';
+                    return;
+                }
+                alert(msg || 'Failed to sign up. Please try again.');
             }
         };
 

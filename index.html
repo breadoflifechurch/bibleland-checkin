@@ -6393,11 +6393,29 @@
                 // Load data from Firestore
                 await loadFromFirestore();
                 
-                // Hide loading, show main app
+                // Hide loading, show main app (or resume check-in if returning from volunteer signup)
                 setTimeout(() => {
                     document.getElementById('loading-screen').classList.add('hidden');
                     document.getElementById('main-app-container').classList.remove('hidden');
-                    show('main-screen');
+
+                    if (window._volunteerReturn) {
+                        const ret = window._volunteerReturn;
+                        window._volunteerReturn = null;
+
+                        // Restore the volunteer's info so skipVolunteerSchedule() has what it needs
+                        memberPhone = ret.phone;
+                        memberFirst = ret.firstName;
+                        memberLast  = ret.lastName;
+
+                        // Make sure they're in the volunteer list
+                        const phoneClean = ret.phone.replace(/[^0-9]/g, '');
+                        addToVolunteerAllIfNotExists({ name: ret.firstName + ' ' + ret.lastName, phone: phoneClean });
+
+                        // Jump straight to child check-in form
+                        skipVolunteerSchedule();
+                    } else {
+                        show('main-screen');
+                    }
                 }, 1000);
                 
                 // Set up real-time sync listener
@@ -6855,41 +6873,18 @@
             if (e.key === 'Enter') handleLogin();
         });
 
-        // ─── Resume check-in after returning from volunteer-signup.html ────────
-        (function checkVolunteerReturn() {
+        // ─── Detect volunteer return BEFORE auth fires ────────────────────────
+        // Set window._volunteerReturn immediately; the auth callback reads it
+        (function() {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('volunteer_done') !== 'true') return;
-
-            // Clean the URL so refreshing doesn't re-trigger
-            window.history.replaceState({}, document.title, window.location.pathname);
-
-            const pending = JSON.parse(localStorage.getItem('pendingVolunteerCheckin') || 'null');
-            if (!pending) return;
-            localStorage.removeItem('pendingVolunteerCheckin');
-
-            // Wait for Firebase auth + data load before resuming
-            const waitForReady = setInterval(() => {
-                if (!window.currentUserId) return; // auth not ready yet
-                clearInterval(waitForReady);
-
-                // Restore volunteer state and proceed directly to child check-in
-                memberPhone    = pending.phone;
-                memberFirst    = pending.firstName;
-                memberLast     = pending.lastName;
-
-                // Ensure they're in volunteers.all
-                const phoneClean = pending.phone.replace(/\D/g, '');
-                addToVolunteerAllIfNotExists({ name: `${pending.firstName} ${pending.lastName}`, phone: phoneClean });
-
-                // Make sure main app is visible
-                document.getElementById('main-app-container').classList.remove('hidden');
-                show('main-screen');
-
-                // Small delay so UI settles, then jump to child check-in
-                setTimeout(() => {
-                    skipVolunteerSchedule();
-                }, 400);
-            }, 300);
+            if (urlParams.get('volunteer_done') === 'true') {
+                window.history.replaceState({}, document.title, window.location.pathname);
+                const pending = JSON.parse(localStorage.getItem('pendingVolunteerCheckin') || 'null');
+                if (pending) {
+                    localStorage.removeItem('pendingVolunteerCheckin');
+                    window._volunteerReturn = pending; // auth callback will pick this up
+                }
+            }
         })();
 
         console.log('🔥 Firebase initialized');
