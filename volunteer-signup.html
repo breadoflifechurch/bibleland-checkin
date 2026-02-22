@@ -548,7 +548,7 @@
                             return (window.volunteers[key] || []).some(v => v.phone === _prePhone);
                         });
                         if (alreadyBooked) {
-                            window.location.href = '/?volunteer_done=true';
+                            window.location.href = 'index.html?volunteer_done=true';
                             return;
                         }
                     }
@@ -780,7 +780,7 @@
                 // If returning from check-in and slot is full or already signed up → just go back
                 if (_returnToCheckin && (msg.includes('already signed up') || msg.includes('now full'))) {
                     closeSignupModal();
-                    window.location.href = '/?volunteer_done=true';
+                    window.location.href = 'index.html?volunteer_done=true';
                     return;
                 }
                 showVsAlert(msg || 'Failed to sign up. Please try again.', 'Sign Up Failed');
@@ -990,7 +990,7 @@
         if (_returnToCheckin) {
             window.closeSuccessModal = function() {
                 // Redirect back to index.html so check-in resumes
-                window.location.href = '/?volunteer_done=true';
+                window.location.href = 'index.html?volunteer_done=true';
             };
 
             // Also pre-fill the modal form once it opens
