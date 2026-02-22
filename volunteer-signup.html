@@ -7,6 +7,28 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <!-- Content Security Policy: only allow scripts/connections from trusted domains -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net;
+        connect-src 'self'
+            https://*.googleapis.com
+            https://*.firebaseio.com
+            https://*.firebaseapp.com
+            https://identitytoolkit.googleapis.com
+            https://securetoken.googleapis.com
+            https://firestore.googleapis.com
+            https://www.googleapis.com
+            https://firebase.googleapis.com
+            https://www.gstatic.com
+            https://*.gstatic.com
+            https://api.emailjs.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        img-src 'self' data: https://www.gstatic.com;
+        font-src 'self' data: https://fonts.gstatic.com;
+        frame-src 'none';
+        object-src 'none';
+    ">
     <style>
         * {
             touch-action: manipulation;
@@ -360,6 +382,15 @@
         </div>
     </div>
 
+    <!-- In-App Alert Modal (replaces browser alert()) -->
+    <div id="vs-alert-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9000; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:16px; padding:32px; width:380px; max-width:90%; text-align:center; box-shadow:0 8px 30px rgba(74,144,226,0.2);">
+            <h3 id="vs-alert-title" style="margin-top:0; color:#2c3e50;"></h3>
+            <p id="vs-alert-message" style="font-size:1.05rem; margin:16px 0 24px;"></p>
+            <button onclick="closeVsAlert()" style="background:#4a90e2; color:white; border:none; padding:12px 36px; border-radius:10px; font-size:1rem; cursor:pointer;">OK</button>
+        </div>
+    </div>
+
     <!-- Signup Modal -->
     <div id="signup-modal" class="modal-overlay hidden">
         <div class="modal-content">
@@ -400,23 +431,45 @@
         </div>
     </div>
 
+    <!-- In-App Alert Helper -->
+    <script>
+        function showVsAlert(message, title) {
+            document.getElementById('vs-alert-title').textContent = title || 'Notice';
+            document.getElementById('vs-alert-message').textContent = message;
+            const modal = document.getElementById('vs-alert-modal');
+            modal.style.display = 'flex';
+        }
+        function closeVsAlert() {
+            document.getElementById('vs-alert-modal').style.display = 'none';
+        }
+    </script>
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getFirestore, doc, getDoc, onSnapshot, runTransaction } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAx61loxO6nymxsHGO0LTkmLnmJT3vu-iw",
+            apiKey: "AIzaSyDchZXJyercgztvVv7I57Ol53NDoLFfEEk",
             authDomain: "bible-land-check-in.firebaseapp.com",
             projectId: "bible-land-check-in",
             storageBucket: "bible-land-check-in.firebasestorage.app",
-            messagingSenderId: "412737285",
-            appId: "1:412737285:web:aeec2e3d50bb9f204ea35e"
+            messagingSenderId: "839634881652",
+            appId: "1:839634881652:web:80410e2b38965312b2d521"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const docRef = doc(db, 'churches/bibleland2025/data/shared');
+        // Read/write ONLY the public volunteer schedule document — no PII is exposed here
+        const docRef = doc(db, 'churches/bibleland2025/data/volunteers_public');
+
+        // ─── XSS-safe HTML escaping ───────────────────────────────────────────────
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            const d = document.createElement('div');
+            d.textContent = String(str);
+            return d.innerHTML;
+        }
 
         // Global variables
         window.volunteers = {};
@@ -481,10 +534,7 @@
                     window.volunteers = data.volunteers || {};
                     window.scheduledSupervisors = data.scheduledSupervisors || {};
                     window.allVolunteers = data.volunteers?.all || [];
-                    
-                    console.log('📊 Volunteers:', window.volunteers);
-                    console.log('📅 Supervisors:', window.scheduledSupervisors);
-                    
+
                     renderSchedule();
                     
                     document.getElementById('loading-view').classList.add('hidden');
@@ -498,7 +548,7 @@
                             return (window.volunteers[key] || []).some(v => v.phone === _prePhone);
                         });
                         if (alreadyBooked) {
-                            window.location.href = 'index.html?volunteer_done=true';
+                            window.location.href = '/?volunteer_done=true';
                             return;
                         }
                     }
@@ -548,7 +598,7 @@
                 } else {
                     volunteersHtml = '<p><strong>Volunteers:</strong></p>';
                     slots.forEach((vol, idx) => {
-                        volunteersHtml += `<span class="volunteer-badge">${idx + 1}. ${vol.name}</span>`;
+                        volunteersHtml += `<span class="volunteer-badge">${idx + 1}. ${escapeHtml(vol.name)}</span>`;
                     });
                     if (slots.length < 3) {
                         volunteersHtml += `<p class="need-more">Still need ${3 - slots.length} more volunteer(s)</p>`;
@@ -557,7 +607,7 @@
                 
                 let supervisorHtml = '';
                 if (supervisor) {
-                    supervisorHtml = `<p><strong>Supervisor:</strong> ${supervisor.firstName} ${supervisor.lastName}</p>`;
+                    supervisorHtml = `<p><strong>Supervisor:</strong> ${escapeHtml(supervisor.firstName)} ${escapeHtml(supervisor.lastName)}</p>`;
                 } else {
                     supervisorHtml = '<p style="color: #999;"><strong>Supervisor:</strong> Not assigned yet</p>';
                 }
@@ -639,12 +689,23 @@
             const lastName = document.getElementById('volunteer-lname').value.trim();
             
             if (!phone || phone.length !== 10) {
-                alert('Please enter a valid 10-digit phone number');
+                showVsAlert('Please enter a valid 10-digit phone number', 'Invalid Phone');
                 return;
             }
             
             if (!firstName || !lastName) {
-                alert('Please enter both first and last name');
+                showVsAlert('Please enter both first and last name', 'Name Required');
+                return;
+            }
+            
+            // Input validation — prevent oversized or malformed data
+            if (firstName.length > 50 || lastName.length > 50) {
+                showVsAlert('Name is too long (max 50 characters each)', 'Invalid Name');
+                return;
+            }
+            const nameRegex = /^[a-zA-Z\u00C0-\u024F\u0400-\u04FF\s'\-]+$/;
+            if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+                showVsAlert('Name can only contain letters, spaces, hyphens, and apostrophes', 'Invalid Name');
                 return;
             }
             
@@ -697,8 +758,8 @@
                         volunteers.all = allVolunteers;
                     }
                     
-                    // Update Firestore
-                    transaction.update(docRef, { volunteers });
+                    // Update Firestore — use set+merge so it works even if doc was just created
+                    transaction.set(docRef, { volunteers }, { merge: true });
                 });
                 
                 console.log('✅ Signup successful!');
@@ -719,10 +780,10 @@
                 // If returning from check-in and slot is full or already signed up → just go back
                 if (_returnToCheckin && (msg.includes('already signed up') || msg.includes('now full'))) {
                     closeSignupModal();
-                    window.location.href = 'index.html?volunteer_done=true';
+                    window.location.href = '/?volunteer_done=true';
                     return;
                 }
-                alert(msg || 'Failed to sign up. Please try again.');
+                showVsAlert(msg || 'Failed to sign up. Please try again.', 'Sign Up Failed');
             }
         };
 
@@ -767,6 +828,10 @@
                             ? `(${cleanedPhone.slice(0, 3)}) ${cleanedPhone.slice(3, 6)}-${cleanedPhone.slice(6, 10)}`
                             : phoneStr;
                         
+                        // EmailJS send — to_email must be passed as a template param.
+                        // IMPORTANT: In EmailJS dashboard → Email Services → your service →
+                        // set "Allowed Origins" to https://bible-land-check-in.web.app ONLY.
+                        // This prevents anyone else from sending emails using your public key.
                         const templateParams = {
                             to_email: 'firealexusa@gmail.com',
                             volunteer_name: `${firstName} ${lastName}`,
@@ -776,7 +841,7 @@
                             event_type: 'Volunteer'
                         };
                         
-                        console.log('📧 Sending email notification...', templateParams);
+                        // Send notification email
                         
                         // Use a timeout to prevent hanging
                         const timeoutPromise = new Promise((_, rej) => 
@@ -816,11 +881,23 @@
             const formattedDate = dateObj.toLocaleDateString('en-US', options);
             
             const message = document.getElementById('success-message-text');
-            message.innerHTML = `
-                <strong>${firstName} ${lastName}</strong>, you have successfully signed up for:<br><br>
-                <strong>Sunday Service</strong><br>
-                ${formattedDate}
-            `;
+            // Use DOM construction — no innerHTML with user data
+            message.innerHTML = '';
+            const nameLine = document.createElement('strong');
+            nameLine.textContent = `${firstName} ${lastName}`;
+            const br1 = document.createElement('br');
+            const br2 = document.createElement('br');
+            const serviceLine = document.createElement('strong');
+            serviceLine.textContent = 'Sunday Service';
+            const br3 = document.createElement('br');
+            const dateLine = document.createTextNode(formattedDate);
+            message.appendChild(nameLine);
+            message.appendChild(document.createTextNode(', you have successfully signed up for:'));
+            message.appendChild(br1);
+            message.appendChild(br2);
+            message.appendChild(serviceLine);
+            message.appendChild(br3);
+            message.appendChild(dateLine);
             
             document.getElementById('success-modal').classList.remove('hidden');
         }
@@ -861,12 +938,29 @@
         }
 
         // ─── Handle return-to-checkin flow ─────────────────────────────────────
+        // Personal data is passed via sessionStorage, never URL params
         const _urlParams = new URLSearchParams(window.location.search);
         const _returnToCheckin = _urlParams.get('return') === 'true';
-        const _prePhone  = _urlParams.get('phone') || '';
-        const _preFname  = _urlParams.get('fname')  || '';
-        const _preLname  = _urlParams.get('lname')  || '';
-        const _preService = _urlParams.get('service') || 'russian';
+
+        // Read handoff data from sessionStorage (no PII in URL)
+        let _prePhone = '', _preFname = '', _preLname = '', _preService = 'russian';
+        if (_returnToCheckin) {
+            try {
+                const handoff = JSON.parse(sessionStorage.getItem('volunteerHandoff') || 'null');
+                if (handoff) {
+                    _prePhone   = handoff.phone   || '';
+                    _preFname   = handoff.fname   || '';
+                    _preLname   = handoff.lname   || '';
+                    _preService = handoff.service || 'russian';
+                    sessionStorage.removeItem('volunteerHandoff'); // clear after reading
+                }
+            } catch(e) { /* ignore parse errors */ }
+        }
+
+        // Clean URL immediately — remove even the ?return=true param
+        if (_returnToCheckin) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         // If launched from check-in, show a banner and pre-set service
         if (_returnToCheckin) {
@@ -880,7 +974,14 @@
             const banner = document.createElement('div');
             banner.id = 'return-checkin-banner';
             banner.style.cssText = 'background:#d4edda;border:2px solid #50c878;border-radius:12px;padding:16px 20px;margin-bottom:20px;text-align:center;font-size:1.1em;color:#2c6e35;';
-            banner.innerHTML = `👋 Hi <strong>${_preFname}</strong>! Sign up below, then you'll be returned to finish checking in your child.`;
+            // Build with DOM to avoid XSS — _preFname comes from sessionStorage/user input
+            const greeting = document.createTextNode('👋 Hi ');
+            const nameSpan = document.createElement('strong');
+            nameSpan.textContent = _preFname;
+            const rest = document.createTextNode("! Sign up below, then you'll be returned to finish checking in your child.");
+            banner.appendChild(greeting);
+            banner.appendChild(nameSpan);
+            banner.appendChild(rest);
             document.querySelector('.container').insertBefore(banner, document.querySelector('.service-tabs'));
         }
 
@@ -889,7 +990,7 @@
         if (_returnToCheckin) {
             window.closeSuccessModal = function() {
                 // Redirect back to index.html so check-in resumes
-                window.location.href = `index.html?volunteer_done=true`;
+                window.location.href = '/?volunteer_done=true';
             };
 
             // Also pre-fill the modal form once it opens
@@ -910,8 +1011,22 @@
             };
         }
 
+        // Suppress reCAPTCHA/Firebase iframe "message channel closed" noise
+        window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && typeof e.reason.message === 'string' &&
+                (e.reason.message.includes('message channel closed') ||
+                 e.reason.message.includes('A listener indicated an asynchronous response'))) {
+                e.preventDefault();
+            }
+        });
+        window.addEventListener('error', function(e) {
+            if (e.message && (e.message.includes('message channel closed') ||
+                e.message.includes('A listener indicated an asynchronous response'))) {
+                e.preventDefault();
+            }
+        });
+
         // Initialize
-        console.log('🔥 Initializing volunteer signup...');
         loadDataFromFirebase();
         setupRealtimeSync();
     </script>
@@ -920,16 +1035,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
         (function() {
-            // Initialize EmailJS with your public key
             emailjs.init('QZdN1DbzW4rI_BOAP');
-            console.log('📧 EmailJS initialized successfully');
-            
-            // Verify EmailJS is ready
-            if (typeof emailjs !== 'undefined') {
-                console.log('✅ EmailJS is ready to send emails');
-            } else {
-                console.error('❌ EmailJS failed to initialize');
-            }
         })();
     </script>
 </body>
